@@ -5,3 +5,8 @@ theory. Here we collect code samples that illustrates aspects and
 features of programming languages. As such this repository serves as
 material for the Paradigms of programming languages course in IIT
 Palakkad.
+
+- [Course wiki][wiki]
+
+
+[wiki]: <https://bitbucket.org/piyush-kurur/popl/wiki> "PoPL Wiki"
