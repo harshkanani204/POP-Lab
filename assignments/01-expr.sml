@@ -1,4 +1,6 @@
-(* Assignment 1
+(*
+
+Assignment 1. Due on 30th Aug Thursday by 12:00 noon.
 
 Name:
 Rollno:
