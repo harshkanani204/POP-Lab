@@ -21,3 +21,33 @@ end
 structure Empty = struct end
 structure U = Unique (Empty)
 structure V = Unique (Empty)
+val u = U.allocate
+val v = V.allocate
+
+(* Exercise 1.
+
+Load the above in sml and try out the expressions
+
+U.toInt u
+U.toInt v
+V.toInt u
+U.toInt v
+
+and explain the observations.
+
+
+ *)
+
+
+(* Exercise 2: Repeat Exercise 1 after modifying the definition of
+the functor Unique as given below.
+
+functor Unique (E : sig end) : UNIQUE = struct
+...
+end
+
+i.e. we use : instead of :>
+
+Explain the observations.
+
+ *)
