@@ -15,6 +15,7 @@ functor Unique (E : sig end) :> UNIQUE = struct
     type uid         = int
     val  current     = ref 0
     fun  allocate () = let val x = !current in current := x + 1; x end
+    fun  alloc ()    = (current := !current +1; !current - 1)
     fun  toInt    x  = x
 end
 
@@ -51,3 +52,4 @@ i.e. we use : instead of :>
 Explain the observations.
 
  *)
+
