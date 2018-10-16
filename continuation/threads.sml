@@ -156,10 +156,10 @@ fun mesg n s () = if n <= 0
 			 mesg (n - 1) s ()
 	               )
 fun main () = (
-    T.spawn (fn _ => print "I will eventually be run");
-    T.spawnNow (fn _ => print "I will be run just now");
     T.spawn (mesg 10 "hello");
     T.spawn (mesg 4 "world");
+    T.spawn (fn _ => print "I will eventually be run\n");
+    T.spawnNow (fn _ => print "I will be run just now\n");
     print "waiting\n";
     T.wait ()
 )
