@@ -55,7 +55,6 @@ You will need to bring your laptop to the lab as well.
         cd code/git
 		git clone https://bitbucket.org/your-bitbucket-account/popl.git
 		cd popl # The popl directory now contains the repository
-
    Notice that in this case, you have cloned _your_ fork of the repository.
 
 7. The cloning of a repository creates what is known as a _remote_
@@ -71,5 +70,9 @@ You will need to bring your laptop to the lab as well.
    https://piyush-kurur.github.io/posts/2011-06-02-SSH-A-quick-guide.html
    for a quick `ssh` guide.
 
+9. Go through the [standard ml tutorial][sml-tutorial] available from
+   this repository and attempt as many exercise as possible.
+
 [bitbucket]: <https://bitbucket.org> "Bitbucket"
 [popl]: <https://bitbucket.org/piyush-kurur/popl> "PoPL course repository"
+[sml-tutorial]: <../sml/tutorial.sml> "SML tutorial"
