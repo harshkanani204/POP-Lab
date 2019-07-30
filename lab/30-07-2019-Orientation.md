@@ -56,6 +56,8 @@ You will need to bring your laptop to the lab as well.
 		git clone https://bitbucket.org/your-bitbucket-account/popl.git
 		cd popl # The popl directory now contains the repository
    Notice that in this case, you have cloned _your_ fork of the repository.
+   In the lab, you might need to set the http proxy for git. Please figure
+   out how this is to be done (google it).
 
 7. The cloning of a repository creates what is known as a _remote_
    called `origin`. If you want to pull changes from my fork without
