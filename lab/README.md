@@ -6,15 +6,38 @@ ensuring easy evaluation of your lab assignments.
 
 ## Instructions.
 
-1. Create a _private git repository_ on bitbucket whose name is your
-   rollnumber-popl-lab. For example, suppose you are James Bond, then
-   your roll number in IIT Palakkad would be `111601007` in which case
-   your repository would be named `111601007-popl-lab`. All your lab
-   assignments needs to be committed to this repository.
-
-2. Add a README.md in the top level with your details like Name and
+1. Create an repository on your local machine/laptop with the
+   following format whose name is your rollnumber-popl-lab.
+   ```
+   mkdir -p code/git/111601007-popl-lab
+   cd code/git/111601007-popl-lab
+   git init
+   ```
+2. Add a `README.md` in the top level with your details like Name and
    Roll number.
+   
+   ```
+   cat > README.md <<EOF
+   
+   # README for PoPL lab
+   
+   * __Name:__ James Bond
+   * __Rollnow:__ 111601007
+   
+   EOF > README.md
+   
+   git add README.md
+   git commit -am 'added README'
+   ```
 
+3. Create a _private git repository_ on bitbucket
+   ```
+   # start browser and create a repository on bitbucket 111601007-popl-lab
+   # set it as the remote origin.
+   git remote add origin https://bitbucket.org/james-bond/111601007-popl-lab
+   git push origin/master -u master
+   ```
+   
 3. Give _read-only_ access to the instructor and the TA in charge of
    this course. We can thus get hold of your assignments easily.
 
@@ -23,16 +46,29 @@ ensuring easy evaluation of your lab assignments.
    of the assignment (not the deadline of the assignment). I will be
    uploading the problem statement with the file name
    `DD-MM-YYYY-Title.md` in this directory.
-
+   ```
+   mkdir 01-01-2000-First-Assignment
+   ```
+  
 5. Solve the assignment problem and ensure that all the source files
    required to build and run your code are within the directory
    created above. Follow good coding practices by making commits that
    are small and meaningful.
+   ```
+   cd 01-01-2000
+   echo 'fun id x = x' > file.ml
+   git add file.md
+   git commit -am 'wrote identity function'
+   ```
 
 6. Push your changes to bitbucket. We will sync from your repository
    on the deadline. You do not have to worry about any last minute
    change. Keep pushing changes but do not force commit or merge and
    we will get the latest one as of the assignment deadline.
+   
+   ```
+   git push origin
+   ```
 
 7. You do not have to explicitly submit the assignments, just ensure
    that your submission related work is merged to your `master` branch
