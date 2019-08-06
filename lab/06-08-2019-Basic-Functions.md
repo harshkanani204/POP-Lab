@@ -11,10 +11,11 @@ repository for all your lab submissions as outlined in the
 
 Write ML functions for the following
 
-
 1. Tri-variate version of the `curry` and `uncurry` functions
-   
+
 2. `fst : 'a * 'b * 'c -> 'a` , `snd : 'a * 'b * 'c -> 'b`, and
    `thd : 'a * 'b * 'c -> 'c`.
 
-3. List functions `hd : 'a list -> 'a` and `tl : 'a list -> 'a list` 
+3. The `plus`, `mul`, and `pow` functions for the `Nat` type defined
+   in the class. Also write the helper function `toInt : Nat -> int`
+   which will aid in debugging the above function
