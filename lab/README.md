@@ -9,7 +9,7 @@ ensuring easy evaluation of your lab assignments.
 1. Create an repository on your local machine/laptop with the
    following format whose name is your rollnumber-popl-lab.
 
-   ```sh
+   ```
    mkdir -p code/git/111601007-popl-lab
    cd code/git/111601007-popl-lab
    git init
@@ -17,7 +17,7 @@ ensuring easy evaluation of your lab assignments.
 2. Add a `README.md` in the top level with your details like Name and
    Roll number.
 
-   ```sh
+   ```
    cat > README.md <<EOF
    # README for PoPL lab
    * __Name:__ James Bond
@@ -29,11 +29,11 @@ ensuring easy evaluation of your lab assignments.
 
 3. Create a _private git repository_ on bitbucket
 
-   ```sh
+   ```
    # start browser and create a repository on bitbucket 111601007-popl-lab
    # set it as the remote origin.
    git remote add origin https://bitbucket.org/james-bond/111601007-popl-lab
-   git push origin/master -u master
+   git pu origin/master -u master
    ```
 
 3. Give _read-only_ access to the instructor and the TA in charge of
@@ -54,7 +54,7 @@ ensuring easy evaluation of your lab assignments.
    created above. Follow good coding practices by making commits that
    are small and meaningful.
 
-   ```sh
+   ```
    cd 01-01-2000
    echo 'fun id x = x' > file.ml
    git add file.md
@@ -66,7 +66,7 @@ ensuring easy evaluation of your lab assignments.
    change. Keep pushing changes but do not force commit or merge and
    we will get the latest one as of the assignment deadline.
 
-   ```sh
+   ```
     git push origin
    ```
 
