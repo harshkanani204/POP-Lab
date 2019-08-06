@@ -19,3 +19,8 @@ Write ML functions for the following
 3. The `plus`, `mul`, and `pow` functions for the `Nat` type defined
    in the class. Also write the helper function `toInt : Nat -> int`
    which will aid in debugging the above function
+
+4. The `iterate` function that takes as argument a `n : Nat`, a
+   function `f`, and a starting value `x0` and computes `f (f ... (f
+   x0))` (`f` applied on `x0`, `n`-times). Rework `plus`, `mul`, and
+   `pow` using `iterate`.
