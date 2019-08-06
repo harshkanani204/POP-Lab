@@ -15,7 +15,6 @@ ensuring easy evaluation of your lab assignments.
    ```
 2. Add a `README.md` in the top level with your details like Name and
    Roll number.
-   
    ```
    cat > README.md <<EOF
    
@@ -24,7 +23,7 @@ ensuring easy evaluation of your lab assignments.
    * __Name:__ James Bond
    * __Rollnow:__ 111601007
    
-   EOF > README.md
+   EOF
    
    git add README.md
    git commit -am 'added README'
