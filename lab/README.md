@@ -6,18 +6,20 @@ ensuring easy evaluation of your lab assignments.
 
 ## Instructions.
 
-1. Create an repository on your local machine/laptop with the
-   following format whose name is your rollnumber-popl-lab.
+* Create an repository on your local machine/laptop with the
+  following format whose name is your rollnumber-popl-lab.
+
 ```sh
    mkdir -p code/git/111601007-popl-lab
    cd code/git/111601007-popl-lab
    git init
 
 ```
-2. Add a `README.md` in the top level with your details like Name and
-   Roll number.
 
-```
+* Add a `README.md` in the top level with your details like Name and
+  Roll number.
+
+```sh
    cat > README.md <<EOF
    # README for PoPL lab
    * __Name:__ James Bond
@@ -28,9 +30,9 @@ ensuring easy evaluation of your lab assignments.
 
 ```
 
-3. Create a _private git repository_ on bitbucket
+* Create a _private git repository_ on bitbucket
 
-```
+```sh
    # start browser and create a repository on bitbucket 111601007-popl-lab
    # set it as the remote origin.
    git remote add origin https://bitbucket.org/james-bond/111601007-popl-lab
@@ -38,36 +40,39 @@ ensuring easy evaluation of your lab assignments.
 
 ```
 
-4. Give _read-only_ access to the instructor and the TA in charge of
+* Give _read-only_ access to the instructor and the TA in charge of
    this course. We can thus get hold of your assignments easily.
 
-5. Add a _separate directory_ for each assignment with the following
+* Add a _separate directory_ for each assignment with the following
    format `DD-MM-YYYY-Title`, where `DD-MM-YYYY` is the date of upload
    of the assignment (not the deadline of the assignment). I will be
    uploading the problem statement with the file name
    `DD-MM-YYYY-Title.md` in this directory.
-   ```
-   mkdir 01-01-2000-First-Assignment
-   ```
 
-6. Solve the assignment problem and ensure that all the source files
-   required to build and run your code are within the directory
-   created above. Follow good coding practices by making commits that
-   are small and meaningful.
-   ```
+```sh
+   mkdir 01-01-2000-First-Assignment
+```
+
+* Solve the assignment problem and ensure that all the source files
+  required to build and run your code are within the directory
+  created above. Follow good coding practices by making commits that
+  are small and meaningful.
+
+```sh
    cd 01-01-2000
    echo 'fun id x = x' > file.ml
    git add file.md
    git commit -am 'wrote identity function'
-   ```
+```
 
 7. Push your changes to bitbucket. We will sync from your repository
    on the deadline. You do not have to worry about any last minute
    change. Keep pushing changes but do not force commit or merge and
    we will get the latest one as of the assignment deadline.
-   ```
+
+```sh
     git push origin
-   ```
+```
 
 8. You do not have to explicitly submit the assignments, just ensure
    that your submission related work is merged to your `master` branch
