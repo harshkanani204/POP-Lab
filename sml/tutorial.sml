@@ -427,7 +427,7 @@ for cons.
 
 (* In general an algebraic datatype will look like this
 
-datatype 'a1 'a2 'a3 Name = C1 of (...) | C2 of (...) | C3 ...
+datatype ('a1, 'a2, 'a3) Name = C1 of (...) | C2 of (...) | C3 ...
 
 Here C1, C2 C3 etc are constructors.
 
