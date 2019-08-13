@@ -30,10 +30,18 @@ val aUnit       = () (* empty product type *)
 
 (*
 
-SML is strongly typed unlike say ruby or python. However, one does not
-need to explicitly give the type declaration. The compiler "infers"
-the type using the context. This is one of the powerful features that
-makes programming in ML a pleasant experience.
+Languages like C or Javascript do not take their types very seriously
+in the sense that C allows (even implicitly does) conversion between
+types like int, double and pointers. Such is not the case with SML and
+in this sense SML is strongly typed. The types are also checked at
+compile time (well in the case of sml compilers like mlton that is)
+unlike the language like Python or ruby. In this sense SML is
+statically type checked language. Despite these, one almost never
+needs to explicitly give the type declarations. The compiler "infers"
+the type using the context.  What this means is that we get all the
+advantages of strong and static type checking, i.e. safety and speed,
+without paying its price in verbosity. This is one of the powerful
+features that makes programming in ML a pleasant experience.
 
 Exercise: Enter the above definitions on the sml interpreter and
 note the types that the interpreter prints.
