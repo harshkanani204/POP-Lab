@@ -16,8 +16,8 @@ Write ML functions for the following
 2. The `map` function is defined in English as follows: `map` takes a function
    `f` and a list `l` and applies to all arguments of the list. Write the following
 
-   - In the comments write the type of `map`
-   - Define the function `map`
+       - In the comments write the type of `map`
+       - Define the function `map`
 
 3. Define the `foldr` and `foldl` which loosely does the following.
 
