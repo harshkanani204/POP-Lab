@@ -28,7 +28,7 @@ The effect of this definition is the following
 2. It defines two new values `nil` and `cons` with types `nil : 'a
    List` and `cons : 'a * 'a List -> 'a List` respectively.
 
-### The type of recursor
+## The type of recursor
 
 The recursor `recList` takes two arguments, one each for the
 constructor `nil` and `cons` and returns a value of type `'a List ->
@@ -66,3 +66,83 @@ val recT :  ...
 		 -> T -> 'b      (* the result type            *)
 
 ```
+
+## The semantics of the recursor.
+
+One way to think about an algebraic datatype is to think of them as
+trees where the nodes are marked with constructors. For example, the
+list [1,2,3], with our constructor definition can be seen pictorially
+as
+
+```sml
+
+  	+---------+
+    |cons 1 . |
+  	+-------|-+
+  			|
+   	   	 +--v-------+
+   	   	 | cons 2 .	|
+   	   	 +--------|-+
+   				  |
+   			   +--v-------+
+   			   | cons 2 . |
+   			   +--------|-+
+   	   	   	   	   	   	|
+                     +--v-------+
+  					 | cons 3 .	|
+  					 +--------|-+
+  							  |
+   	   	   	   	   	   	   	+---+
+  							|nil|
+  						   	+---+
+
+```
+
+Recall that the recursor `recList` takes two arguments one
+corresponding to the constructor `nil` and the other corresponding to
+the constructor `cons`. Let us call these arguments by the variables
+`N` and `C` respectively. Then pictorially the `recList` does
+the following.
+
+
+
+```sml
+
+         -------- recList N C --------|
+		 |							  V
+		 |
+   	+---------+		   	   	   	    +---------+
+    |cons 1 . |		  			    |C    1 . |
+  	+-------|-+		  			    +-------|-+
+  			|		  			            |
+   	   	 +--v-------+ 			         +--v-------+
+   	   	 | cons 2 .	| 			         | C    2 . |
+   	   	 +--------|-+ 			         +--------|-+
+   				  |	   	   	   	                  |
+   			   +--v-------+		               +--v-------+
+   			   | cons 2 . |		               | C    2 . |
+   			   +--------|-+		               +--------|-+
+   	   	   	   	   	   	|		                        |
+                     +--v-------+                    +--v-------+
+  					 | cons 3 .	|                    | C    3 . |
+  					 +--------|-+                    +--------|-+
+  							  |	                              |
+   	   	   	   	   	   	   	+---+                           +---+
+  							|nil|                           | N |
+  	   	   	   	   	   	   	+---+                           +---+
+
+```
+
+That is `recList N C ` can be visualised as replacing the `nil` node
+with the constant `N` and the `cons` node with `C`. We can give the
+complete definition the `recList` function.
+
+```sml
+
+fun recList N C nil           = N
+  | recList N C (cons (x,xs)) = C (x , recList N C xs)
+
+```
+
+Notice that for the argument `xs` the recursor goes about replacing
+stuff recursively.
