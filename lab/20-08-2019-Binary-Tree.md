@@ -21,8 +21,8 @@ and define some functions on it.
 
                    a                   b
                   / \                 / \
-                 /   \               /   \
-                b  ⭮ 🌲₃  ======>   🌲₁   a
+                 / ⭮ \               /   \
+                b    🌲₃  ======>   🌲₁   a
                / \                       / \
               /   \                     /   \
              🌲₁   🌲₂                 🌲₂    🌲₃
