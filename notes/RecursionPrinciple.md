@@ -48,7 +48,8 @@ as there are constructors for `T` and returns a value of type `T ->
 'b`. The argument that associated with the constructor `C : τ -> T`,
 where `τ` can possibly recursively refer to `T`, has type `τ₁ -> 'b`
 where `τ₁` is obtained from `τ` by replacing any (recursive)
-occurrence of `T` by `'b'. In other words, if `T` is defined as the datatype
+occurrence of `T` by `'b`. In other words, if `T` is defined as the
+datatype
 
 ```sml
 datatype T = ...
