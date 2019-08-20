@@ -146,4 +146,34 @@ fun recList N C nil           = N
 ```
 
 Notice that for the argument `xs` the recursor goes about replacing
-stuff recursively.
+stuff recursively. The general case is similar. Recall a general
+data type definition given below.
+
+```sml
+datatype T = ...
+           | C of τ
+		   | ...
+```
+
+The recursor will take one argument for each constructor, let us call
+the argument corresponding to the constructor `C` by `CF`. There will
+be one equation for each of the possible patterns with the pattern for
+C defined as follows.
+
+```sml
+
+fun recT ... CF ...       = ...
+  |      ....
+  | recT ... CF ... (C p) = CF p₁
+  |      ....
+
+```
+
+That is the recursor replaces the constructor `C` with the associated
+function `CF`. When the type `τ` is a product the pattern is `p` is
+something like `(x,y,z,...,u)`. The expression `p₁` is the pattern `p`
+with `recT` being applied recursively over every component which is of
+type `T`. Note that this matches with the type expected from `CF` ---
+Those components of the tuple `(x,y,z,...u) : τ` which are of type `T`
+need to be replaced by elements of type `'b` to get an element
+`(x1,y1,z1,...,u1) : τ₁` before CF can be applied on it.
