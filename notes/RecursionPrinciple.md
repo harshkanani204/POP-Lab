@@ -71,7 +71,7 @@ val recT :  ...
 
 One way to think about an algebraic datatype is to think of them as
 trees where the nodes are marked with constructors. For example, the
-list [1,2,3], with our constructor definition can be seen pictorially
+list [1,2,5,3], with our constructor definition can be seen pictorially
 as
 
 ```sml
@@ -85,7 +85,7 @@ as
    	   	 +--------|-+
    				  |
    			   +--v-------+
-   			   | cons 2 . |
+   			   | cons 5 . |
    			   +--------|-+
    	   	   	   	   	   	|
                      +--v-------+
@@ -120,7 +120,7 @@ the following.
    	   	 +--------|-+ 			         +--------|-+
    				  |	   	   	   	                  |
    			   +--v-------+		               +--v-------+
-   			   | cons 2 . |		               | C    2 . |
+   			   | cons 5 . |		               | C    5 . |
    			   +--------|-+		               +--------|-+
    	   	   	   	   	   	|		                        |
                      +--v-------+                    +--v-------+
