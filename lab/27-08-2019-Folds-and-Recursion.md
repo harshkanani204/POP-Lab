@@ -15,6 +15,12 @@ structure](http://sml-family.org/Basis/list.html)
 
 4. `nth : 'a list * int -> 'a option`.
 
-Be careful with `reverse` as the obvious version of reverse will have
-running time O(n²). Instead get an O(n) version (Hint: For this case
-`foldl` might be more convenient).
+## Hints.
+
+
+1. Be careful with `reverse` as the obvious version of reverse will
+   have running time O(n²). Instead get an O(n) version (Hint: For
+   this case `foldl` might be more convenient).
+
+2. For the `nth` function, the curried version would be easier
+   `nthCurried : 'a list -> int -> 'a option`
