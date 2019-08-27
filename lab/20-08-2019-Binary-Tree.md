@@ -15,8 +15,8 @@ and define some functions on it.
 4. Define the recursor function for the tree data type. First write
    down the type of the recursor and then write its definition.
 
-5. Define the rotate clockwise function for binary trees. The rotate
-   clockwise the function is pictorially defined as the following.
+5. Define the rotate clockwise function for binary trees. Pictorially
+   this rotation function is defined as the following.
 
 
                    a                   b
