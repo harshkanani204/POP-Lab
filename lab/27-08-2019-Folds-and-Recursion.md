@@ -6,13 +6,14 @@ convenient. For the documentation of these library function, read the
 documentation of the [`List`
 structure](http://sml-family.org/Basis/list.html)
 
-1. `nth : 'a list * int -> 'a option`.
 
-2. `partition : ('a -> bool) -> 'a list -> 'a list * 'a list`
+1. `partition : ('a -> bool) -> 'a list -> 'a list * 'a list`
 
-3. `map : ('a -> 'b) -> 'a list -> 'b list`.
+2. `map : ('a -> 'b) -> 'a list -> 'b list`.
 
-4. `reverse : 'a list -> 'a list`
+3. `reverse : 'a list -> 'a list`
+
+4. `nth : 'a list * int -> 'a option`.
 
 Be careful with `reverse` as the obvious version of reverse will have
 running time O(n²). Instead get an O(n) version (Hint: For this case
