@@ -14,8 +14,9 @@ towards a lambda calculus interpreter in standard ML.
    a fresh variable name, i.e. `fresh xs` gives a string `x` which is
    different from all strings in `xs`. (Hint use diagonalisation).
 
-4. Write a function `subst : expr -> string -> expr`, where `subst e₁
-   x e₂` substitutes in `e₁` all free occurance of `x` by `e₂`.
+4. Write a function `subst : expr -> string -> expr -> expr`, where
+   `subst e₁ x e₂` substitutes in `e₁` all free occurance of `x` by
+   `e₂`.
 
 ## Faster implementation (bonus, ungraded)
 
