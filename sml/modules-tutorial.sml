@@ -127,6 +127,45 @@ val  v   = 42
 fun  f x = x + 1
 end
 
+(** ** Opaque signatures
+
+Signature declaration can enforce a stronger form of hiding using the
+opaque signature declaration. Consider the following definition.
+
+
+ *)
+structure AO :> MYSIG = struct
+
+type t = int
+val  v = 100
+val  f = fn x => x + 1
+val  bar = 43
+end
+
+(**
+
+The above definition of the structure AO not only hides bar from the
+outside world (because MYSIG does not have a bar member), it also
+hides the fact that the type AO.t is int. Outside the module one has
+no way to manipulate elements of type AO.t.
+
+Exercise: Try out the following definitions by uncommenting the below
+lines.
+
+*)
+(*
+
+val x : C.t = 43
+val y : AO.t = 43
+
+*)
+
+(**
+
+Such opaque signatures allows one to define truly abstract types which
+can only be manipulated by the members of the structure.
+
+*)
 
 (** ** Functors
 
