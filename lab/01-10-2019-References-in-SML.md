@@ -60,7 +60,7 @@ references
    the integer code for all the strings seen so far.
 
 The `I2S` and `S2I` maps should be inverses of each other. You can use
-an [Map][ordmap] for the key value lookup table.
+an [`ORD_MAP` data structure][ordmap] for the key value lookup table.
 
 The idea is simple. There are three `ref` variables that contians the
 above three elements.  The functions like `atom` on input `s` first
@@ -77,7 +77,6 @@ have assigned any string that code). You can use the opaque signature
 technique to ensure that `Atom.atom` type is different from int
 outside the `Atom` structure. Any atom value that you can generate is
 only through the controlled interface provided by the function `atom`.
-
 
 [atom]: <https://www.classes.cs.uchicago.edu/archive/2015/spring/22620-1/atom-sig.html>
 [ordmap]: <https://www.classes.cs.uchicago.edu/archive/2015/spring/22620-1/ord-map-sig.html>
