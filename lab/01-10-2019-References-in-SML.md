@@ -22,14 +22,14 @@ val vx = !x     (* get the value out of the reference cell *)
    creates a structure of the previous kind. This way you can have
    multiple counters.
 
-   ```
+```
 	   structure A = MkCounter ()
 	   structure B = MkCounter ()
 
 	   A.set 42
 	   B.set 56
 	   ...
-   ```
+```
 
 ## Bonus question (Ungraded)
 
