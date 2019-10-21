@@ -151,8 +151,8 @@ structure T = Thread ()
 fun mesg n s () = if n <= 0
 		  then ()
 		  else ( print (Int.toString n ^ " " ^ s ^ ">\n");
-			 T.yield ();
 			 OS.Process.sleep (Time.fromSeconds 1);
+			 T.yield ();
 			 mesg (n - 1) s ()
 	               )
 fun main () = (
