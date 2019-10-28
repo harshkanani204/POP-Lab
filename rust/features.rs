@@ -8,9 +8,9 @@ fn main()
      **
      **/
 
-    
+
     /************** Mutability  ****************************************/
-    
+
     let x = 10;       /* x is not mutable and hence you cannot change
                          its value.
                        */
@@ -19,21 +19,25 @@ fn main()
     y = 42;
 
     // x = 42; // Uncomment and get an error
-    
+
     println!("x = {0} and y = {1}",x,y);
 
     /************** End demo on Mutability ******************************/
-    
+
     /*************** Ownership ******************************************/
-    
+
     let xbox  = Box::new(10);
     println!("xbox = {0}", xbox);
-    
+
     let ybox  = xbox; /* Ownership has transfered from xbox to ybox */
 
     // println!("xbox = {0}", xbox); // Uncomment and get an error
 
-    println!("ybox = {0}", ybox) 
+    println!("ybox = {0}", ybox);
 
-    
+    let zbox = &ybox; /* zbox borrows the resource form y */
+
+    println!("ybox = {0} and zbox = {1}", ybox, zbox);
+
+
 }
