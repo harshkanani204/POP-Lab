@@ -1,4 +1,4 @@
-# Notes on Rust's ownership and related concepts.
+# Ownership and move semantics in rust.
 
 Rust uses move semantics and an ownership model to manage and keep
 track of resources. In this brief set of notes we give a quick
