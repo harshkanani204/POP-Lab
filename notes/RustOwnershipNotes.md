@@ -92,7 +92,8 @@ i.e. T does not implement the `Copy` trait.
 
 4. At most a single mutable reference (and thereby a mutable borrow)
    can exist for a give object, that to if the object in question is
-   mutable. In particular, you _cannot_ create a mutable reference
+   mutable. For a variable `x`, you create a mutable reference using
+   `&mut x`. In particular, you _cannot_ create a mutable reference
    pointing to `x` if any of the following is true
 
      - The variable `x` is immutable
@@ -101,6 +102,44 @@ i.e. T does not implement the `Copy` trait.
 
 5. When a function is called, every parameter should be seen as an assignment
    and hence the same rules as that of assignment is valid.
+
+## Examples
+
+Rule 4 above is a bit confusing, particularly when the variable that
+borrows is itself mutable.  The following snippet of code is okey.
+
+```rust
+let mut x = ..;
+let mut y = &x; // y as a variable is mutable and hence can change itself
+	            // to point to something else. But its value is an
+				//_immutable reference_ to x. So the borrow is a immutable borrow.
+let z     = &x
+
+// *y = 10 // Uncommenting this is an error as y has only a immutable reference to
+           // x.
+
+```
+
+Note that the `let mut y` says that y is mutable (with contents being
+the immutable reference to x). To borrow `x` via a mutable reference
+you would need to use `let y = &mut x` or if you want `y` itself to be
+varying (the second meaning of mutable) then you will require `let mut
+y = &mut x`. In particular, the following two code snippets lead to compile
+error
+
+```rust
+let mut x = ...
+let y = &mut x
+let z = &x
+```
+or
+
+```rust
+
+let mut x = ...
+let mut y = &mut x
+let z = &x
+```
 
 [trait-Copy]: <https://doc.rust-lang.org/std/marker/trait.Copy.html>
 [trait-Drop]: <https://doc.rust-lang.org/std/ops/trait.Drop.html>
