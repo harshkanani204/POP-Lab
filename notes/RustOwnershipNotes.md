@@ -95,9 +95,9 @@ i.e. T does not implement the `Copy` trait.
    mutable. In particular, you _cannot_ create a mutable reference
    pointing to `x` if any of the following is true
 
-   - The variable `x` is immutable
-   - There are other reference (mutable or otherwise) to x that is
-	 alive at the same time.
+     - The variable `x` is immutable
+     - There are other reference (mutable or otherwise) to x that is
+	   alive at the same time.
 
 5. When a function is called, every parameter should be seen as an assignment
    and hence the same rules as that of assignment is valid.
