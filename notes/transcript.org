@@ -1,0 +1,77 @@
+#+STARTUP: indent
+* Getting started (Interactive Session).
+
+** Basic Information
+
+- Instructor :: Piyush <ppk@.>
+- TAs
+
+  1. Chilankamol Sunny
+  2. Haritha Madhav C
+  3. Lijo M Jose
+
+- Bitbucket Repository :: https://bitbucket.org/piyush-kurur/popl
+
+Hosting site for git repositories
+
+- Moodle website :: https://lms.iitpkd.ac.in
+- Youtube channel :: https://www.youtube.com/channel/UCfCBIg1UZAYs5rjCR9GiBow
+- Google meet link :: Link already sent to you
+
+** Format of the lectures
+
+/Flipped classroom/ model of lectures
+
+- There will be weekly videos that I will post at the Youtube channel
+- Interactive session weekly once (Monday 11:00-12:00 hrs/9:30-10:30)
+- Lab Interactive session (PoPL Lab) (Thursdays 14:00-15:30 hrs)
+- TAs will have a surprise interaction with you to check you are not asleep
+
+** Grading
+
+- Try have a lot of Short quizes (Monday 9:00-9:30 in the Even week). Over
+  moodle (best n-2 in n). best n-1 in n (60-80%)
+
+- End sem
+
+** TODO At Home (Homework 0)
+
+1. All of you have a laptop/desktop with internet
+
+2. Should have a working GNU/Linux partition (Debian/Ubuntu)
+
+3. Basics of computing
+
+4. Start using a good editor (Emacs)
+
+5. Should know how to install some software.
+
+#+BEGIN_SRC bash
+
+sudo apt install git   # debian/ubuntu
+sudo apt install mlton
+
+#+END_SRC
+
+** Things to learn in the process of doing this course
+
+1. git
+2. make files etc dev tools on linux
+
+** What this course is about
+
+- Basic principles by which programming languages are designed
+
+  - Functional Programming (SML - Standard Meta Language)
+  - Rust (Imperative programming language)
+  - Logical programming (Prolog)
+  - Type systems, Concurrency, Modularity - Principles behind programming
+languages.
+
+- Compilers in the next semester
+
+- Lab component
+
+  - Using the theory and putting it into practice.
+  - Side benefits (git, general programming practices)
+  - Compilers course next semester some of these things will put into practice
