@@ -1,6 +1,8 @@
 GENERATED=pdf fdb_latexmk fls log aux out tex toc
 .DEFAULT_GOAL=all
-.PHONY: clean all
+.PHONY: clean all setup-record setup-normal
+
+HOSTNAME=$(shell hostname -s)
 %.tex : %.org
 	emacs $< --batch -f org-latex-export-to-latex --kill
 
@@ -11,3 +13,9 @@ transcript.pdf : transcript.tex
 all: transcript.pdf
 clean:
 	rm -f $(addprefix transcript., ${GENERATED})
+
+setup-record:
+	sudo alsactl restore -f alsa-setting/${HOSTNAME}/record.conf
+
+setup-normal:
+	sudo alsactl restore -f alsa-setting/${HOSTNAME}/normal.conf
