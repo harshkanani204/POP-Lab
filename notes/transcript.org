@@ -75,3 +75,46 @@ languages.
   - Using the theory and putting it into practice.
   - Side benefits (git, general programming practices)
   - Compilers course next semester some of these things will put into practice
+
+
+* Lecture 1 :: Functional Programming - Getting started
+- Video :: https://www.youtube.com/watch?v=slmy8JH5Llo
+
+Language that we will use is Standard ML (SML)
+
+ML stands for Meta Language
+
+** SML/NJ - New Jersey
+
+- Interpreter
+- Is quick to use
+- Is good for interactive sessions
+- Standalone programs can be written but not recommended.
+
+*** Installation
+
+#+BEGIN_SRC
+sudo apt intall smlnj
+sudo apt install rlwrap
+sudo apt install sml-mode
+#+END_SRC
+
+** Mlton
+
+- Full program optimising compiler
+- Is slow to use (the compilation process is slow)
+- Produces standalone fast executables
+
+
+*** Installation
+
+#+BEGIN_SRC
+sudo apt install mlton
+
+#+END_SRC
+
+** Tale of two SML's
+ - For interactive use smlnj
+   - on terminal or in emacs
+
+ - for standalone compiling use mlton
