@@ -94,9 +94,9 @@ ML stands for Meta Language
 *** Installation
 
 #+BEGIN_SRC
-sudo apt intall smlnj
-sudo apt install rlwrap
-sudo apt install sml-mode
+sudo apt intall smlnj      # the smlnj system.
+sudo apt install rlwrap    # for adding history support for sml
+sudo apt install sml-mode  # for emacs
 #+END_SRC
 
 ** Mlton
@@ -110,6 +110,17 @@ sudo apt install sml-mode
 
 #+BEGIN_SRC
 sudo apt install mlton
+
+#+END_SRC
+
+*** Compiling code
+
+#+BEGIN_SRC
+mlton foo.hs # produces the foo executable
+./foo        # run the executable
+
+mlton -output myprog foo.hs # generate executable in myprog
+./myprog
 
 #+END_SRC
 
