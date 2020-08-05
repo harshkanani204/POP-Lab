@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# Script to compress the ogv file from recordmydesktop to .mp4 file
+#
+
 input=$1
 output=`echo $1 | sed s/.ogv/.mp4/`
 
