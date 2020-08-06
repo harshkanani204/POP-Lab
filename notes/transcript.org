@@ -1,5 +1,5 @@
 #+STARTUP: indent
-* Getting started (Interactive Session).
+* Class Room 1 :: Getting started
 
 ** Basic Information
 
@@ -129,3 +129,91 @@ mlton -output myprog foo.hs # generate executable in myprog
    - on terminal or in emacs
 
  - for standalone compiling use mlton
+
+* Lab 1 :: Getting started
+SCHEDULED: <2020-08-06 Thu>
+
+** Git
+
+1. Installation
+
+#+BEGIN_SRC
+sudo apt install git tig gitk
+#+END_SRC
+
+2. Set your name and email id.
+
+#+BEGIN_SRC
+
+git config --global --edit
+
+#+END_SRC
+
+3. Make a local repository
+
+#+BEGIN_SRC
+
+mkdir code/git/ROLLNO-popl -p
+cd code/git/ROLLNO-popl
+git init
+emacs README.md
+git add README.md # Asks git to keep track of changes in this file from now own
+git commit -m 'added readme' # This creates a commit with message "added readme"
+# or one can avoid the -m option
+git commit # will open an editor
+
+
+#+END_SRC
+
+4. Have a .gitignore file
+
+Controls what files should be ignored by git
+
+5. I often put a pre-commit hook
+
+This is to avoid committing changes with trailing spaces.
+
+#+BEGIN_SRC
+
+# Go to the top of the repository
+cd ~code/git/007-popl
+mv .git/hook/pre-commit.sample .git/hook/pre-commit # Enable the pre-commit hook
+
+#+END_SRC
+
+6. Learn more about git and you can also use magit (git operations from emacs)
+
+
+** Bitbucket stuff
+
+1. Create account on bitbucket
+2. Create a new repository in bitbucket
+3. Push changes from local to bitbucket repository
+
+#+BEGIN_SRC sh
+
+# Create a link to the remote repository on bitbucket and call it origin.
+git remote origin git@bitbucket.org:piyush-kurur/007-popl.git
+
+# Push things here to bitbucket.
+git push origin -u master
+
+#+END_SRC
+
+
+** Assignment Submission Workflow
+
+1. Give readonly access to all TA's and me (piyush-kurur) (Using the webinterface of bitbucket)
+
+2. Write your code in the repository (within the deadline) and commit
+   it.
+
+3. Push it to bitbucket.
+
+
+** Few related things to try out
+
+1. You can fork my popl repository on bitbucket
+2. You should "Watch" my popl repository
+3. You can clone repositories from (say) bitbucket
+4. If the repository above is your own, then you can push stuff there.
