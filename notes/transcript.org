@@ -76,6 +76,8 @@ languages.
   - Side benefits (git, general programming practices)
   - Compilers course next semester some of these things will put into practice
 
+* TODO Class Room 2 :: Basics of Standard ML
+SCHEDULED: <2020-08-10 Mon>
 
 * Lecture 1 :: Functional Programming - Getting started
 - Video :: https://www.youtube.com/watch?v=slmy8JH5Llo
