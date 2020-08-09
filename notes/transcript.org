@@ -132,6 +132,138 @@ mlton -output myprog foo.hs # generate executable in myprog
 
  - for standalone compiling use mlton
 
+* Lecture 2 :: Standard ML Programming model
+
+- The mental model of what programs are and what they do
+
+- This need not be the way in which the language is really
+  implemented.
+
+** C programming model
+
+- C programs have a set of variables  which are memory cells
+- Assignment statements update these cells
+- Programs are essentially such statements
+- Computation happens by running these statements in a sequence.
+
+
+
+
+
+** SML programming model
+
+*** Programs are variable bindings
+
+#+BEGIN_SRC sml
+val x = 10     (* binds x to the value 10 *)
+val y = x + 2  (* it evalutes x + 2 and binds it to y *)
+val z = x + y
+
+(* Binding looks like
+
+val <variable> = expression
+
+*)
+
+#+END_SRC
+
+#+RESULTS:
+: val x = 10 : int
+: val y = 12 : int
+: val z = 22 : int
+
+**** Commentary
+
+#+BEGIN_SRC  sml
+val x = 10
+(*
+   1. 10 is itself a value so no reduction.
+   2. x gets bound to 10
+*)
+
+val y = x + 2
+(*
+  RHS is x + 2 -----> 10 + 2 ---> 12
+
+  y gets bound to 12
+
+*)
+val z = x + y
+
+(*
+RHS is x + y ---> 10 + y ----> 10 + 12 ---> 22
+
+z gets bound to 22
+
+*)
+
+#+END_SRC
+
+*** Computations happen when expressions are evaluated.
+
+
+1. When variables are encountered during evalution, the corresponding
+   value is substituted for it and the evaluation process continues.
+
+**** Expressions (examples)
+
+- 2
+- 3 + 100
+- x
+- "hello"
+- print "hello"
+
+**** Values and reductions.
+
+A subset of expressions are designated as values and are considered
+in their simplest form (normal form).
+
+Anything that is not a value needs simplification (reduction).
+
+#+BEGIN_SRC
+
+3 + (10 * 2) ---->  3 + 20 ---> 23 which is value
+
+x --> We need to look up at that point what is the value bound to x
+
+#+END_SRC
+
+
+
+
+*** SML programs are just bindings.
+
+1. A program is a list of bindings
+2. Each binding defines a variable and associates it with a value
+3. The value associated to a variable is obtained by
+   reducing/simplifying the RHS.
+4. Computations happen while these reductions are done.
+
+** Pure values vs evaluation with side effects.
+
+#+BEGIN_SRC sml
+
+val x = print "hello\n"
+val y = ()
+#+END_SRC
+
+#+RESULTS:
+: hello
+: val x = () : unit
+: val y = () : unit
+
+1. x gets bound to the value ~()~ - unit or hermit
+2. When print "hello\n" is reduced, it results in "hello" being printed
+   on the terminal.
+3. The value obtained in this case ~()~ does not reflect this side effect.
+4. The evaluation of print "hello\n" results in a side effect of printing
+   the string "hello"
+
+In that sense print "hello" is /not/ a /pure value/
+
+In general it is always preferable to use pure values and use
+side-effects only when necessary.
+
 * Lab 1 :: Getting started
 SCHEDULED: <2020-08-06 Thu>
 
