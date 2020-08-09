@@ -264,6 +264,59 @@ In that sense print "hello" is /not/ a /pure value/
 In general it is always preferable to use pure values and use
 side-effects only when necessary.
 
+
+
+* TODO Lecture 3 :: Defining Functions
+
+** Function application or Using functions
+
+1. How
+2. Associativity
+3. Precendence
+
+
+** Function definition
+#+BEGIN_SRC sml
+
+val ident = fn x => x
+
+#+END_SRC
+
+#+RESULTS:
+: val ident = fn : 'a -> 'a
+
+** Anonymous function.
+Start by saying function application.
+#+BEGIN_SRC
+
+print "hello"  (* the function print applied to value "hello" *)
+
+(* f is a function
+   x is a value
+  then f x  is the function f applied on x
+
+*) Function application is very important an hence we want uncluttered notation for it.
+
+
+#+END_SRC
+1. Last class bindings, and expression evaluations
+2. How to create functions.
+3. fun ident x = x
+#+BEGIN_SRC sml
+
+fun ident x = x  (* creates a new binding for the variable
+                    ident which is the identity function *)
+fun incr x = x + 1
+fun double x = 2 * x
+
+
+#+END_SRC
+
+1. Function appl
+#+RESULTS:
+: val ident = fn : 'a -> 'a
+
+
 * Lab 1 :: Getting started
 SCHEDULED: <2020-08-06 Thu>
 
