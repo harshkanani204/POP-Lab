@@ -301,7 +301,9 @@ mlton -output myprog foo.hs # generate executable in myprog
 
  - for standalone compiling use mlton
 
-* Lecture 2 :: Standard ML Programming model
+* DONE Lecture 2 :: Standard ML Programming model
+- Video :: https://www.youtube.com/watch?v=WoVXpQkhVhw
+- Video :: https://www.youtube.com/watch?v=QVxqTi8iCzw&t=5s
 
 - The mental model of what programs are and what they do
 
