@@ -1,5 +1,5 @@
 #+STARTUP: indent
-* Class Room 1 :: Getting started
+* DONE Class Room 1 :: Getting started
 
 ** Basic Information
 
