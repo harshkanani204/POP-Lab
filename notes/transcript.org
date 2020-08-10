@@ -241,6 +241,14 @@ val v = "hello" : string
 val u1 = () : unit
 val u2 = () : unit
 #+end_example
+
+
+* Information.
+- Youtube play list ::
+https://www.youtube.com/playlist?list=PLhMQ0_-r9W5-LeXeXQtW8UcmtdJk98hfH
+
+- Repository ::
+https://bitbucket.org/piyush-kurur/popl
 - Video :: https://www.youtube.com/watch?v=slmy8JH5Llo
 
 Language that we will use is Standard ML (SML)
