@@ -492,7 +492,7 @@ fun double x = 2 * x
 : val ident = fn : 'a -> 'a
 
 
-* Lab 1 :: Getting started
+* DONE Lab 1 :: Getting started
 SCHEDULED: <2020-08-06 Thu>
 
 ** Git
