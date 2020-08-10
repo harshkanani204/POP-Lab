@@ -76,10 +76,171 @@ languages.
   - Side benefits (git, general programming practices)
   - Compilers course next semester some of these things will put into practice
 
-* TODO Class Room 2 :: Basics of Standard ML
+
+* DONE Class Room 2 :: Basics of Standard ML
 SCHEDULED: <2020-08-10 Mon>
 
-* Lecture 1 :: Functional Programming - Getting started
+** The programming model for Languages
+
+- It is a mental model of what the program /is/ and what it /does/.
+
+- It might not be the actual implementation model. Is typically the
+  machine model.
+
+- The distinction between the programming model and the implementation
+  model is important because the programming model is often
+  simpler/convenient for Humans.
+
+- Moral :: Programming Languages are both for Humans to understand and
+  for machines to perform.
+
+*** C Language
+
+- Variables that are memory cells
+- assignments that update memory cells
+- There is a control flow which determines in what order the instructions are executed
+
+** Programming model for SML
+
+*** Variable Bindings
+
+#+BEGIN_SRC sml
+
+val x = 10     (* Binds the variable x to the value 10 *)
+val y = 5 + 2  (* RHS = 5 + 2 (expression) ----> 7 (value)
+                  Bind the value 7 to y
+               *)
+val z = x + y  (* RHS is not value.
+                 x + y ----> 10 + y (substitution of x)
+                       ----> 10 + 7 (substitution of y)
+                       ----> 17
+                 Binds z to 17
+                 *)
+val amitabbachan = "Big B"
+val z1 = amitabbachan
+
+#+END_SRC
+
+#+RESULTS:
+: val x = 10 : int
+: val y = 7 : int
+: val z = 17 : int
+: val amitabbachan = "Big B" : string
+: val z1 = "Big B" : string
+
+*** Expressions
+
+- Values are certain expressions which are no more reducible.
+- Values are expressions that are in reduced form (simplified form)
+- Values are defined based on the context
+
+
+**** Examples
+
+- 2     (value)
+- 3 + 5 (not value) where as 8 is value
+- x     (not value) but we need to figure it out from the binds applicable at the point
+
+- "hello"
+
+
+
+*** Computations/effects happen while expressions are evaluated.
+** Hello world
+
+#+BEGIN_SRC sml
+
+val x = print "Hello World\n"
+
+#+END_SRC
+
+#+RESULTS:
+: Hello World
+: val x = () : unit
+
+** Side effects and pure expressions.
+
+#+BEGIN_SRC sml
+
+val x = print "hello\n"  (* Prints the string "hello" as a side effect *)
+val y = ()
+val z = x (* No side effect as () is a value and
+             hence need no reduction *)
+
+val z = () (* This is equivalent to the above binding *)
+
+(*
+
+ print "hello\n" (expression)
+   ----> ()
+
+In the process there is a side effect of
+printing the "hello\n"
+
+*)
+
+#+END_SRC
+
+#+RESULTS:
+: hello
+: val x = () : unit
+
+Certain expressions on reduction has side effects
+e.g = ~print "hello\n"~ . Evaluating it has an effect on
+the outside world.
+
+
+Those Expressions whose evaluation  do not have side effect is
+called a /pure expression/
+
+1. ~print "hello"~ is an expression that is /not/ a value
+2. It reduces to the value ~()~
+3. The reduction has the side effect of printing "hello"
+4. However, the resulting value ~()~ has no side effect.
+
+*** SML is /not/ a pure functional programming language
+
+Because there are expressions (e.g ~print "hello"~) whose reductions
+have side effect.
+
+
+
+
+** Unit
+
+1. Type called ~unit~
+2. It has only one value ~()~ (call this unit, void)
+
+#+BEGIN_SRC sml
+fun identity x  = x
+fun hello ()   = print "hello\n"
+fun hello1 x   = print "hello1\n"
+val z          = hello () (* --> (1) *)
+val u = identity 10
+val v = identity "hello"
+val u1 = hello1 42        (* --> (2) *)
+val u2 = hello1 "hello"   (* --> (3) *)
+val _  = hello ()
+val _  = print "This is just printing without binding\n"
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+hello
+hello1
+hello1
+hello
+This is just printing without binding
+val identity = fn : 'a -> 'a
+val hello = fn : unit -> unit
+val hello1 = fn : 'a -> unit
+val z = () : unit
+val u = 10 : int
+val v = "hello" : string
+val u1 = () : unit
+val u2 = () : unit
+#+end_example
 - Video :: https://www.youtube.com/watch?v=slmy8JH5Llo
 
 Language that we will use is Standard ML (SML)
