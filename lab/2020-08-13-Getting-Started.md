@@ -1,5 +1,7 @@
 # Getting Started.
 
+DEADLINE: 17 Aug 2020, Monday 23:59.
+
 This lab session is meant to help you setup your machine and account
 so that you can easily submit your assignment for this course. We will
 assume that you have the following.
