@@ -441,7 +441,101 @@ side-effects only when necessary.
 
 
 
-* TODO Lecture 3 :: Defining Functions
+* DONE Lecture 3 :: Types
+- Video :: https://youtu.be/qC4RkYatlC0
+
+** SML is a typed programming language
+
+#+BEGIN_SRC sml
+val x     = 10
+val hello = "hello"
+val y     = (1,"hello")
+val z     = [1,2,3]
+val z1    = ["hello", "world"]
+(*
+
+x : T   means x has the type T
+
+*)
+#+END_SRC
+
+#+RESULTS:
+: val x = 10 : int
+: val hello = "hello" : string
+: val y = (1,"hello") : int * string
+: val z = [1,2,3] : int list
+: val z1 = ["hello","world"] : string list
+
+** Types rule out certain programs.
+
+
+#+BEGIN_SRC  sml
+val x = 2 + "hello"
+
+#+END_SRC
+
+#+RESULTS:
+: stdIn:32.5-32.20 Error: operator and operand don't agree [overload conflict]
+:   operator domain: [+ ty] * [+ ty]
+:   operand:         [+ ty] * string
+:   in expression:
+
+** Types are taken seriously (strongly typed)
+
+
+#+BEGIN_SRC sml
+
+val x = 2.5
+val z = 2
+val y = x * 2
+
+#+END_SRC
+
+#+RESULTS:
+: stdIn:48.5-48.14 Error: operator and operand don't agree [overload conflict]
+:   operator domain: real * real
+:   operand:         real * [int ty]
+:   in expression:
+
+
+** Strict types are great for safety
+
+Write a program to take two numbers and compute its average.
+
+*** In C
+
+#+BEGIN_SRC C
+
+# include<stdio.h>
+double average( double x , double y )
+{
+   return 1.0/2.0 * (x + y);
+}
+
+int main ()
+{
+   printf("%g", average(2,3));
+   return 0;
+}
+
+#+END_SRC
+
+#+RESULTS:
+: 2.5
+
+
+*** In SML
+
+#+BEGIN_SRC sml
+
+fun average x y = 1.0/2.0 * (x + y)
+
+#+END_SRC
+
+#+RESULTS:
+: val average = fn : real -> real -> real
+
+* TODO Lecture 4 :: Defining Functions
 
 ** Function application or Using functions
 
@@ -579,3 +673,5 @@ git push origin -u master
 2. You should "Watch" my popl repository
 3. You can clone repositories from (say) bitbucket
 4. If the repository above is your own, then you can push stuff there.
+
+* DONE Lab 2 :: SML Tutorial.
