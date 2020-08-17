@@ -535,56 +535,94 @@ fun average x y = 1.0/2.0 * (x + y)
 #+RESULTS:
 : val average = fn : real -> real -> real
 
-* TODO Lecture 4 :: Defining Functions
+* DONE Lecture 4 :: Functions
+- Video :: https://youtu.be/IVeW5wv0wcA
 
-** Function application or Using functions
+** Definition of functions
+#+BEGIN_SRC sml
+fun identity x = x
+fun increment x = x + 1
+val z = identity 10
+val helo = identity "hello"
+val foo  = identity [1,2,3]
+fun idInt (x : int)  = x
 
-1. How
-2. Associativity
-3. Precendence
+(*
+
+The type of functions form A to B is A -> B
+'a is a type variable.
+*)
+#+END_SRC
+#+RESULTS:
+: val identity = fn : 'a -> 'a
+: val increment = fn : int -> int
+: val z = 10 : int
+: val helo = "hello" : string
+: val foo = [1,2,3] : int list
+: val idInt = fn : int -> int
 
 
-** Function definition
+- identity is a polymorphic function
+- SML takes care of inferring the types of arguments and results.
+- It infers the most general type possible
+
+** Only single argument functions
+
+- SML supports only single argument functions
+
+- Recall :: If A and B are types then A -> B denotes the type
+            of all functions from A to B
+
+- Associativity of "->" :: It associates towards right
+     ~A -> B -> C  === A -> (B -> C)~
+
+*** Curried form
+
 #+BEGIN_SRC sml
 
-val ident = fn x => x
+fun add x y = x + y
+
+(* add takes a single argument x and returns a function that takes a single argument y
+  and returns x + y
+*)
+
+val increment = add 1
+#+END_SRC
+
+#+RESULTS:
+: val add = fn : int -> (int -> int)
+
+*** Uncurried form
+
+- A * B is the cartesian product of types A and B.
+- elements of A * B are pairs (a,b) such that a : A and b : B
+#+BEGIN_SRC sml
+
+val z = (1, true)
+val u = (1.0, 1, "hello")
+fun add (x,y) = x + y
 
 #+END_SRC
 
 #+RESULTS:
-: val ident = fn : 'a -> 'a
-
-** Anonymous function.
-Start by saying function application.
-#+BEGIN_SRC
-
-print "hello"  (* the function print applied to value "hello" *)
-
-(* f is a function
-   x is a value
-  then f x  is the function f applied on x
-
-*) Function application is very important an hence we want uncluttered notation for it.
+: val z = (1,true) : int * bool
+: val u = (1.0,1,"hello") : real * int * string
+: val add = fn : int * int -> int
 
 
-#+END_SRC
-1. Last class bindings, and expression evaluations
-2. How to create functions.
-3. fun ident x = x
+*** Conversion
+
 #+BEGIN_SRC sml
 
-fun ident x = x  (* creates a new binding for the variable
-                    ident which is the identity function *)
-fun incr x = x + 1
-fun double x = 2 * x
-
+(* curry : ('a * 'b -> 'c) -> 'a -> 'b -> 'c *)
+fun curry f x y = f (x,y)
+fun uncurry f (x,y) = f x y
 
 #+END_SRC
 
-1. Function appl
 #+RESULTS:
-: val ident = fn : 'a -> 'a
-
+: val curry = fn : ('a * 'b -> 'c) -> 'a -> 'b -> 'c
+: val uncurry = fn : ('a -> 'b -> 'c) -> 'a * 'b -> 'c
 
 * DONE Lab 1 :: Getting started
 SCHEDULED: <2020-08-06 Thu>
