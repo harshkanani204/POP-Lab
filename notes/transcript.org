@@ -242,6 +242,195 @@ val u1 = () : unit
 val u2 = () : unit
 #+end_example
 
+* DONE Class Room 3 :: Types and Functions
+SCHEDULED: <2020-08-17 Mon>
+
+** Standard ML has types
+
+It is strongly enforced.
+
+
+|                       | Weak types | strong types |
+|-----------------------+------------+--------------|
+| Static type checking  | C, C++     | SML, Java    |
+| Dynamic type checking | JavaScript | Ruby, scheme |
+
+
+*** Static type checking
+
+- Advantages ::
+
+1. Errors are caught before deployment.
+2. More efficient code is expected out of static type checking
+
+- Disadvantages ::
+
+1. Very verbose type declarations.
+2. Not easy to prototype
+
+These complaints are because of languages like Java.
+
+SML has this nice property that it can infer the types.
+
+#+BEGIN_SRC sml
+
+fun add x y = x + y
+
+#+END_SRC
+
+#+RESULTS:
+: val add = fn : int -> int -> int
+
+** Strong types are good
+
+Write a function to compute the average of two real numbers.
+
+#+BEGIN_SRC C
+# include <stdio.h>
+double av( double x , double y)
+{
+   return 1/2 * (x + y);
+}
+
+int main ()
+{
+   printf("the result is %g\n", av(2,3));
+}
+
+
+#+END_SRC
+
+#+RESULTS:
+: the result is 0
+
+The bug is due to the automatic conversion from
+integers to double.
+
+#+BEGIN_SRC sml
+
+fun av x y = 1.0/2.0 * (x + y)
+
+
+#+END_SRC
+
+#+RESULTS:
+: val av = fn : real -> real -> real
+
+
+
+** What are types
+
+- Basic types :: ~int~, ~bool~, ~char~, ~string~
+
+#+BEGIN_SRC sml
+val anInt = 10
+val aBool = true
+val anotherBool = false
+val aChar = #"c"
+val aString = "hello\n"
+
+#+END_SRC
+
+- Compound types :: product types, lists etc
+
+#+BEGIN_SRC sml
+val y = (1, "hello")
+val y1 = (1,true, "hello")
+val x  = #1 y
+val h =  #2 y
+val z = [1,2,3]
+val z1 = [ "hello", "world"]
+val u = 2 :: z
+val u1 = []
+val u2 = "foo" :: z1
+fun bar x (y : real) = x + y
+fun bar1 x y = (x+1,y)
+
+(*
+ A * B  is the type of all tuples (a,b) where a : A and b : B.
+
+'a , 'b , 'c  --> type variables
+
+A -> B denotes the type of functions from A to B
+
+Functions whose range is B and domain is A
+
+*)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+val y = (1,"hello") : int * string
+val y1 = (1,true,"hello") : int * bool * string
+val x = 1 : int
+val h = "hello" : string
+val z = [1,2,3] : int list
+val z1 = ["hello","world"] : string list
+val u = [2,1,2,3] : int list
+val u1 = [] : 'a list
+val u2 = ["foo","hello","world"] : string list
+val bar = fn : real -> real -> real
+val bar1 = fn : int -> 'a -> int * 'a
+#+end_example
+
+
+
+- Polymorphism :: SML figures out the most general possible type.
+This kind of polymorphism is called parametric polymorphism
+
+
+** Function evaluation
+
+*** Variable bindings
+*** Reductions/simplifications
+
+#+BEGIN_SRC sml
+
+fun increment x = x + 1
+(* the variable increment is bound to that function which on input x gives x + 1 *)
+val x = 10
+val z = increment (2 + x)
+
+fun foo (x,y) = x + y
+
+fun bar () () = ()
+
+val u = bar (print "hello\n")
+
+
+(*
+    f            e
+    increment (2 + x) ---> increment (2 + x)
+                     ---> increment (2 + 10)
+                     ---> increment 12 ----> bind x to 12 and evalute (x + 1 )
+                     ---> 12 + 1
+                     ---> 13
+                       match it with the lhs (identity x) which binds x to 12
+    (1) reduce f
+    (2) reduce e
+    (3)
+
+Eger evaluation: Arugments are reduced before functions are applied.
+lazy evaluation: Arugments are evaluated only when needed.
+
+*)
+
+#+END_SRC
+
+#+RESULTS:
+: hello
+: val increment = fn : int -> int
+: val x = 10 : int
+: val z = 13 : int
+: val foo = fn : int * int -> int
+: val bar = fn : unit -> unit -> unit
+: val u = fn : unit -> unit
+
+1. First the RHS is reduced to a value and then
+   bound to x
+
+2. During evaluation if a variable is found then
+   its corresponding bound value is substituted
 
 * Information.
 - Youtube play list ::
