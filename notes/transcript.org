@@ -617,13 +617,13 @@ val y = ()
 : val y = () : unit
 
 1. x gets bound to the value ~()~ - unit or hermit
-2. When print "hello\n" is reduced, it results in "hello" being printed
+2. When ~print "hello\n"~ is reduced, it results in "hello" being printed
    on the terminal.
 3. The value obtained in this case ~()~ does not reflect this side effect.
-4. The evaluation of print "hello\n" results in a side effect of printing
-   the string "hello"
+4. The evaluation of ~print "hello\n"~ results in a side effect of printing
+   the string ~"hello"~
 
-In that sense print "hello" is /not/ a /pure value/
+In that sense ~print "hello"~ is /not/ a /pure value/
 
 In general it is always preferable to use pure values and use
 side-effects only when necessary.
