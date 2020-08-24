@@ -977,6 +977,173 @@ fun uncurry f (x,y) = f x y
 : val curry = fn : ('a * 'b -> 'c) -> 'a -> 'b -> 'c
 : val uncurry = fn : ('a -> 'b -> 'c) -> 'a * 'b -> 'c
 
+
+* DONE Lecture 5 :: Revisiting Types and Values
+
+** Why types ?
+
+Values come with types and they govern
+
+1. How we create values
+
+2. How we make use of values
+
+#+BEGIN_EXAMPLE
+
+f : A -> B
+
+x : A
+
+y : B
+
+z : C
+
+
+1. f x  is okey because x is of type A and f expectes its argument to be of
+   type A.  The expression f x itself is of type B
+
+
+2. f y is not not okey because f was given an argument which is not its domain
+
+#+END_EXAMPLE
+
+- Type checking is checking whether your program violates any of the typing rules
+
+- Type checking can catch a lot of programming bugs
+
+
+|                       | Strong | Weak       |
+|-----------------------+--------+------------|
+| Static Type Checking  | SML    | C          |
+| Dynamic Type Checking | Ruby   | JavaScript |
+
+
+- Strong/Weak :: How strictly types are enforced
+
+- Static Type checking :: The code is checked for type errors in the compilation phase
+                          Nothing is done at run time
+
+- Dynamic Type checking :: The type checking happens at run time
+
+** Advantages of Static type checking
+
+1. Type checking helps in finding bugs and the earlier the better
+
+2. Since type checkings is already done the code generated can be much
+   more efficient
+
+3. SML has type inference that gives the language a feel of a
+   Dynamically type checked language like ruby but gives the safety of
+   a Statically type checked language.
+
+** Basic types in SML
+
+#+BEGIN_SRC sml
+val anInt = 1
+val aString = "hello"
+val aChar   = #"c"
+val aReal   = 2.0
+val aBool   = true
+val anotherBool = false
+#+END_SRC
+
+#+RESULTS:
+: val anInt = 1 : int
+: val aString = "hello" : string
+: val aChar = #"c" : char
+: val aReal = 2.0 : real
+: val aBool = true : bool
+: val anotherBool = false : bool
+
+** Cartesian product of types
+
+#+BEGIN_SRC sml
+val x = (1, 2.0)
+val y = ("hello", 2, true)
+val z = (x,y)
+
+val (u,v) = z  (* pattern matching
+                  bind the variables u and v such that the pair (u,v) is z
+                  SML sloves for u and v such that (u,v) = z in this case
+                  *)
+
+#+END_SRC
+
+#+RESULTS:
+: val x = (1,2.0) : int * real
+: val y = ("hello",2,true) : string * int * bool
+: val z = ((1,2.0),("hello",2,true)) : (int * real) * (string * int * bool)
+: val u = (1,2.0) : int * real
+: val v = ("hello",2,true) : string * int * bool
+
+- A * B  :: The set theoretic Cartesian prodcut
+
+A*B consists of values (a,b) where a : A and b : B
+
+** Lists
+
+#+BEGIN_SRC sml
+val x1 = []
+val x = [1,2,3]
+val z = [true,false,false]
+val y = 42 :: x   (* y is 42 followed by x *)
+(* y is that list whose first element is 42 and the rest of the list is x *)
+
+
+(* val foo = [1 ,true ]  (* This is an error all elements should be of the same type *)  *)
+
+#+END_SRC
+
+#+RESULTS:
+: stdIn:17.11-17.21 Error: operator and operand don't agree [overload conflict]
+:   operator domain: [int ty] * [int ty] list
+:   operand:         [int ty] * bool list
+:   in expression:
+
+- Polymorphism :: int list, bool list etc 'a list where 'a is a type variable
+- All elements of a particular list should be of the same type
+- Recursively defined type/Inductive type
+** What are lists
+
+Let 'a be any type then 'a list is defined as the type consisting of
+
+I.  [] : 'a list
+II. If x : 'a and xs : 'a list then (x :: xs) : 'a list
+III. The smallest collection of such values constitute the type 'a list
+
+#+BEGIN_SRC sml
+  val y = [1,2]       (* This is a syntactic sugar for the one below *)
+  val x = 1 :: 2 :: []
+  val u :: us = x  (* pattern matching for list *)
+
+  (* If possible find bindings for u and us such that u :: us is the
+  same as x *)
+  (* val v :: vs = []  *)
+
+  val z = [ (1,true) , (2, false) ]
+  val (r,s)::ls = z
+
+#+END_SRC
+
+#+RESULTS:
+: val y = [1,2] : int list
+: val x = [1,2] : int list
+: val u = 1 : int
+: val us = [2] : int list
+: val z = [(1,true),(2,false)] : (int * bool) list
+: val r = 1 : int
+: val s = true : bool
+: val ls = [(2,false)] : (int * bool) list
+
+
+i.  [] : int list
+
+ii. 2 : int and [] : int list (from i) so 2 :: [] : int list (From
+    rule II)
+
+iii. 1 : int and 2:: [] : int list (from ii) and hence 1 :: 2 :: [] :
+     int list (From rule II)
+
 * DONE Lab 1 :: Getting started
 SCHEDULED: <2020-08-06 Thu>
 
