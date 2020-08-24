@@ -605,7 +605,7 @@ https://bitbucket.org/piyush-kurur/popl
 
 
 
-* DONE Lecture 1 :: Functional Programming - Getting started
+* DONE Functional Programming - Getting started                     :LECTURE:
 - Video :: https://www.youtube.com/watch?v=slmy8JH5Llo
 
 Language that we will use is Standard ML (SML)
@@ -658,7 +658,7 @@ mlton -output myprog foo.hs # generate executable in myprog
 
  - for standalone compiling use mlton
 
-* DONE Lecture 2 :: Standard ML Programming model
+* DONE Standard ML Programming model                                :LECTURE:
 - Video :: https://www.youtube.com/watch?v=WoVXpQkhVhw
 - Video :: https://www.youtube.com/watch?v=QVxqTi8iCzw&t=5s
 
@@ -794,7 +794,7 @@ side-effects only when necessary.
 
 
 
-* DONE Lecture 3 :: Types
+* DONE Types                                                        :LECTURE:
 - Video :: https://youtu.be/qC4RkYatlC0
 
 ** SML is a typed programming language
@@ -888,7 +888,7 @@ fun average x y = 1.0/2.0 * (x + y)
 #+RESULTS:
 : val average = fn : real -> real -> real
 
-* DONE Lecture 4 :: Functions
+* DONE Functions                                                    :LECTURE:
 - Video :: https://youtu.be/IVeW5wv0wcA
 
 ** Definition of functions
@@ -978,7 +978,7 @@ fun uncurry f (x,y) = f x y
 : val uncurry = fn : ('a -> 'b -> 'c) -> 'a * 'b -> 'c
 
 
-* DONE Lecture 5 :: Revisiting Types and Values
+* DONE Revisiting Types and Values                                  :LECTURE:
 
 ** Why types ?
 
@@ -1144,7 +1144,7 @@ ii. 2 : int and [] : int list (from i) so 2 :: [] : int list (From
 iii. 1 : int and 2:: [] : int list (from ii) and hence 1 :: 2 :: [] :
      int list (From rule II)
 
-* DONE Lab 1 :: Getting started
+* DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
 ** Git
@@ -1232,8 +1232,8 @@ git push origin -u master
 3. You can clone repositories from (say) bitbucket
 4. If the repository above is your own, then you can push stuff there.
 
-* DONE Lab 2 :: SML Tutorial.
-* DONE Lab 3 :: Basic functions
+* DONE SML Tutorial.                                                    :LAB:
+* DONE Basic functions                                                  :LAB:
 
 ** Pattern matching on tuples.
 
