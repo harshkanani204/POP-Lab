@@ -1,5 +1,5 @@
 #+STARTUP: indent
-* DONE Class Room 1 :: Getting started
+* DONE Getting started                                            :CLASSROOM:
 
 ** Basic Information
 
@@ -77,7 +77,7 @@ languages.
   - Compilers course next semester some of these things will put into practice
 
 
-* DONE Class Room 2 :: Basics of Standard ML
+* DONE Basics of Standard ML                                      :CLASSROOM:
 SCHEDULED: <2020-08-10 Mon>
 
 ** The programming model for Languages
@@ -242,7 +242,7 @@ val u1 = () : unit
 val u2 = () : unit
 #+end_example
 
-* DONE Class Room 3 :: Types and Functions
+* DONE Types and Functions                                        :CLASSROOM:
 SCHEDULED: <2020-08-17 Mon>
 
 ** Standard ML has types
