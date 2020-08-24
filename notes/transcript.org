@@ -432,6 +432,170 @@ lazy evaluation: Arugments are evaluated only when needed.
 2. During evaluation if a variable is found then
    its corresponding bound value is substituted
 
+* DONE Algebraic data types and Pattern Matching                  :CLASSROOM:
+SCHEDULED: <2020-08-24 Mon>
+
+** More types
+
+1. Types i.e basic types like ~int~, ~real~, ~string~
+2. Cartesian produce ~int * real~
+3. Function types ~int -> string~
+4. Polymorphism ~'a -> 'b -> 'a~
+5. Type aliasing
+
+#+BEGIN_SRC sml
+
+type complex = real * real
+val x : complex = (2.0, 1.0)
+
+fun realpart (a:real, b:real) = a
+val z = realpart x
+(*
+ complex is just a new name for real * real.
+As types they are the same.
+
+*)
+#+END_SRC
+
+#+RESULTS:
+: type complex = real * real
+: val x = (2.0,1.0) : complex
+: val realpart = fn : real * real -> real
+: val z = 2.0 : real
+
+** Algebraic type.
+
+#+BEGIN_SRC sml
+
+datatype Day = Sun
+             | Mon
+             | Tue
+             | Wed
+             | Thu
+             | Fri
+             | Sat
+
+(* If SML did not have booleans *)
+datatype Bool = True
+              | False
+
+(* how to define a value of type Day *)
+val x = Sun
+
+(* how to write functions *)
+
+(*
+
+Write a function isHoliday : Day -> bool
+
+1. d : Day
+2. ... : bool
+
+*)
+fun isHoliday Sun = true
+  | isHoliday Sat = true
+  | isHoliday _   = false
+
+
+(*
+
+
+isHoliday Mon  ---->
+  Try in this order
+
+  1. match isHoliday Sun with isHoliday Mon ---> true
+  2. match isHoliday Sat with isHoliday Mon ---> true
+  3. match isHolida  _   with isHoliday Mon ---> false
+
+
+*)
+(*
+
+This is not like enum of C or C++ because
+there is not automatic conversion from enum
+to int and vice-versa
+
+*)
+
+#+END_SRC
+
+#+RESULTS:
+: stdIn:107.5-107.25 Warning: match nonexhaustive
+:           Sun => ...
+:
+: datatype Day = Fri | Mon | Sat | Sun | Thu | Tue | Wed
+: datatype Bool = False | True
+: val x = Sun : Day
+: val isHoliday = fn : Day -> bool
+
+#+BEGIN_SRC sml
+
+val x = SOME 10
+val y = NONE
+
+(*
+
+head is a function that takes a list and
+produces the first element of the list.
+
+head : 'a list -> 'a
+
+head is not defined on empty list
+THis will be a runtime bug because
+
+head e
+
+headSafe : 'a list -> 'a option
+
+
+datatype 'a option = SOME of 'a
+                   | NONE
+
+
+print : string -> ()
+
+*)
+
+datatype 'a Option = Some of 'a
+                   | None
+
+fun head (x :: _) = x
+
+fun headSafe (x :: _) = SOME x
+  | headSafe _        = NONE
+
+
+val foo = head [1,2,3]
+val bar = headSafe []
+val _   = print (head ["foo" , "bar" ])
+val _   = print (head [])
+
+val _   = print (headSafe ["foo", "bar"])
+#+END_SRC
+
+#+RESULTS:
+: stdIn:233.5-233.22 Warning: type vars not generalized because of
+:    value restriction are instantiated to dummy types (X1,X2,...)
+: stdIn:237.5-237.42 Error: operator and operand don't agree [tycon mismatch]
+:   operator domain: string
+:   operand:         string option
+:   in expression:
+
+#+BEGIN_SRC C
+
+int main ()
+{
+  FILE *fp;
+  if ( fp = fopen("hello"))  == NULL)
+  {
+     /*
+      handle the fact that there is no hello file */
+  }
+  ... stuff with fp
+
+}
+
+#+END_SRC
 * Information.
 - Youtube play list ::
 https://www.youtube.com/playlist?list=PLhMQ0_-r9W5-LeXeXQtW8UcmtdJk98hfH
