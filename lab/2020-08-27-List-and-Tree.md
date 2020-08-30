@@ -1,5 +1,7 @@
 # Lists and Trees
 
+Deadline : 2nd Sep 2020, 23:59 hrs
+
 In this assignment we look at functions on lists and binary trees.
 
 1. For lists define the function `map : ('a -> 'b) -> 'a list -> 'b
@@ -30,3 +32,5 @@ In this assignment we look at functions on lists and binary trees.
                / \                       / \
               /   \                     /   \
              🌲₁   🌲₂                 🌲₂    🌲₃
+
+	If the left subtree of the root is null then rotation is identity operation.
