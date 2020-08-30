@@ -980,6 +980,9 @@ fun uncurry f (x,y) = f x y
 
 * DONE Revisiting Types and Values                                  :LECTURE:
 
+- Video :: https://youtu.be/gWz-UTGFoCI
+- Video :: https://youtu.be/oqNi4F74vGk
+
 ** Why types ?
 
 Values come with types and they govern
