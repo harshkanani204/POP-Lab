@@ -1147,6 +1147,117 @@ ii. 2 : int and [] : int list (from i) so 2 :: [] : int list (From
 iii. 1 : int and 2:: [] : int list (from ii) and hence 1 :: 2 :: [] :
      int list (From rule II)
 
+
+* DONE Pattern Matching                                             :LECTURE:
+
+- Video :: https://youtu.be/GTPc4aPhXiQ
+- Video :: https://youtu.be/RjHvrC51Hok
+
+** What are patterns
+
+1. Variables like ~x~ is pattern
+
+2. Wildcard  ~_~ is a pattern (The underscore pattern)
+
+3. If ~p1~ and ~p2~ are patterns then so is ~(p1,p2)~ and similarly for
+   n-tuples
+
+4. If ~p~ and ~ps~ are patterns then ~p :: ps~ is also a pattern
+
+** Pattern matching.
+
+Given an value ~v~, and a pattern ~pat~
+
+1. Does ~pat~ match the value ~v~
+
+2. What are the resulting variable bindings.
+
+** Rules of pattern matching
+
++--------------------+-----------+---------------+-------------------------------------+
+| Pattern            | Type of v | Form of the v |Bindings created                     |
++--------------------+-----------+---------------+-------------------------------------+
+| Variable (say ~x~) | any type  | any value     |~x = v~                              |
++--------------------+-----------+---------------+-------------------------------------+
+| Wild card (~_~)    | any type  | any value     |No bindings created                  |
++--------------------+-----------+---------------+-------------------------------------+
+| ~(p1,p2)~          | ~'a * 'b~ | ~(v1,v2)~     |match ~p1~ with ~v1~ and ~p2~ with   |
+|                    |           |               |~v2~                                 |
++--------------------+-----------+---------------+-------------------------------------+
+| ~p :: ps~          | ~'a list~ | ~(v :: vs)~   |matchs ~p~ with ~v~ and ~ps~ with    |
+|                    |           |               |~vs~                                 |
++--------------------+-----------+---------------+-------------------------------------+
+| ~[]~               | ~'a list~ | ~[]~          |no bindings created                  |
++--------------------+-----------+---------------+-------------------------------------+
+
+
+
+1. The type checking is done (column 2) at compile time (statics)
+
+2. Form of value (column 3) is checked at runtime.
+
+#+BEGIN_SRC sml
+
+val x :: xs = e  (* unless you reduce e there is no way to know
+whether it is [] or is it v :: vs *)
+
+#+END_SRC
+
+*
+** Functions via pattern matching.
+
+#+BEGIN_SRC sml
+
+(* fst : 'a * 'b -> 'a  *)
+fun fst (x,_) = x
+fun snd (_,y) = y
+
+(* isEmpty : 'a list -> bool *)
+fun isEmpty [] = true   (* 1 *)
+  | isEmpty _  = false  (* 2 *)
+
+
+(*  isEmpty [] ---- matches the first eqn so replace by the rhs ---> true
+
+    isEmpty [1,2,3] == isEmpty (1 :: (2 :: 3 :: []))
+             ---> does not match the eqn 1 so try eqn 2.
+             y is bound to 1 and ys is bound (2 :: 3 :: [])
+
+             ---> false
+
+*)
+
+(*
+
+length : 'a list -> int
+
+*)
+
+fun length []         = 0
+  | length (_ :: ys)  = 1 + length ys
+
+(*
+map f [x1,x2....,xn] = [f x1 , f x2 ...., f xn ]
+*)
+
+fun map f []        = []
+  | map f (x :: xs) = f x :: map f xs
+
+fun incr x = x + 1
+
+val u = map incr [1,2, 3]
+
+#+END_SRC
+
+#+RESULTS:
+: val fst = fn : 'a * 'b -> 'a
+: val snd = fn : 'a * 'b -> 'b
+: val isEmpty = fn : 'a list -> bool
+: val length = fn : 'a list -> int
+: val map = fn : ('a -> 'b) -> 'a list -> 'b list
+: val incr = fn : int -> int
+: val u = [2,3,4] : int list
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
