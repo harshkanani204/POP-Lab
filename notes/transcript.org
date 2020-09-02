@@ -1258,6 +1258,9 @@ val u = map incr [1,2, 3]
 : val incr = fn : int -> int
 : val u = [2,3,4] : int list
 
+
+* TODO Algebraic data types.
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
