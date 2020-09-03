@@ -1261,6 +1261,114 @@ val u = map incr [1,2, 3]
 
 * TODO Algebraic data types.
 
+** Motivation
+
+Often types are defined by enumerating all the possible values
+in the type.
+
+#+BEGIN_SRC sml
+
+datatype mybool = True | False
+
+val someBool = True
+
+(*
+
+not  : mybool -> mybool
+
+*)
+fun not True  = False
+  | not False = True
+
+#+END_SRC
+
+#+RESULTS:
+: datatype mybool = False | True
+: val someBool = True : mybool
+: val not = fn : mybool -> mybool
+
+
+** Optional value
+
+#+BEGIN_SRC sml
+
+datatype 'a option = SOME of 'a | NONE
+
+(*
+headSafe  : 'a list -> 'a option
+*)
+
+fun headSafe (x :: _) = SOME x
+  | headSafe []       = NONE
+
+val x = headSafe []
+#+END_SRC
+
+#+RESULTS:
+: stdIn:49.5-49.20 Warning: type vars not generalized because of
+:    value restriction are instantiated to dummy types (X1,X2,...)
+: datatype 'a option = NONE | SOME of 'a
+: val headSafe = fn : 'a list -> 'a option
+: val x = NONE : ?.X1 option
+
+** Recursive type.
+
+
+#+BEGIN_SRC sml
+
+datatype 'a mylist = Nil
+                   | Cons of 'a * 'a mylist
+
+fun embed Nil = []
+  | embed (Cons (x,xs)) = x :: embed xs
+
+fun revEmbed []         = Nil
+  | revEmbed (x :: xs)  = Cons (x , revEmbed xs)
+
+val my123 = revEmbed [1,2,3]
+val y     = Cons (1, Cons (2, (Cons (3, Nil))))
+val yl    = embed y
+
+#+END_SRC
+
+#+RESULTS:
+: datatype 'a mylist = Cons of 'a * 'a mylist | Nil
+: val embed = fn : 'a mylist -> 'a list
+: val revEmbed = fn : 'a list -> 'a mylist
+: val my123 = Cons (1,Cons (2,Cons #)) : int mylist
+: val y = Cons (1,Cons (2,Cons #)) : int mylist
+: val yl = [1,2,3] : int list
+
+
+** Binary trees on 'a
+
+1. An empty tree is a binary tree
+
+1. If x : 'a and t1 and t2 are trees of type 'a then the tree with
+   root being x and t1 and t2 being subtrees is also a tree
+
+#+BEGIN_SRC sml
+
+datatype 'a tree = empty
+                 | node of 'a * 'a tree * 'a tree
+
+(* inorder : 'a tree -> 'a list *)
+fun inorder empty             = []
+  | inorder (node (x,tL, tR)) = inorder tL @ [x] @ inorder tR
+
+fun singleton x = node (x, empty, empty)
+
+val t = node (2, singleton 1, singleton 3)
+val y = inorder t
+
+#+END_SRC
+
+#+RESULTS:
+: datatype 'a tree = empty | node of 'a * 'a tree * 'a tree
+: val inorder = fn : 'a tree -> 'a list
+: val singleton = fn : 'a -> 'a tree
+: val t = node (2,node (1,empty,empty),node (3,empty,empty)) : int tree
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
