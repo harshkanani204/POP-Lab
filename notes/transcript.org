@@ -596,6 +596,209 @@ int main ()
 }
 
 #+END_SRC
+* DONE Abstract syntax and datatypes                              :CLASSROOM:
+SCHEDULED: <2020-09-05 Sat>
+
+** While writing compilers
+
+1. Captures the constructs of the language
+
+2. Depending on the construct translate the code to target code
+
+3. Use the constructs of the language to (in an editor) highlight parts
+   differently
+
+4. Source code processing like indenting, linting,
+
+
+Keeping the programs text is not very convenient.
+
+
+1. Some syntax is just sugar
+   e.g [1,2,3] is a sugar for 1 :: 2 :: 3 :: []
+
+2. Program text needs to worry about things like precedence whereas
+   the representation that we see need not worry.
+
+** Abstract syntax of the language
+
+This is a term used mainly in programming language theory.
+
+- Parse tree  - compiler literature
+- Abstract syntax tree
+
+Consider the language of expressions with + and * and constants (integers)
+
+#+BEGIN_EXAMPLE
+1 + 2 * 3
+
+(1 * 2) + 3
+
+(1 + 2) * 3
+
+1 +   -- not an expression
+1 3   -- not an expression
+
+(1 + 2) 3 -- not an expression
+
+#+END_EXAMPLE
+
+- Concrete syntax ::
+
+1. Governs what string/text is valid program
+2. We want to know "how" the string is a member of the language. x ∈ L
+3. We need ways to ensure that the grammar is unambiguous
+4. Used to convert from "textual" representation of
+   the program to .... abstract syntax or parse trees
+
+
+#+BEGIN_EXAMPLE
+
+E -> nat    -- nat rule
+  |  E + E  -- plus rule
+  |  E * E  -- mul rule   has more precedence
+  | ( E )   -- paren rule
+
+
+Proof that 1 + 2 * 3 is an E  --- 1 + {2 * 3}
+
+(1) 1 is an E  (nat rule)
+(2) 2 is an E  (nat rule)
+(3) 3 is an E  (nat rule)
+(4) 2 * 3 is an E (mul using 2,3)
+(5) 1 + 2 * 3 is an E (plus using 1,4)
+
+
+Proof that 1 + 2 * 3 is an E   {1 + 2} * 3
+
+(1) 1 is an E  (nat rule)
+(2) 2 is an E  (nat rule)
+(3) 3 is an E  (nat rule)
+(4) 1 + 2 is an E (plus using 1,2)
+(5) 1 + 2 * 3 is an E (mul using 3,4)
+
+#+END_EXAMPLE
+
+
+Expressing expressions as trees will not have a problem of ambiguity.
+
+#+BEGIN_EXAMPLE
+
+         1 + {2 * 3}          {1 + 2} * 3
+
+             +		           *
+            / \		          / \
+           1   * 		       	 +   3
+              / \		      	/ \
+             2   3	               1   2
+
+
+#+END_EXAMPLE
+
+
+- Abstract syntax ::
+
+#+BEGIN_EXAMPLE
+
+E -> nat
+   | E + E
+   | E * E
+
+#+END_EXAMPLE
+
+1. A nat is an expression
+
+2. If E1 and E2 are expressions then E1 + E2 is an expression
+
+3. If E1 and E2 are expressions then E1 * E2 is expression
+
+#+BEGIN_SRC sml
+datatype expr = Const of int
+              | Plus  of expr * expr
+              | Mul   of expr * expr
+
+
+fun exprDenote (Const x)      = x
+  | exprDenote (Plus (e1,e2)) = exprDenote e1 + exprDenote e2
+  | exprDenote (Mul (e1,e2))  = exprDenote e1 * exprDenote e2
+
+(* instruction of a stack machine *)
+datatype inst = push of int
+              | plus
+              | mul
+
+
+(*
+
+push x :  pushes x on top of the stack
+
+plus : x1 = pop x2 = pop ; push (x1 + x2)
+
+mul  : x1 = pop x2 = pop ; push (x1 * x2)
+
+
+*)
+type executable = inst list
+
+type stack = int list
+
+(* instDenote : inst -> stack -> stack *)
+fun instDenote (push x) stk                 = x :: stk
+  | instDenote plus     (x1 :: x2 :: stk)   = x1 + x2 :: stk
+  | instDenote mul      (x1 :: x2 :: stk)   = x1 * x2 :: stk
+
+fun interp prog stk = fold....
+
+(* compile : expr -> executable *)
+fun compile (Const x)       = [push x]
+  | compile (Plus (e1,e2))  = let val prog1 = compile e1
+                                  val prog2 = compile e2
+                              in
+                                 prog2 @ prog1 @ [plus]
+                              end
+
+  | compile (Mul  (e1,e2))  = let val prog1 = compile e1
+                                  val prog2 = compile e2
+                              in
+                                 prog2 @ prog1 @ [mul]
+                              end
+
+val one = Const 1
+val two = Const 2
+val three = Const 3
+val x = Plus (Plus (one, two), three)
+val p1 = compile x
+#+END_SRC
+
+#+RESULTS:
+: datatype expr = Const of int | Mul of expr * expr | Plus of expr * expr
+: datatype inst = mul | plus | push of int
+: type executable = inst list
+: val compile = fn : expr -> inst list
+: val one = Const 1 : expr
+: val two = Const 2 : expr
+: val three = Const 3 : expr
+: val x = Plus (Plus (Const #,Const #),Const 3) : expr
+: val p1 = [push 3,push 2,push 1,plus,plus] : inst list
+
+Abstract syntax
+
+1. Only captures the essence of the syntax
+2. Brackets and other disambiguation things can be removed.
+
+
+#+BEGIN_EXAMPLE
+
+S -> nat
+  |  nat , S
+
+#+END_EXAMPLE
+
+#+BEGIN_SRC sml
+
+type commaSepNat = int list
+
+#+END_SRC
 * Information.
 - Youtube play list ::
 https://www.youtube.com/playlist?list=PLhMQ0_-r9W5-LeXeXQtW8UcmtdJk98hfH
@@ -1260,7 +1463,7 @@ val u = map incr [1,2, 3]
 
 
 * TODO Algebraic data types.
-
+- Video :: https://youtu.be/TLej5OaXpgg
 ** Motivation
 
 Often types are defined by enumerating all the possible values
