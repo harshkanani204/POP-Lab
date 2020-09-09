@@ -1462,8 +1462,9 @@ val u = map incr [1,2, 3]
 : val u = [2,3,4] : int list
 
 
-* TODO Algebraic data types.
+* DONE Algebraic data types.
 - Video :: https://youtu.be/TLej5OaXpgg
+- Video :: https://youtu.be/oChjS-CuEqY
 ** Motivation
 
 Often types are defined by enumerating all the possible values
@@ -1572,6 +1573,43 @@ val y = inorder t
 : val singleton = fn : 'a -> 'a tree
 : val t = node (2,node (1,empty,empty),node (3,empty,empty)) : int tree
 
+
+** General form
+
+#+BEGIN_SRC sml
+
+datatype ('a, 'b, 'c) Name = C1
+                           | C2 of sometype
+                           | CN
+
+#+END_SRC
+
+1. Constructors are of two forms. Either ~C1~ or ~C2 of some type~
+
+2. the types appearing on the rhs can refer to the type variables in the lhs, i.e 'a, 'b, 'c
+
+3. The type can be recursive, i.e sometype can refer to Name itsef.
+
+
+*** The consequence of a datatype definition
+
+1. A new polymorphic type ~('a, 'b, 'c) Name~ is created
+
+2. Constructors becomes functions.
+
+#+BEGIN_EXAMPLE sml
+
+C1 : ('a,'b,'c) Name
+C2 : sometype -> ('a,'b, 'c) Name
+C3 : ('a,'b,'c) Name
+
+#+END_EXAMPLE
+
+3. Constructors can be used in pattern matching involving values of
+   the type Name.
+
+   i. ~C1~ is a pattern of type ~('a, 'b, 'c) Name~
+   ii. If ~p~ is a pattern of type something then ~C2 p~ is also a pattern
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
