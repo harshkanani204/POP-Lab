@@ -799,6 +799,195 @@ S -> nat
 type commaSepNat = int list
 
 #+END_SRC
+* DONE Structures and functors                                    :CLASSROOM:
+
+** Main Idea
+
+Main idea :: Control the name-space of definitions.
+
+1. Possibly multiple instances of name vs value binding
+
+2. Together with functor it gives powerful way of manipulating name space.
+#+BEGIN_SRC sml
+
+val x = 10
+val x = "hello"
+
+structure A = struct
+   val  x   = 10
+   type foo = int
+end
+(*
+
+Modules in ocaml.
+
+*)
+
+val y = A.x
+fun myfun (x : A.foo) = x + 1
+
+open A (* generaly discouraged *)
+fun myanotherfun (x : foo) = x + 1
+
+val u = List.map myfun [1,2,3]
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+val x = <hidden-value> : int
+val x = <hidden-value> : string
+structure A :
+  sig
+    val x : int
+    type foo = int
+  end
+val y = 10 : int
+val myfun = fn : foo -> int
+opening A
+  val x : int
+  type foo = int
+val myanotherfun = fn : foo -> int
+val u = [2,3,4] : int list
+#+end_example
+
+Caution
+
+1. Do not confuse this with structures in C. In C structs are just
+   product types which in SML is called records.
+
+2. Similar to namespace in C++
+
+** Signatures
+
+
+1. Signatures can used to control what is exposed from a structure.
+
+2. Signatures itself can be defined and used
+
+3. Signature is used in functors to control what structures are expected to have.
+
+
+#+BEGIN_SRC sml
+
+signature MYSIG = sig
+   type foo
+   val  x : foo
+ end
+
+structure A : MYSIG
+
+(* sig
+   val x : int
+   type foo
+  end *) =  struct
+
+val x = 10
+val y = 100
+type foo = int
+type bar = string
+end
+
+val y = A.x  (* this is fine *)
+(* val z = A.y  (* not fine as y is not exposed *) *)
+
+
+structure B : MYSIG = struct
+
+  type foo = string
+  val x    = "hello"
+
+end
+
+#+END_SRC
+
+#+RESULTS:
+: signature MYSIG =
+:   sig
+:     type foo
+:     val x : foo
+:   end
+: structure A : MYSIG
+: val y = 10 : foo
+: structure B : MYSIG
+
+
+** An analogy with values and types
+
+
+| Value world            | Structure world                  | Ocaml        |
+|------------------------+----------------------------------+--------------|
+| values (val)           | structures (structure .. struct) | module       |
+| types  (type/datatype) | signatures (signature .. sig)    | module types |
+| functions (fun)        | functor                          | functor      |
+
+
+** Functors take structures and produce other structure.
+
+#+BEGIN_SRC sml
+
+datatype CMP = LT | GT | EQ
+
+signature ORD = sig
+  type t
+  val compare : t -> t -> CMP
+end
+
+
+structure IntOrd : ORD = struct
+  type t = int
+  fun compare x y = ...
+end
+
+
+functor Invert ( O : ORD ) = struct
+   type t = O.t
+   fun compare x y = O.compare y x
+end
+
+struct InvIntOrd = Invert (IntOrd)
+
+functor Sort (O : ORD) = struct
+   fun sort (xs : O.t list) = ....
+
+end
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+datatype CMP = EQ | GT | LT
+signature ORD =
+  sig
+    type t
+    val compare : t -> t -> CMP
+  end
+functor Invert(O: sig
+                    type t
+                    val compare : t -> t -> CMP
+                  end) :
+              sig
+                type t
+                val compare : O.t -> O.t -> CMP
+              end
+#+end_example
+
+
+** General facts
+
+1. Structures/functors are unique to ML and its dialect. But they can
+   be retrofitted to any language.
+
+2. One can defunctorise the code, i.e. take a program with structurs
+   and functors and rewrite it to get code that is without them.  In
+   fact the first phase of MLton compiler is precisely this.
+
+3. structure/functors are what are know as zero-cost
+   abstraction. There is no cost at runtime (space or time) for using
+   the feature structure/functors. Maybe compile time will increase.
+
+
+
 * Information.
 - Youtube play list ::
 https://www.youtube.com/playlist?list=PLhMQ0_-r9W5-LeXeXQtW8UcmtdJk98hfH
