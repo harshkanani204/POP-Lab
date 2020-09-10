@@ -1,4 +1,5 @@
 # References in Standard ML..
+Dead line : 16 Sept, 23:59
 
 In this assignment, we use the `ref` construct of Standard ML to
 create a counter. SML provides first class references to create a
@@ -16,11 +17,11 @@ reduces `e1` first and then reduces `e2`. The value of `e1; e2` is the
 value of `e2`.
 
 1. Define a Counter structure that has an internal ref cell and
-   exposes the three functions, `incr : unit -> unit`, `set : int ->
-   unit`, `get : unit -> int`. The outside world should not have any
-   other access to the counter.  Hint: You will have to define a
-   signature say COUNTER and restrict he signature of your Counter
-   structure appropriately.
+   exposes the three functions, `incr : unit -> unit`, `decrement :
+   unit -> unit`, `get : unit -> int`. The outside world should not
+   have any other access to the counter.  Hint: You will have to
+   define a signature say COUNTER and restrict he signature of your
+   Counter structure appropriately.
 
 2. What if your program requires two or more counter ? Instead of a
    plain `Counter` structure define a `MkCounter` functor which
@@ -31,8 +32,8 @@ value of `e2`.
 	   structure A = MkCounter ()
 	   structure B = MkCounter ()
 
-	   A.set 42
-	   B.set 56
+	   A.incr 42
+	   B.decr 56
 	   ...
 ```
 
