@@ -2117,3 +2117,171 @@ opening List
 val mynth = fn : int -> 'a list -> 'a option
 val x = SOME 2 : int option
 #+end_example
+* DONE References                                                       :LAB:
+
+** Basics of Reference
+
+#+BEGIN_SRC sml
+val x = 10 + 2          (* value is 12 but no side effect *)
+val z = print "hello\n" (* value is () but there is a side effect *)
+val y = ref "hello"     (* y is bound to a new reference cell *)
+val z2 = !y             (* z2 is bound to "hello" *)
+
+(* !y is an impure expression.
+
+  1. Side effect is to read the value associated with the reference cell y
+  2. The reduced value is the value read in step 1
+
+!y here reduces to the value "hello" and that is assigned to z2.
+
+*)
+
+val z1 = (y := "foo")     (* the reference cell associated with y is filled with "foo" *)
+(* y := "foo" is an expression which when reduced
+has the side effect of storing the value "foo" in the ref cell bound to y *)
+
+val z3 = !y             (* z3 is bound to "foo" *)
+
+#+END_SRC
+
+#+RESULTS:
+: hello
+: val x = 12 : int
+: val z = () : unit
+: val y = ref "foo" : string ref
+: val z2 = "hello" : string
+: val z1 = () : unit
+: val z3 = "foo" : string
+
+#+BEGIN_SRC C
+
+int main ()
+{
+
+   /* y is a reference cell capable of storing int */
+   const int x = 10;
+   int y z1 z2;
+   y = 10;
+   z1 = y;
+   y  = 100;
+   z2 = y;
+}
+
+#+END_SRC
+
+** The semicolon operator.
+
+Suppose ~e~ is the expression ~e1 ; e2~
+
+1. What is the value associated with e
+2. How does e reduce to the corresponding value.
+
+*** Reduction of ~e~
+
+1. First reduce ~e1~ to ~v1~ (This might not be possible because *)
+2. Ignore the value ~v1~
+3. Reduce ~e2~ to ~v2~
+
+Then ~e~ gets reduced to ~v2~
+
+#+BEGIN_EXAMPLE
+e1 ----->* v1
+e2 ----->* v2
+e  ---->* v2
+
+#+END_EXAMPLE
+
+#+BEGIN_SRC sml
+
+val x = (print "hello\n"  ; 3)
+val x1 = 3
+
+val y = ref "hello"
+val z1 = ( y := "foo" ; !y )
+
+val y1 = ref "hello"
+
+val z2 = let val u = !y1
+         in
+             y1 := "foo"; u
+         end
+
+val y = ref 100
+fun incrY () = (y := !y + 1; !y)
+
+
+#+END_SRC
+
+#+RESULTS:
+: hello
+: val x = 3 : int
+: val x1 = 3 : int
+: val y = <hidden-value> : string ref
+: val z1 = "foo" : string
+: val y1 = ref "foo" : string ref
+: val z2 = "hello" : string
+: val y = ref 100 : int ref
+: val incrY = fn : unit -> int
+
+Semi colon is the sequencing operation. The order
+of evaluation is /important/
+
+** Atom
+
+#+BEGIN_SRC sml
+val hello = Atom.atom "hello"
+val foo   = Atom.atom "foo"
+
+datatype expr = V of string
+              | C of int
+              | Plus of expr * expr
+              | Mul  of expr * expr
+
+datatype exprA = VA of Atom.atom
+               | CA of int
+               | PlusA of exprA * exprA
+               | MulA  of exprA * exprA
+
+fun var (str : string) = VA (Atom.atom str)
+
+val xpone  = Plus (V "x", C 1)
+val xpone' = PlusA (var "x", CA 1)
+#+END_SRC
+
+#+RESULTS:
+: val hello = - : atom
+: val foo = - : atom
+: datatype expr
+:   = C of int | Mul of expr * expr | Plus of expr * expr | V of string
+: datatype exprA
+:   = CA of int | MulA of exprA * exprA | PlusA of exprA * exprA | VA of atom
+: val var = fn : string -> exprA
+: val xpone = Plus (V "x",C 1) : expr
+: val xpone' = PlusA (VA -,CA 1) : exprA
+
+
+#+BEGIN_SRC sml
+
+(* Definition of the atom structure *)
+
+signature ATOM = sig
+   .....
+end
+
+structure Atom : ATOM = struct
+
+  (* Internal counter that keeps track of how many atoms I have allocated *)
+
+  type atom = int
+  val nvars = ref 0
+  val stringToAtom = ref (* empty dictionary with key = string and value = int *)
+  val atomTOString = ref (* empty dictionary with key = int value = string *)
+
+  fun atom (x : string) = ...
+  fun toString (a : atom) = ....
+
+end
+
+
+
+#+END_SRC
