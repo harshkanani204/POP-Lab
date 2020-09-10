@@ -1651,7 +1651,7 @@ val u = map incr [1,2, 3]
 : val u = [2,3,4] : int list
 
 
-* DONE Algebraic data types.
+* DONE Algebraic data types.                                        :LECTURE:
 - Video :: https://youtu.be/TLej5OaXpgg
 - Video :: https://youtu.be/oChjS-CuEqY
 ** Motivation
