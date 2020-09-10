@@ -2031,7 +2031,7 @@ append [1,2,3] 4 => let val y = 1
 http://mlton.org/ValueRestriction
 
 #+END_SRC
-* TODO Fold functions
+* DONE Fold functions
 SCHEDULED: <2020-09-03 Thu>
 
 #+BEGIN_SRC sml
