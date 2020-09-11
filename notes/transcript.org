@@ -1801,6 +1801,7 @@ C3 : ('a,'b,'c) Name
    ii. If ~p~ is a pattern of type something then ~C2 p~ is also a pattern
 * DONE Structures, Signatures, Functors.
 - Video :: https://youtu.be/_AwO5d7WhPI
+- Video :: https://youtu.be/bAGppGJjglQ
 ** Motivation
 
 Controlling the scope of a name binding.
@@ -1945,6 +1946,57 @@ val z = EQUAL : order
 val z1 = EQUAL : order
 #+end_example
 
+** General remarks
+
+1. We really need only values (types and functions) for programs
+
+2. Structures gives modularity and abstraction for coding in large.
+
+   - Reuse or overloading ::
+
+        #+BEGIN_SRC sml
+
+
+        functor Sort ( O : ORD ) : sig
+           val sort : O.t list -> O.t list
+          end
+          = struct
+            fun sort xs = xs
+            end
+
+        #+END_SRC
+
+        #+RESULTS:
+        : functor Sort(O: sig
+        :                   type t
+        :                   val compare : t * t -> order
+        :                 end) :
+        :             sig val sort : O.t list -> O.t list end
+
+   - Abstract types :: Types which can only be processed in a specific way.
+
+   - At the meta level :: This is not at the value level where the "real" programming happens.
+        values, functions and types as your workers, then the structure/functors is the managers
+        of these
+
+   - Main Idea :: This is mostly for programming in large
+
+3. The structure layer is similar to the values layer
+
+
+| Value world                     | Structure layer                              |
+|---------------------------------+----------------------------------------------|
+| values (~val~)                  | structures (~structure~)                     |
+| types (specs on values)         | signatures (specs on structures)             |
+| functions maps values to values | functors (that map structures to structures) |
+
+4. Structures give a zero cost abstraction.
+
+   ML with structures is as efficient as ML without structures.
+   In fact the mlton compiler first defunctorises (removes structures and functors).
+
+5. SML like Structures can be added to any language (mostly)
+   C with SML like structures.
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
