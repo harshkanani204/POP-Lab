@@ -1799,6 +1799,152 @@ C3 : ('a,'b,'c) Name
 
    i. ~C1~ is a pattern of type ~('a, 'b, 'c) Name~
    ii. If ~p~ is a pattern of type something then ~C2 p~ is also a pattern
+* DONE Structures, Signatures, Functors.
+- Video :: https://youtu.be/_AwO5d7WhPI
+** Motivation
+
+Controlling the scope of a name binding.
+
+#+BEGIN_SRC  sml
+val x = 10
+type foo = int
+datatype bar = biz | bhur
+fun incr x = x + 1
+
+structure A = struct
+   type foo     = int
+   val x    : foo = 42
+   fun incr (y : foo) = y + 1
+end
+
+val z  = A.x
+val z1 = x
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+val x = 10 : int
+type foo = int
+datatype bar = bhur | biz
+val incr = fn : int -> int
+structure A :
+  sig
+    type foo = int
+    val x : foo
+    val incr : foo -> int
+  end
+val z = 42 : foo
+val z1 = 10 : int
+#+end_example
+
+
+** Explicit signatures and controlling exports
+
+
+#+BEGIN_SRC sml
+
+signature MYSIG = sig
+   type foo
+   val x : foo
+end
+
+structure A  : MYSIG
+   = struct
+       type foo = int
+       val x : foo = 10
+       val inner : foo = 42
+     end
+
+structure B : MYSIG
+   = struct
+         type foo = string
+         val x   = "hello"
+         val internalString = "The answer is 42"
+     end
+val z1 = A.x
+val z2 = B.x
+
+(*
+val z2 = A.inner (* with explicit signatures inner is hidden and hence error *)
+
+*)
+#+END_SRC
+
+#+RESULTS:
+: signature MYSIG =
+:   sig
+:     type foo
+:     val x : foo
+:   end
+: structure A : MYSIG
+: structure B : MYSIG
+: val z1 = 10 : foo
+: val z2 = "hello" : B.foo
+
+** Functors
+
+- Main Idea :: Functors are "functions" on structures
+
+#+BEGIN_SRC sml
+
+datatype order = LESS | GREATER | EQUAL
+
+signature ORD = sig
+   type t
+   val compare : t * t -> order
+end
+
+structure IntOrd = struct
+   type t = int
+   fun compare (x,y) = if x < y then LESS
+                       else if x > y then GREATER
+                            else EQUAL
+
+end
+
+functor InvertORD (O : ORD) : ORD = struct
+
+   type t = O.t
+   fun compare (x,y) = O.compare (y,x)
+
+end
+
+structure InvIntOrd = InvertORD ( IntOrd )
+
+val tup = (3,3)
+val z = IntOrd.compare  tup
+val z1 = InvIntOrd.compare tup
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+datatype order = EQUAL | GREATER | LESS
+signature ORD =
+  sig
+    type t
+    val compare : t * t -> order
+  end
+structure IntOrd :
+  sig
+    type t = int
+    val compare : int * int -> order
+  end
+functor InvertORD(O: sig
+                       type t
+                       val compare : t * t -> order
+                     end) :
+                 sig
+                   type t
+                   val compare : t * t -> order
+                 end
+structure InvIntOrd : ORD
+val tup = (3,3) : int * int
+val z = EQUAL : order
+val z1 = EQUAL : order
+#+end_example
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
