@@ -32,8 +32,8 @@ value of `e2`.
 	   structure A = MkCounter ()
 	   structure B = MkCounter ()
 
-	   A.incr 42
-	   B.decr 56
+	   A.incr ()
+	   B.decr ()
 	   ...
 ```
 
