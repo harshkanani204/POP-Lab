@@ -987,7 +987,184 @@ functor Invert(O: sig
    the feature structure/functors. Maybe compile time will increase.
 
 
+* Structures and funtors continued                                :CLASSROOM:
 
+
+** Some interesting libraries
+
+1. Look for utility functions in the Standard Basis library
+
+#+BEGIN_SRC sml
+
+open Array
+
+val myintarray = array (10, 42)
+val mystrarray = array (10, "The answer is")
+val _ = update (myintarray, 0, 100)
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+opening Array
+  type 'a array = 'a ?.array
+  type 'a vector = 'a ?.vector
+  val maxLen : int
+  val array : int * 'a -> 'a array
+  val fromList : 'a list -> 'a array
+  val tabulate : int * (int -> 'a) -> 'a array
+  val length : 'a array -> int
+  val sub : 'a array * int -> 'a
+  val update : 'a array * int * 'a -> unit
+  val vector : 'a array -> 'a vector
+  val copy : {di:int, dst:'a array, src:'a array} -> unit
+  val copyVec : {di:int, dst:'a array, src:'a vector} -> unit
+  val appi : (int * 'a -> unit) -> 'a array -> unit
+  val app : ('a -> unit) -> 'a array -> unit
+  val modifyi : (int * 'a -> 'a) -> 'a array -> unit
+  val modify : ('a -> 'a) -> 'a array -> unit
+  val foldli : (int * 'a * 'b -> 'b) -> 'b -> 'a array -> 'b
+  val foldri : (int * 'a * 'b -> 'b) -> 'b -> 'a array -> 'b
+  val foldl : ('a * 'b -> 'b) -> 'b -> 'a array -> 'b
+  val foldr : ('a * 'b -> 'b) -> 'b -> 'a array -> 'b
+  val findi : (int * 'a -> bool) -> 'a array -> (int * 'a) option
+  val find : ('a -> bool) -> 'a array -> 'a option
+  val exists : ('a -> bool) -> 'a array -> bool
+  val all : ('a -> bool) -> 'a array -> bool
+  val collate : ('a * 'a -> order) -> 'a array * 'a array -> order
+  val toList : 'a array -> 'a list
+  val fromVector : 'a vector -> 'a array
+  val toVector : 'a array -> 'a vector
+val myintarray = [|100,42,42,42,42,42,42,42,42,42|] : int array
+val mystrarray =
+  [|"The answer is","The answer is","The answer is","The answer is",
+   "The answer is","The answer is","The answer is","The answer is",
+   "The answer is","The answer is"|] : string array
+#+end_example
+
+2. Additional utility functions and libraries are available as part
+   of the SML of NL library. This is also available in mlton
+
+** Unique value creation
+
+1. Not Globally unique but unique in a particular run of the computation.
+
+
+#+BEGIN_SRC sml
+
+datatype order = LESS | GREATER | EQUAL
+
+signature UNIQUE = sig
+
+   type uniq
+
+   val new : unit -> uniq
+
+end
+
+(* opaque signature *)
+structure Unique :> UNIQUE = struct
+  type uniq = int
+
+  val uniqRef = ref 0
+
+  (* wrong implementation *)
+  fun new () = 10 (* fixme *)
+
+
+
+end
+
+val x = Unique.new ()
+(* val y = [x, 42] *)
+
+
+
+(* Problem: Nothing gurantees that all the unique
+   values that I created in the program is via Unique.new ()
+ *)
+
+
+#+END_SRC
+
+#+RESULTS:
+: datatype order = EQUAL | GREATER | LESS
+: signature UNIQUE =
+:   sig
+:     type uniq
+:     avl new : unit -> uniq
+:   end
+: structure Unique : UNIQUE
+: val x = - : Unique.uniq
+
+
+2. Atom implementation
+
+A representation for variables in programs.
+
+#+BEGIN_SRC sml
+
+signature ATOM = sig
+
+   type atom
+
+   val atom  : string -> atom
+   val toString : atom -> string
+
+   val compare : atom * atom -> order
+
+....
+end
+
+structure Atom :> ATOM = struct
+
+   type atom = int
+
+   val atomRef = ref 0
+
+   (*
+   1. A referencce to map from int (atom) -> string
+
+   2. A reference to a map from string -> int (atom)
+
+   *)
+
+   type toStringMap = string IntRedBlackMap.map
+   type atomMap     = atom StringRedBlackMap.map
+
+   val toStringRef : ref toStringMap = ref IntRedBlackMap.empty
+   val atomMap     : ref atomMap     = StringRedBlackMap.empty
+
+   fun atom str = let val toStrMP = !toStringRef
+                   (* loopkup the given str in toStrMP
+                      1. It is already there in which case return the associated atom (int)
+                      2. otherwise increment atomRef and assign str to this new value
+                    *)
+
+   fun toString atm = lookup
+end
+
+#+BEGIN_SRC sml
+
+(* int -> int *)
+
+val const ( _ : int) = 0
+val incr x = x + 1
+
+
+(* Given a function of type 'a -> 'a, 'a -> 'b -> 'a , int -> b -> int  *)
+
+fun foo x = x
+
+#+END_SRC
+
+Benign side effect :: A side effectful computation that can be treated
+like a pure computation The atom and toString functions of the Atom
+structure look pure outside the structure although internally they
+have side effect.
+
+
+#+END_SRC
 * Information.
 - Youtube play list ::
 https://www.youtube.com/playlist?list=PLhMQ0_-r9W5-LeXeXQtW8UcmtdJk98hfH
