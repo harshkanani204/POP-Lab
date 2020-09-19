@@ -2284,6 +2284,133 @@ This is to store a finite map from keys to values.
 
 Details: https://www.smlnj.org/doc/smlnj-lib/Util/sig-ORD_MAP.html
 
+* DONE Opacity in signatures                                        :LECTURE:
+
+- Video :: https://youtu.be/UUsscUwqvMI
+
+** Motivating example
+
+#+BEGIN_EXAMPLE sml
+
+signature ORD_KEY = sig
+   type ord_key
+   val compare : ord_key * ord_key -> ordering
+
+end
+
+signature ORD_SET = sig
+  type set
+  (* Some stuff here *)
+end
+
+#+END_EXAMPLE
+
+#+BEGIN_SRC sml
+
+functor BinarySetFn (O : ORD_KEY) :> ORD_SET = struct
+
+  datatype set = empty
+               | node of O.ord_key * set * set
+
+
+  (* external functions *)
+  fun union xs ys = ...
+
+  (* some internal functions *)
+
+  fun internal = ..
+
+end
+
+#+END_SRC
+
+1. The implementation makes use of the order structure to maintain the set
+   as a /binary search tree/.
+
+2. This BST property is crucial for the correctness of the implementation. Say
+   membership test is essentially a BST search.
+
+3. Because the ~set~ type is exposed, outside the structure one can
+   write functions on ~set~ (as it is a binary tree implementation)
+   which does not keep track of the BST property.
+
+4. Next time when one uses the same datatype it fails.
+
+5. What we really want is to expose the type ~set~ but not anything
+   more, i.e. we want the ~set~ type to be /abstract/
+
+Opaque signature is for this.
+
+
+- Howto :: Use ~structure A :> SIG~ instead of ~structure A : SIG~.
+
+** Examples
+
+#+BEGIN_SRC sml
+
+signature SIG = sig
+  type foo
+  val x : foo
+end
+
+structure A : SIG = struct
+
+   type foo = int
+   val x = 4
+
+end
+
+structure B :> SIG = struct
+   type foo = int
+   val x = 42
+
+end
+
+val z  : int = A.x  (* recognises that A.foo which is the type of A.x is int *)
+val z1 = B.x        (* B.x is of type B.foo which is different for int outside B *)
+
+#+END_SRC
+
+#+RESULTS:
+: signature SIG =
+:   sig
+:     type foo
+:     val x : foo
+:   end
+: structure A : SIG
+: structure B : SIG
+: val z = 4 : int
+: val z1 = - : B.foo
+
+** Translucence instead of Opaque
+
+#+BEGIN_SRC sml
+
+signature SIG = sig
+  type foo
+  type bar    = int
+  val x : foo
+  val y : bar
+
+end
+
+structure A :> SIG = struct
+  type foo = int
+  type bar = int
+  val x = 42
+  val y = 42
+end
+
+val z = A.y + 1   (* A.bar is transparent *)
+val z1 = A.x + 1  (* is an error as A.foo is abstract type opaque *)
+#+END_SRC
+
+#+RESULTS:
+: stdIn:128.5-128.17 Error: operator and operand don't agree [overload conflict]
+:   operator domain: [+ ty] * [+ ty]
+:   operand:         A.foo * [int ty]
+:   in expression:
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
