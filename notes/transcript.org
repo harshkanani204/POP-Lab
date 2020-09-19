@@ -2770,3 +2770,152 @@ end
 
 
 #+END_SRC
+* TODO The lambda calculus                                              :LAB:
+
+** Alonzo Church's lambda calculus
+
+
+#+BEGIN_SRC sml
+
+val incr = fn x => x + 1
+fun incr1 x = x + 1
+
+#+END_SRC
+
+#+RESULTS:
+: val incr = fn : int -> int
+: val incr1 = fn : int -> int
+
+- Function Abstraction ::
+      ~fn x => x + 1~ is that function that maps ~x~ to ~x + 1~.
+     ~fn x => e~ is that function that maps ~x~ to ~e~
+
+- Function Application ::
+
+   ~f~ is a function and ~e~ is an expression then ~f e~ is
+   the application of ~f~ on ~e~
+
+
+
+*** Church thesis (1933)
+
+These are the only things one needs to have a full programming language.
+
+Church used the notation ~λ x . e~ for ~fn x => e~. I.e ~λ x . e~ is that
+function that takes ~x ↦ e~
+
+
+** Function application.
+
+
+What does it mean to say that ~fn x => e~ is that function that maps
+~x~ to ~e~ ?
+
+1. There is a notion of reduction of λ-calculus expression.
+
+   ~(fn x => e) M -–>   e [ x := M ]~
+
+~e [ x := M]~ . Replace ~M~ for ~x~ in ~e~
+
+Why do I say that in SML ~F = fn x => x + 1~ is the increment function ?
+
+~F y ≡  (fn x => x + 1) y –>  substitute y for x in x + 1.
+                          –> y + 1
+
+
+
+*** Infinite loops.
+
+#+BEGIN_SRC
+
+Id = fn x => x  (* is in normal form *)
+A = fn x => x x
+Ω = A A
+
+Ω = (fn x => x x) A
+  -> A A
+
+#+END_SRC
+
+
+** Problems with naive substitution
+
+Variable capture.
+
+1. ~(fn x => (fn x => x)) M~
+
+e = (fn x => x y) ≡ fn t => t y
+
+e [x := M]
+
+1        1
+∫ x y dx = ∫ t dt
+0        0
+
+
+Is ~fn x => x~ the same as ~fn t => t~
+
+
+~e [x := M]~ What I mean is substitute M for every /free/ occurrance
+of ~x~
+
+
+** Free variables (formal definition )
+
+The free variables of e is defined as follows.
+
+There are three possibilities e is either
+
+1. ~x~ in which case FV(e) = {x }
+
+2. ~e₁ e₂~ in which case FV(e) = FV(e₁) ⋃ FV(e₂)
+
+3. ~fn x => e'~ in which case FV (e) = FV(e') ∖ { x }
+
+
+~(fn x => fn y => x)(fn t => t)~ = ~M N~  reduces to ~fn y => (fn t => t)~
+
+where M = (fn x => fn y => x) and N = (fn t => t)
+
+(fn x => e) L —>  e [x := L]
+
+ In this context e is (fn y => x)
+
+
+
+
+1. (fn x => fn t => x) N  –> fn t => N
+
+  If N was fn t => t
+
+   fn t => fn y => y
+
+
+ When you substitute N for x, the context in which x occurs free should not bind any free variables
+ of N.
+
+ (fn x =>[ .....(fn t => ....x....)]) N
+
+#+BEGIN_SRC
+
+s0 = x00 x01 .......
+s1 = x10 x11 .......
+.
+.
+sn = xn0 xn1 ........
+
+s
+#+END_SRC
+
+
+ #+BEGIN_SRC sml
+
+val x = 10
+fun foo x = fn y => x
+
+
+ #+END_SRC
+
+ #+RESULTS:
+ : val x = 10 : int
+ : val foo = fn : 'a -> 'b -> 'a
