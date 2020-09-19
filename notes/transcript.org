@@ -2174,6 +2174,116 @@ val z1 = EQUAL : order
 
 5. SML like Structures can be added to any language (mostly)
    C with SML like structures.
+* DONE Structures and functors in practice                          :LECTURE:
+
+Video :: https://youtu.be/95UPSteFfTA
+Video :: https://youtu.be/KhSN46EiiRU
+
+** Standard Libraries.
+
+Many data structures, utility functions, IO functions etc are
+available with the standard library system of SML
+
+1. [[https://smlfamily.github.io/Basis/manpages.html][Standard Basis Libaray]]
+
+2. [[https://www.smlnj.org/doc/smlnj-lib/Util/smlnj-lib.html][SML of NJ library]]
+
+
+*** Opening structures.
+
+Opening structure brings the bindings inside the structure to the
+current scope.
+
+This is not really recommended as List.map is much more understandable
+than just map when in particular you have say Tree.map as well.
+
+#+BEGIN_SRC sml
+
+val x = splitAt
+
+val y = let open List
+        in
+           splitAt
+        end
+
+#+END_SRC
+
+#+RESULTS:
+: stdIn:12.5-15.12 Warning: type vars not generalized because of
+:    value restriction are instantiated to dummy types (X1,X2,...)
+: val x = fn : 'a list * int -> 'a list * 'a list
+: val y = fn : ?.X1 list * int -> ?.X1 list * ?.X1 list
+
+** Case Study: Set data structure
+
+Details: https://www.smlnj.org/doc/smlnj-lib/Util/sig-ORD_SET.html
+
+Algorithms often need to maintain the set of objects of a given type
+
+A set data-structure implementation gives a way to implement this with
+efficient opertions like union, intersection etc.
+
+SML of NJ library
+
+There are multiple implementation for Int set given by
+
+- IntBinarySet   :: using binary tree
+- IntListSet     :: using lists
+- IntRedBlackSet :: using red-black trees.
+
+
+The ~ORD_SET~ signature gives you what all operations are defined.
+
+
+
+*** Defining set data structure for your own type.
+
+
+1. Define an structure K of signature ORD_KEY for your datatype
+
+#+BEGIN_SRC sml
+
+datatype order = LESS | GREATER | EQUAL
+
+signature ORD_KEY = sig
+
+    type ord_key
+
+    val compare : ord_key * ord_key -> order
+end
+
+datatype Foo = ...
+
+structure FooORD : ORD_KEY = struct
+   type ord_key = Foo
+   val compare (f1,f2) = ...
+end
+
+#+END_SRC
+
+2. Use this K as parameter to one of the Set implementation functors.
+
+   - ListSetFn
+   - BinarySetFn
+
+#+BEGIN_SRC sml
+
+structure FooSet = RedBlackSetFn ( FooORD )
+
+let emptyFooSet = FooSet.empty
+
+
+#+END_SRC
+
+
+** Map data structure
+
+This is to store a finite map from keys to values.
+
+- structure IntRedBlackMap
+
+Details: https://www.smlnj.org/doc/smlnj-lib/Util/sig-ORD_MAP.html
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
