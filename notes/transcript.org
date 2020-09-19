@@ -1976,7 +1976,7 @@ C3 : ('a,'b,'c) Name
 
    i. ~C1~ is a pattern of type ~('a, 'b, 'c) Name~
    ii. If ~p~ is a pattern of type something then ~C2 p~ is also a pattern
-* DONE Structures, Signatures, Functors.
+* DONE Structures, Signatures, Functors.                            :LECTURE:
 - Video :: https://youtu.be/_AwO5d7WhPI
 - Video :: https://youtu.be/bAGppGJjglQ
 ** Motivation
