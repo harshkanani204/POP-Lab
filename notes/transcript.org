@@ -2411,6 +2411,85 @@ val z1 = A.x + 1  (* is an error as A.foo is abstract type opaque *)
 :   operand:         A.foo * [int ty]
 :   in expression:
 
+
+* DONE Lambda Calculus: The "core" of functional programming        :LECTURE:
+- Video :: https://youtu.be/OH8mVopLJIs
+
+** What all do we need for a minimal functional languages
+
+- Variables :: x, y, ...
+
+- Function applications ::  ~f e~
+
+- Function abstraction :: ~fn x => e~ This denotes the function that maps ~x~ to ~e~
+
+
+This is all that we need to get the full power of a programming
+language.
+
+There is a way to encode all possible computations by just these.
+
+This was the observation of Church and is know as the Church Hypothesis.
+
+Church used the notation ~λ x . e~ instead of ~fn x => e~.
+
+#+BEGIN_SRC sml
+
+val incr = fn x => x + 1
+
+#+END_SRC
+#+RESULTS:
+: val incr = fn : int -> int
+
+** Syntax
+
+#+BEGIN_EXAMPLE
+
+<expr> := <variable>
+        |  <expr₁> <expr₂>          (function application )
+        |  fn <variable> => <expr>  (function abstraction )
+        | λ <variable> . <expr>     (Church's notation for abstraction)
+
+fn x y => e   is a short hand for fn x => fn y => e
+
+We will use paranthesis to disambiguate.
+#+END_EXAMPLE
+
+
+** Semantics
+
+The computation is captured by the notion of β-reduction.
+
+#+BEGIN_EXAMPLE
+
+(fn x => e) M  ===>  e [ x := M].
+
+(fn x => fn y => x) (fn t => t) =========>
+   (fn y => x) [x := M] =======> fn y => (fn t => t)
+
+#+END_EXAMPLE
+
+~e [x := M]~ is the notation for substitute M for x in e.
+
+Given a λ-calculus term, any subterm can be reduced using the
+β-reduction rule. And this gives computation.
+
+
+Keep reducing till a term is obtained which cannot be β-reduced.
+
+
+** Complications in Substitutions.
+
+Substitutions are complicated because of variable capture.
+
+#+BEGIN_SRC
+
+(fn x => fn y => x y) y ====> fn y => y y  (* wrong *)
+
+(fn x => fn z => x z) y  ====> fn z => y z (* correct *)
+
+#+END_SRC
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
