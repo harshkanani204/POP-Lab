@@ -1165,6 +1165,156 @@ have side effect.
 
 
 #+END_SRC
+* DONE Lambda calculus and computability                          :CLASSROOM:
+
+** Local declarations (non-recursive let).
+
+
+#+BEGIN_SRC sml
+fun foo x = let val y = x + 1
+            in y * x
+            end
+
+#+END_SRC
+
+#+RESULTS:
+: val foo = fn : int -> int
+
+#+BEGIN_EXAMPLE
+
+let v = e1
+in e2
+
+===
+
+(λ v . e2) e1
+
+(fn v => e2) e1
+
+....x = .. (let x = e1 in e2) ....
+
+   The x in the expression e1 will be coming from
+the outside scope
+
+#+END_EXAMPLE
+
+One can think of ~let v = e1 in e2~ as a syntactic sugar for
+~(λ v . e2) e1~
+
+
+Non-recursive let explanation
+#+BEGIN_EXAMPLE
+
+      <-----------
+                 |
+        (let x = x + 1 in .... x ...)
+             ^                 |
+             +-----------------+
+
+
+  (let x = 5
+     in
+       let x = x + 1  (* this binds x to 5 + 1 = 6 *)
+          in x        (* x here is 6 *)
+       end
+     end
+  )
+
+  This entire expression evaluates to 6
+#+END_EXAMPLE
+
+In OCAML there is ~let~ and ~let rec~
+
+** Recursion and Fixpoints
+
+1. Every lambda calculus expression is a function
+
+2. A fixpoint of a function say F is a value X such that F X = X.
+
+*** Fixpoint theorem
+
+1. Every *closed* lambda calculus function has a fixed point.
+
+
+2. This fixpoint is effectively computable. There is a λ-calculus
+   combinator ~Y~ such that for all closed lambda calculus expressions
+   ~F~, ~YF~ is the fixed point of ~F~.
+
+- Consequence of part 1 :: In terms of recursive definition this means
+     that any recursive definition of a function can be achieved
+     through computing the appropriate fixpoint.
+
+- Consequence of part 2 :: Think of a compiler that takes your
+     favourite programming language and converts it into
+     λ-calculus. The second part allows you to write such a compiler
+     for recursive definitions.
+
+     For a recursive equation like fact this means that you can write
+     it as.
+
+#+BEGIN_EXAMPLE
+let F = fn f => fn n => if n <= 0 then 1 else n * f (n - 1)
+   in let fact = Y F
+          in  ....
+          end
+   end
+#+END_EXAMPLE
+
+- Closed expressions :: Expressions without free variables
+- Combinator  :: Another name for closed expression.
+
+Only closed expressions have meanings completely determined. In general,
+the value associated with an expression depends on its free variable.
+
+~λ x . x~ :: This is the identity function.
+
+~x~ :: The value is determined only when the value of x is determined.
+
+
+*** Fix points gives recursion.
+
+1. letrec f x = ... f y .... in e
+
+   F = λ f x . .....f y .....
+
+#+BEGIN_SRC sml
+
+fun fact n = if n <= 0 then 1
+             else n * fact (n - 1)
+
+val y = fact 4 (* this is just to check fact *)
+
+
+fun F f n = if n <= 0 then 1 else n * f (n - 1) (* notice there is no recursion *)
+
+val G = fn f => fn n => if n <= 0 then 1 else n * f (n - 1)
+
+#+END_SRC
+
+#+RESULTS:
+: val fact = fn : int -> int
+: val y = 24 : int
+: val F = fn : (int -> int) -> int -> int
+: val G = fn : (int -> int) -> int -> int
+                  A               A
+
+1. What is the fixpoint of ~F~ if it exists ?
+
+   The fixpoint of ~F~ is that ~X~ such that ~F X = X~.
+
+   ~F X is fn n => if n <= 0 then 1 else n * X (n - 1)~
+
+   ~F X = X~ means ~X = F X~ which means
+
+   ~X = fn n => if n <= 0 then 1 else n * X (n - 1)~
+   ~fact = fn n => if n <= 0 then 1 else n * fact (n - 1)~
+
+2. The recursive function definition ~fact~ is nothing but the fixpoint of
+   The function ~F = fn f => fn n => if n <= 0 then 1 else n * f (n - 1)~
+
+
+3. Notice that ~F~ is not recursive but its fixpoint is the solution to
+   the recursive equation for ~fact~.
 * Information.
 - Youtube play list ::
 https://www.youtube.com/playlist?list=PLhMQ0_-r9W5-LeXeXQtW8UcmtdJk98hfH
