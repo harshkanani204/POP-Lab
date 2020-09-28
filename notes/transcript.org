@@ -987,7 +987,7 @@ functor Invert(O: sig
    the feature structure/functors. Maybe compile time will increase.
 
 
-* Structures and funtors continued                                :CLASSROOM:
+* DONE Structures and funtors continued                           :CLASSROOM:
 
 
 ** Some interesting libraries
