@@ -1,8 +1,11 @@
 # Lambda Calculus with let and let-rec
 
-Consider variants of lambda calculus λ-let and λ-letrec where the
-former adds the syntactic sugar of non-recursive `let` and the latter adds
-`letrec`.
+Deadline: 2020-10-08
+
+
+Consider variants of lambda calculus λ-calculus ⊆ λ-let ⊆ λ-letrec
+where the former adds the syntactic sugar of non-recursive `let` and
+the latter adds `letrec`.
 
 1. Define abstract syntax for λ-let and λ-letrec as a SML datatype.
 
