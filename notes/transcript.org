@@ -2701,6 +2701,105 @@ Substitutions are complicated because of variable capture.
 
 #+END_SRC
 
+
+* DONE Lambda Calculus: Revisiting substituions                     :LECTURE:
+
+Video :: https://youtu.be/EwRr8JBhLbA
+
+Systematic study and formalisation of the notion of substitution and
+fix problems with β-reduction.
+
+** Free and bound variables.
+
+In an λ-calculus term any variable x that occurs in the /shadow/ of a
+~fn x => ~ is a /bound variable/ otherwise it is /free/.
+
+#+BEGIN_EXAMPLE
+
+F (y) ≡ fn x => x y  ( x is bound but y is free )
+
+I(y) ≡ ₀∫¹ x y dx   ( x is bound and y is free )
+
+ψ (z) ≡ ∀ x ∃ y ϕ(x,y,z) ( x and y are bound where as z is free).
+
+fun foo x = print x  (here x is bound but print is free).
+#+END_EXAMPLE
+
+- The "value" associated with the term depends on the free variables
+  but not on the bound variables.
+
+- The bound variables may be replaced by "fresh" variables.
+
+
+
+#+BEGIN_EXAMPLE
+
+F (y) ≡ fn x => x y = fn t => t y ( x is bound but y is free )
+
+I(y) ≡ ₀∫¹ x y dx  = ₀∫¹ t y dt  ( x is bound and y is free )
+
+ψ (z) ≡ ∀ x ∃ y ϕ(x,y,z) = ∀ t ∃ u ϕ(t,u,z) ( x and y are bound where as z is free).
+
+fun foo l = print l  (here x is bound but print is free).
+#+END_EXAMPLE
+
+** Formal definition.
+
+- FV(e) :: free variables of the λ-calculus expression e is a subset of variables
+           defined by induction as follows.
+
+  1. FV(x) = { x }
+
+  2. FV(e₁ e₂) = FV(e₁) ∪ FV(e₂)
+
+  3. FV(λ x . e) = FV(e) ∖ {x }
+
+
+- Where do bound variables get bound.
+
+#+BEGIN_EXAMPLE
+fn x => (fn x => x) ≡  fn x₀ => (fn x₁ => x₁)
+#+END_EXAMPLE
+
+The innermost binding is the strongest.
+
+*** Substitution e [x := M]
+
+e [x := M] stands for the expression e' obtained by substituting M for all
+free occurance of x in e.
+
+- Variable Substitution rule ::
+
+  1. x [ x := M ]  ≡ M
+
+  2. y [ x := M ]  ≡ y  (if y ≠ x
+
+- Substitution in application :: (e₁ e₂) [ x := M ] ≡ (e₁ [x := M]) (e₂ [x := M])
+
+- Substitution in abstraction ::
+
+     1. (λ x . e) [ x := M] = (λ x . e) (only substitute for free occurance)
+
+     2. (λ y . e) [ x := M] = (λ y . e [x := M]) (if y ≠ x)
+
+** β-reduction
+
+#+BEGIN_EXAMPLE
+
+(λ x . e) M ===> e [ x := M]
+
+#+END_EXAMPLE
+
+
+- Side condition :: No free variables of M should be bound in e
+
+- α-reduction :: change the bound variables of e to fresh variables.
+
+    (λ z . M) ===>  (λ u . M [ z := u ]) where u is fresh.
+
+
+
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
