@@ -1240,6 +1240,9 @@ In OCAML there is ~let~ and ~let rec~
    combinator ~Y~ such that for all closed lambda calculus expressions
    ~F~, ~YF~ is the fixed point of ~F~.
 
+- Closed expressions :: Expressions without free variables
+- Combinator  :: Another name for closed expression.
+
 - Consequence of part 1 :: In terms of recursive definition this means
      that any recursive definition of a function can be achieved
      through computing the appropriate fixpoint.
@@ -1259,9 +1262,6 @@ let F = fn f => fn n => if n <= 0 then 1 else n * f (n - 1)
           end
    end
 #+END_EXAMPLE
-
-- Closed expressions :: Expressions without free variables
-- Combinator  :: Another name for closed expression.
 
 Only closed expressions have meanings completely determined. In general,
 the value associated with an expression depends on its free variable.
@@ -1297,6 +1297,30 @@ val G = fn f => fn n => if n <= 0 then 1 else n * f (n - 1)
 : val F = fn : (int -> int) -> int -> int
 : val G = fn : (int -> int) -> int -> int
                   A               A
+
+#+BEGIN_EXAMPLE
+
+fact = λ n . if n <= 0 then 1 else n * fact (n - 1)
+
+We want fact to be a solution of the above recursion
+
+
+F = λ f . λ n . if n <= 0 then 1 else n * f (n - 1)
+
+g is the fixpoint of F
+
+This means g satisfies the recursion
+
+   g = F g
+
+g = (λ f . λ n . if n <= 0 then 1 else n * f (n - 1)) g
+  = λ n . if n <= 0 then 1 else n * g (n - 1)
+
+Solution of the recursion
+ f = M (f)
+ is the fixpoint of  λ f . M (f)
+
+#+END_EXAMPLE
 
 1. What is the fixpoint of ~F~ if it exists ?
 
@@ -1957,15 +1981,15 @@ Given an value ~v~, and a pattern ~pat~
 +--------------------+-----------+---------------+-------------------------------------+
 | Pattern            | Type of v | Form of the v |Bindings created                     |
 +--------------------+-----------+---------------+-------------------------------------+
-| Variable (say ~x~) | any type  | any value     |~x = v~                              |
+| Variable (say ~x~) | any type  | any value     | ~x = v~                             |
 +--------------------+-----------+---------------+-------------------------------------+
 | Wild card (~_~)    | any type  | any value     |No bindings created                  |
 +--------------------+-----------+---------------+-------------------------------------+
 | ~(p1,p2)~          | ~'a * 'b~ | ~(v1,v2)~     |match ~p1~ with ~v1~ and ~p2~ with   |
-|                    |           |               |~v2~                                 |
+|                    |           |               | ~v2~                                |
 +--------------------+-----------+---------------+-------------------------------------+
 | ~p :: ps~          | ~'a list~ | ~(v :: vs)~   |matchs ~p~ with ~v~ and ~ps~ with    |
-|                    |           |               |~vs~                                 |
+|                    |           |               | ~vs~                                |
 +--------------------+-----------+---------------+-------------------------------------+
 | ~[]~               | ~'a list~ | ~[]~          |no bindings created                  |
 +--------------------+-----------+---------------+-------------------------------------+
@@ -3435,3 +3459,119 @@ fun foo x = fn y => x
  #+RESULTS:
  : val x = 10 : int
  : val foo = fn : 'a -> 'b -> 'a
+* TODO The λ-let and λ-letrec                                           :LAB:
+
+let x = e in e₁  -> (fn x => e₁) e
+
+1. The x in e₁ is the x bound in the let x = e
+2. The x in e  is a free variable
+
+let x = 5 in (let x = x + 1 in x*2)
+
+letrec x = e in e₁ -> lambda calculus
+
+1. F ∈ λ-calculus one can find a fixpoint X of
+of F.   F X = X
+
+1. We have a combinator Y ∈ λ-calculus such that Y F is the fixpoint
+   of F for all F ∈ λ-calculus.
+
+2.  letrec f = M(f) in e
+
+    ===> let f = Y (λ f. M(f)) in e
+
+ - letrec f = M (f) in e ::
+Compute  the expression e where the variable f
+is the solution to the recursion f = M(f)
+
+
+   Let g be the fixpoint of λ f . M (f) then this expression can be written
+   as let f = g in e.
+
+
+   Define F = λ f . M (f))
+   Let    g = Y F
+          g is the fixpoint of F
+          g = F g
+          g = (λ f . M(f)) g
+            = M (g)
+
+   g is the solution for the recursive equation.
+
+#+BEGIN_SRC sml
+val x = let fun fact n = if n <= 0 then 1
+                          else n * fact (n - 1)
+        in
+          fact 4
+        end
+
+#+END_SRC
+
+#+RESULTS:
+: val x = 24 : int
+
+#+BEGIN_EXAMPLE
+
+letrec fact = λ n . if n <= 0 then 1
+                    else n * fact (n - 1)
+   in fact 10
+
+
+#+END_EXAMPLE
+
+
+M f = λ n . if n <= 0 then 1 else n * f (n - 1)
+
+letrec f = M (f) in e
+
+1. Evaluate e where f is bound to the solution of
+   the recursive eqn f = M f
+
+2. Solution of the eqn f = M f is nothing but
+
+  Y ( λ f . M (f) )
+
+ Evaluate e in the environment where f is something
+ let f = something in e
+
+let f = Y ( λ f . M (f) ) in e
+
+ Something is the solution to Y ( λ f . M f)
+
+Think of M(f) as some λ-let program where f is free.
+
+
+#+BEGIN_EXAMPLE
+
+let x
+
+#+END_EXAMPLE
+
+
+letrec f1 = M(f1,f2)
+       f2 = N(f1,f2)  in e
+
+letrec (f1,f2) = ( M (f1,f2), N (f1,f2) ) = e
+
+
+
+
+ Imagine you have a way to pair elements and project their component.
+
+  pair : λ
+  fst : λ
+  snd : λ
+
+  fst (pair u v) = u
+
+  snd (pair u v) = v
+
+  pair = (λ u . λ v . λ f . f u v)
+  fst  = λ p . p K
+  snd  = λ p . p K₁
+
+  K  = λ x λ y . x  (K is the constant function )
+  K₁ = λ x λ y . y  (K₁ is the ignore function )
+
+K ignores the second argument
+K₁ ignores the first argument
