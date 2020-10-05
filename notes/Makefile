@@ -5,11 +5,12 @@ GENERATED=pdf fdb_latexmk fls log aux out tex toc
 HOSTNAME=$(shell hostname -s)
 %.tex : %.org
 	emacs $< --batch -f org-latex-export-to-latex --kill
-
+%.html : %.org
+	emacs $< --batch -f org-html-export-to-html --kill
 
 
 transcript.pdf : transcript.tex
-	latexmk -pdf transcript.tex
+	latexmk -f -pdfxe transcript.tex
 all: transcript.pdf
 clean:
 	rm -f $(addprefix transcript., ${GENERATED})
