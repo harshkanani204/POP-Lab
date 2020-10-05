@@ -1399,7 +1399,209 @@ P F = (λ n λ e λ r λ a λ  j .  j(neeraj)) θ θ θ θ F
 
 #+END_SRC
 
+* DONE Typed Lambda calculus                                      :CLASSROOM:
+<2020-10-05 Mon>
 
+** So far.
+
+So far we have seen untyped lambda calculus. It is a Turing complete
+programming language, i.e. any computation task can be solved using
+lambda calculus. We can have a semi-decision algorithm for any
+recursively enumerable language of {0,1}*.
+
+Lambda calculus is a full-fledged programming language.
+
+1. There are no bultin constants or types like integers.
+
+Adding types to lambda calculus. Constants and functions (builtin).
+
+
+** λ-calculii and types.
+
+The thing of interest for us is judgements ~e : τ~ where ~e~ is a term
+and ~τ~ is a type.
+
+
+*** The world of types
+
+1. Start with some basic types, for eg. ~nat~, ~bool~, ....
+
+2. The function type ~τ₁ -> τ₂~
+
+#+BEGIN_EXAMPLE
+
+<type> := one of the basic types like nat bool etc
+       | <type>₁ -> <type>₂          (* function type or arrow type *)
+
+
+#+END_EXAMPLE
+
+*** The world of terms.
+
+(λ x : τ . e)
+
+These judgements e : τ, what do they mean ?  2 : nat means that we
+cannot "apply" 2 to anything.
+
+Suppose you know that e : nat then
+
+1. You can use e in any context that expects a nat.  e.g (e + 1) is
+   allowed
+
+2. You cannot use e where a nat is not allowed e.g. (e x) is not
+   allowed.
+
+
+The fact that e : nat rules out the use of e in certain context in a
+λ-calculus term. Or in other words, consider any context where e occurs
+in a λ-calculus term M, we can decide whether e is used like a nat or not.
+
+
+*** Types as a specification to values.
+
+The judgement e : nat should be seen as a /specification/ of the
+"program" e.
+
+1. A specification or spec is a property that the program satisfies.
+   For example, for scheduling /fairness/, i.e  any process that is
+   ready should be scheduled to run in a finite amount of time.
+
+2. A spec for a sorting program is that it "sorts the list".
+
+   - Non-contracting :: If x is the input to the sort program then
+        length of x = length of (sort x).
+
+
+*** There are two problems associated with types.
+
+- Type checking :: Given a term ~e~ and a type ~τ~, can we derive the
+                   judgement ~e : τ~.
+
+- Type inference :: Given a term ~e~ compute a type ~τ~ such that ~e :
+                    τ~ is derivable.
+
+
+We have to give the type rules for the calculus that we are talking
+about.
+
+
+
+
+** Simply typed lambda calculus.
+
+
+1. Types: Basic types + arrow types.
+
+   τ := nat
+     |  τ₁ -> τ₂
+
+
+When we want to derive the judgement ~e : τ~, we need a typing
+context, i.e.  We need as assumption a set of judgements ~Γ = { x :
+τ₁, x₂ , τ₂ .... }~ for all free variables of ~e~.
+
+
+Say I want to arrive at this conclusion.
+~x : nat~
+
+I cannot /assert/ ~x : nat~ unless I /know/ that ~x : nat~.
+
+The judgement ~x : nat~ is only valid under the assumption ~x : nat~.
+
+x : nat ⊢ x : nat
+
+
+~Γ ⊢ e : τ ~  is to be read as the judgement ~e : τ~ is valid in the context ~Γ~
+
+A typing context Γ is just a list of type assumptions on variables.
+
+Γ = { x₁ : τ₁, ... xₙ : τₙ }.
+
+
+** Rules of typing.
+
+*** Syntax consists of
+
+- Variables :: x, y , z ..
+- Function application :: e₁ e₂ ,i.e. The function  e₁ applied on e₂
+- function abstraction :: (λ x:τ . e)
+
+*** Typing rules
+
+**** Types
+
+#+BEGIN_EXAMPLE
+
+τ := nat
+  | τ₁ -> τ₂ |
+
+#+END_EXAMPLE
+
+
+There should be a rule for all the three term construction rules.
+
+- A General Rule looks like ::
+
+  #+BEGIN_EXAMPLE
+
+   Pre-cond1
+   Pre-cond2
+   ...
+   Pre-condn
+
+   =========================
+
+   conclusion.
+
+
+#+END_EXAMPLE
+
+- VAR :: The variable rule.
+
+  #+BEGIN_EXAMPLE
+
+
+   ===================
+    {x : τ} ⊢ x : τ
+
+  #+END_EXAMPLE
+
+  Under no pre-condition, we can derive the judgement x : τ under the context x : τ
+
+- APP ::
+
+  #+BEGIN_EXAMPLE
+
+    Γ ⊢ e₁ : τ₁ -> τ₂
+    Γ ⊢ e₂ : τ₁
+
+    =======================
+
+    Γ ⊢ e₁ e₂ : τ₂
+
+
+  #+END_EXAMPLE
+
+  - Pre-condition ::
+     ~e₁ : τ₁ -> τ₂~ under the context ~Γ~ and
+     ~e₂ : τ₁~ under the cotnext ~Γ~
+
+  - Conclusion ::
+    ~e₁ e₂ : τ₂~ under the context ~Γ~.
+- ABS ::
+
+  #+BEGIN_EXAMPLE
+
+   Γ ∪ { x : τ₁ } ⊢  e : τ₂
+
+   ==============================
+
+   Γ ⊢ (λ x : τ₁ . e) : τ₁ -> τ₂
+
+  #+END_EXAMPLE
+
+  - Pre-condition :: With the assumption ~x : τ₁~ suppose I derive ~e : τ₂~ then
+  - Conclusion  :: (λ x : τ₁ . e) : τ₁ -> τ₂
 * Information.
 - Youtube play list ::
 https://www.youtube.com/playlist?list=PLhMQ0_-r9W5-LeXeXQtW8UcmtdJk98hfH
