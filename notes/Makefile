@@ -8,10 +8,10 @@ HOSTNAME=$(shell hostname -s)
 %.html : %.org
 	emacs $< --batch -f org-html-export-to-html --kill
 
-
 transcript.pdf : transcript.tex
 	latexmk -f -pdfxe transcript.tex
-all: transcript.pdf
+
+all: transcript.html
 clean:
 	rm -f $(addprefix transcript., ${GENERATED})
 
