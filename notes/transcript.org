@@ -3512,7 +3512,7 @@ end
 
 
 #+END_SRC
-* TODO The lambda calculus                                              :LAB:
+* DONE The lambda calculus                                              :LAB:
 
 ** Alonzo Church's lambda calculus
 
@@ -3661,7 +3661,7 @@ fun foo x = fn y => x
  #+RESULTS:
  : val x = 10 : int
  : val foo = fn : 'a -> 'b -> 'a
-* TODO The λ-let and λ-letrec                                           :LAB:
+* DONE The λ-let and λ-letrec                                           :LAB:
 
 let x = e in e₁  -> (fn x => e₁) e
 
@@ -3777,3 +3777,237 @@ letrec (f1,f2) = ( M (f1,f2), N (f1,f2) ) = e
 
 K ignores the second argument
 K₁ ignores the first argument
+* TODO Higher order abstract syntax
+
+
+#+BEGIN_EXAMPLE sml
+
+(*
+   <expr> = <variable>                (* variable case    *)
+          | <expr>₁ <expr>₂           (* application case *)
+          | λ <variable> . <expr>     (* abstraction case *)
+
+
+(λ x . λ t₁ . x t₁) t₀  ->  (λ t₁ . x t₁) [x := t₀] -> λ t₁ . t₀ x
+       [   M     ]  N
+
+(λ x . M) N  =====>  M [x := N]
+
+The above beta reduction is allowed only if FV(N) ∩ Bound(M) = ∅
+
+Any beta reduction should not change variable binding
+
+*)
+
+datatype L = V  of String
+           | Ap of (L, L)
+           | Ab of (String, L)
+
+
+#+END_EXAMPLE
+
+SML itself is a λ-calculus.
+
+#+BEGIN_EXAMPLE sml
+
+datatype HL = HV  of String
+            | HAp of (HL, HL)
+            (* | Ab of (String, L)  *)
+            | HAb of (HL -> HL)
+
+
+(*
+C of τ
+
+C : τ -> Whatever is your type
+
+*)
+(*
+
+λ x . x           Ab ("x", V "x")
+
+                  HAb (fn e => e)
+λ x y . x        Ab ("x", Ab ("y", (V "x"))
+
+λ x . (λ y . x)
+                 HAb (fn x => (HAb (fn y => x))
+
+
+ A = λ f x . f (f x)
+
+(λ x . M) N -> M [x := N]
+
+HA (HAb f, N) = f N
+
+f : HL -> HL
+
+
+(λ x . λ t . x t y)) t
+
+Ab ("x" , (Ab ("t", Ap (V "x", V "t)))) V "t"
+
+ Ab ("t",  Ap (V "t", V "t"))
+
+HAb ( fn (x : HL) =>  HAb (fn (t : HL) => HAp x  t) HV "t"
+
+
+
+Hab : (HL -> HL) -> HL
+HAb (fn (t : HL)  => (HAp (HV "t"), t)
+
+
+HAb : (HL -> HL) -> HL
+
+HV : string -> HL
+
+
+
+*)
+
+
+#+END_EXAMPLE
+
+
+1. In our case the language of interest is λ-calculus (object
+   language), i.e. the language we are studying/implementing.
+
+2. Our implementation language is SML (meta-language).
+
+3. The constructs in the object language are expressed as datatypes in
+   the meta-language. (Using algebraic types to capture syntax)
+
+4. Capture the "binding" structure in the meta-language is what HOAS
+   ("Higher order abstract syntax") allows you to do. Often one needs
+   to substitute terms for a bound variable (like in the case of
+   β-reduction)
+
+
+HOAS is used in the internal representation of the language.
+
+1. Cannot be used to show results to user.
+
+2. When you parse what you get is a usual representation not HOAS.
+
+
+#+BEGIN_EXAMPLE sml
+
+subst : (string * lam) -> lam -> lam
+
+(*
+subst ("x",N) e  has to do  e [x := N]
+
+*)
+
+fun subst (x,N) (V y)       = ...
+  | subst (x,N) (A (e1,e2)) = A (subst (x,N) e1), (subst (x,N) e2))
+  | subst (x,N) (L (u, e))  = ..
+
+substH : (string * HL) -> HL -> HL
+fun substH (x,N) (HV y)       = ... same as above
+  | substH (x,N) (HA (e1,e2)) =  HA (substH (x,N) e1), (substH (x,N) e2))
+  | substH (x,N) (HAb f)      =
+           let fun fp t = subst (x,N) (f t )
+           in
+              HAb fp
+
+(*
+
+If f is (fn t => M) then fp should be
+
+       (fn t => substH (x,N) M)
+
+M = λ t . t x
+
+abstract "x" M  should give me (λ x λ t . t x)
+
+parse and get lam and then convert to the internal repsentation which is hlam
+
+hoas : lam -> hlam
+
+fun hoas (V x)       = HV x
+  | hoas (Ap (e1,e2) = HAp (hoas e1, hoas e2)
+  | hoas (L (x,e)    = ?
+
+
+(* internal representation to outside world *)
+
+fun syntax : hlam -> lam
+
+fun syntax (HV x)          = V x
+  | syntax (HAp (e1, e2)   = Ap (syntax e1, syntax e2)
+  | syntax (HAb f)         = ?
+
+(*
+  Generate a fresh variable name x and then just   L (x , syntax (f (HV x) ))
+
+
+HAbs f   -> Abs (u, syntax f (HV u))
+
+f = fn t => HAp (HV "x", t)
+
+HAp (HV "x", HV "y")
+
+["x", "y"]
+
+freeP M will generate a list which is a super set of the free variables of M
+
+λ x . x x
+
+λ u . x u
+
+*)
+
+*)
+
+(* substH ("x",N) (HAb (fn t => HA (t , (HV "x"))))
+
+ substH ("x", N) (HAb (fn t => t))
+
+ λ t . t  [ x := N]
+
+  HAb (fn t => N)
+*)
+(* f : HL -> HL *)
+#+END_EXAMPLE
+
+
+#+BEGIN_EXAMPLE
+
+Y = λ f . (λ x . f (x x)) (λ x . f (x x))
+
+
+#+END_EXAMPLE
+
+#+BEGIN_SRC sml
+
+val Y = fn f => (fn x => f ( x x ))(fn x => f (x x))
+
+val F f = fn n => if n <= 0 then 1 else n * f (n -1)
+
+g = Y F
+
+(*
+  = (fn f => fn x => f (x x)) (fn x => f (x x))) F
+  = (fn x => F (x x)) (fn y => F (y y))
+    F ((fn y => F (y y)) (fn y => F (y y))    )
+
+*)
+    F (Y F) = F g
+
+  = fn n => if (n <= 0) then 1 else n * ((Y F) (n-1))
+
+g is the fix point of F
+
+g satisfies F g
+
+g = fn n => if n <= 0 then 1 else n * (g (n - 1))
+#+END_SRC
+
+#+RESULTS:
+: stdIn:6.30-6.33 Error: operator is not a function [circularity]
+:   operator: 'Z
+:   in expression:
+:     x x
+: stdIn:6.48-6.51 Error: operator is not a function [circularity]
+:   operator: 'Z
+:   in expression:
