@@ -1,4 +1,5 @@
 # Lambda Calculus: Higher order abstract syntax (HOAS).
+Deadline :: Oct 15, 2020
 
 In the last lab we defined lambda calculus expressions using a ML data
 type. One of the problem with that definition is that the interpreter
@@ -21,7 +22,8 @@ datatype lam = V of string
 datatype hlam = HV   of string
               | HA   of hlam * hlam
               | HL   of hlam -> hlam
-              (* as opposed to L of string * lam *)
+
+(* as opposed to L of string * lam *)
 ```
 
 The main advantage of this representation is clean and fast
@@ -31,7 +33,6 @@ MH denote the HOAS representation of M) so β-reducing `(λ x . M) N` is
 just function application.
 
 In this assignment we work with functions related to the HOAS syntax
-
 
 1. Define the substitution function `subst : string * hlam -> hlam ->
    hlam`. The expression `subst ("x",u) e` should replace every free
@@ -53,12 +54,14 @@ In this assignment we work with functions related to the HOAS syntax
    obtained by substituting "x" with `nh` in `mh`. Use part 2 to
    complete the assignment.
 
-3. Define a function `freshen : hlam -> list string` which will
-   generate a string that does not occur free in its input. For
-   example, for something like `HL (fn t => HA (t , HV "x"))` it can
-   generate any string but the string "x". If we have a way to compute
-   the free variables of `hlam` one can use that. However, the
-   `freshen` is easier.
+3. Define a function `freshen : hlam -> string` which will generate a
+   string that does not occur free in its input. For example, for
+   something like `HL (fn t => HA (t , HV "x"))` it can generate any
+   string but the string "x". If we have a way to compute the free
+   variables of `hlam` one can use that. However, the `freshen` is
+   easier. `free : hlam -> list string`. Write a helper function
+   `freeP : hlam -> list string` such that for all `t : hlam` `freeP t
+   ∩ FV(t) = ∅`. Idea is when one sees `FV(HAb f) ⊂ f (HV "x")`.
 
 
 4. Give a conversion functions `hoas : lam -> hlam` `syntax : hlam ->
