@@ -1602,6 +1602,155 @@ There should be a rule for all the three term construction rules.
 
   - Pre-condition :: With the assumption ~x : τ₁~ suppose I derive ~e : τ₂~ then
   - Conclusion  :: (λ x : τ₁ . e) : τ₁ -> τ₂
+* TODO Typed Lambda calculus Contd                                :CLASSROOM:
+
+** Typing rule review
+
+We want to have a complete set of rules for forming the judgement ~e : τ~ for each
+λ-calculus term ~e~
+
+~Γ~ is a set of type assumptions (i.e. judgements of the kind ~x : τ~). Conclusions are always
+of the form ~Γ ⊢ e : τ~ (I can derive the judgement ~e : τ~ from the set of type assumptions ~Γ~.
+
+Every Rule looks like
+#+BEGIN_EXAMPLE
+Pre-conditions
+===============
+Conclusion
+
+#+END_EXAMPLE
+
+
+- VAR :: The variable rule for the judgement ~x : τ~.
+
+  #+BEGIN_EXAMPLE
+
+
+   ===================
+    Γ ∪ {x : τ} ⊢ x : τ
+
+  #+END_EXAMPLE
+- APP :: The application rule for judgement ~e₁ e₂ : τ~
+
+  #+BEGIN_EXAMPLE
+
+    Γ ⊢ e₁ : τ₁ -> τ₂
+    Γ ⊢ e₂ : τ₁
+
+    =======================
+
+    Γ ⊢ e₁ e₂ : τ₂
+
+
+  #+END_EXAMPLE
+- ABS :: The abstraction rule for judgement ~fun (x : τ₁) => e  : τ₁ -> τ₂
+
+  #+BEGIN_EXAMPLE
+
+   (Γ ∪ { x : τ₁ }) ⊢  e : τ₂
+
+   ==============================
+
+   Γ ⊢ (λ x : τ₁ . e) : τ₁ -> τ₂
+  #+END_EXAMPLE
+
+- Weakening ::
+
+#+BEGIN_EXAMPLE
+
+   Γ ⊢ e : τ
+   ==========
+   Γ ∪ {x : τ₁} ⊢ e : τ
+
+
+#+END_EXAMPLE
+
+
+
+~Γ ⊢ e : τ~, I can derive the type judgement ~e: τ~
+given the assumption set ~Γ~
+
+We are now talking about the ABS rule.
+
+- Judgement that I want to derive ::
+     ~(fun (x : τ₁) => e)  : τ₁ -> τ₂~
+
+When can the above function i.e. (fun (x : τ₁) => e)
+have the type ~τ₁ -> τ₂~ ?
+- Answer :: only when I have the pre-conditon that
+            e : τ₂ under the assumption x : τ₁
+
+** Some proofs of judgements.
+
+A proof of a judgement should be a list of judgements of the kind Γ ⊢ e : τ₁. where
+
+J₁ (R₁) ,J₂ (R₂),...,Jₙ (Rₙ)
+
+(1) Rᵢ's are one of the instatiations of the the rule VAR, ABS, APP.
+
+(2) every judgement Jᵢ follows from a set of judgements { Jₗ : l < i}  using one of the VAR,ABS or
+    APP rule.
+
+
+Jₙ is the judgement  (fun x : int => fun y : bool => x) : int -> bool -> int
+
+
+1. ~x : int            ⊢ x : int~
+                                   (VAR)
+2. ~x : int, y : bool  ⊢ x : int~
+                                  (VAR | WEAKENING (1) )
+
+3. ~x : int            ⊢ (fun y : bool => x)  : bool -> int~
+                                  (ABS (2))
+
+4. ~⊢ fun (x : int) => fun (y : bool) => x) : int -> bool -> int~
+                                  (ABS (3))
+Γ ∪ x : τ₁ ⊢ e : τ₂
+====================
+Γ | (fun x : τ₁ => e) : τ₁ -> τ₂
+
+#+END_EXAMPLE
+
+In the case of 3 what is Γ ?
+- Answer :: { x : int }
+What is e is ?
+- Answer :: (fun y : bool => x)
+
+What is τ₁ ?
+- Answer :: bool
+
+What is τ₂ ?
+- Answer :: int
+
+What is x ?
+- Answer :: y
+
+
+** Exercise
+
+Prove the judgement ~⊢ (fn x : nat => fn y : bool => x) 3 true : nat~
+
+You can also use the additional Rules
+
+#+BEGIN_EXAMPLE
+
+===========           (TRUE-rule)
+ true : bool
+
+===========          (FALSE-rule)
+ false : bool
+
+===========  (NAT-n rule for each natural number n)
+  n : nat
+
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+λ x y . x y  is same as λ x . λ y . x y
+
+fn x y => x y   is same as fn x => (fn y => x y)
+
+#+END_EXAMPLE
 * Information.
 - Youtube play list ::
 https://www.youtube.com/playlist?list=PLhMQ0_-r9W5-LeXeXQtW8UcmtdJk98hfH
@@ -3998,7 +4147,9 @@ g = Y F
 
 g is the fix point of F
 
-g satisfies F g
+g satisfies the equation g = F g
+
+which is equivalent to
 
 g = fn n => if n <= 0 then 1 else n * (g (n - 1))
 #+END_SRC
