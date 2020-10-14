@@ -3174,6 +3174,109 @@ free occurance of x in e.
 
 
 
+* DONE Typed lambda calculi
+
+- Video :: https://youtu.be/O7-W3lVFAyI
+
+I have used calculi (the plural) instead of the calculus.
+
+** Introduction
+
+- What are the Types :: This can be just simple types or
+  much more complicated say involving polymorphism etc.
+
+- Typing Judgements :: Let ~e~ be a term in the calculus and let ~τ~
+     be a type. Judgements kill be assertions of the kind ~e~ has type
+     ~τ~ Judgements are written in the notation ~e : τ~
+
+- Typing rules :: These are a set of rules which tell you what judgements
+                  your are allowed to make. These often come with pre-conditions
+                  which are themselves judgements.
+
+- Type checking problem :: Given an expression ~e~ and a type ~τ~,
+     decide whether the judgement ~e : τ~ is a /valid judgement/ (as
+     described by the typing rules) or not.
+
+- Type inference problem :: Given an expression ~e~ compute a type ~τ~
+  (if possible) such that ~e : τ~ is valid. If ~e~ is ill-typed, i.e if
+  there is no τ such that ~e : τ~ is valid then report error.
+
+
+** Typing judgement generalisation.
+
+*** When is the judgement ~x : τ~ valid ?
+
+We cannot decide on this without knowing ~x~.
+We need to know the type of ~x~.
+
+*** For terms.
+
+The judgement ~e : τ~ can only be asserted under type assumptions on
+free variables of ~e~
+
+
+*** Generalisation.
+
+
+- Type assumption :: A type assumption is a judgement of the kind ~x : τ~ for
+     some variable ~x~.
+
+- Judgement would be :: ~Γ ⊢ e : τ~ where Γ = { x₁ : τ₁, ... , xₙ : τₙ }
+  is a set of type assumptions.
+
+- Type checking/inference :: can be done only for the case when ~Γ ⊃ FV(e)~
+
+- Typing rules will talk about this generalised judgements.
+
+
+** Typing rules and proofs.
+
+
+#+BEGIN_EXAMPLE
+
+J₁
+J₂
+J₃
+.
+.
+.
+Jₙ
+====================
+J
+
+#+END_EXAMPLE
+
+In the rule above ~Jᵢ~, i.e. the judgements above the line, are called
+the /pre-conditions/ and the judgement ~J~ is called the /conclusion/
+of the rule.
+
+
+#+BEGIN_EXAMPLE
+
+Γ ⊢ f : τ₁ → τ₂
+
+Γ ⊢ e : τ₁
+
+============
+
+Γ ⊢ f e : τ₂
+
+#+END_EXAMPLE
+
+*** A proof
+
+Fix a set of rules R₁,... Rₖ.
+
+
+A proof is a sequence of judgements that satisfy
+
+- An empty sequence is a proof
+
+- If γ = J₁,...,Jₙ is a proof and if Rᵢ is a rule which all its
+  pre-conditions in γ, then the sequence J₁,...,Jₙ, J is also a proof
+  where J is the conclusion of Rᵢ. (Applying the  rule Rᵢ).
+
+A proof of a judgement J is just a valid proof whose last judgement is J.
 
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
