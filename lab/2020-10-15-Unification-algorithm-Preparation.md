@@ -43,9 +43,9 @@ algorithm. First some terminologies.
 	 occur in tᵢ. In other words `Var(tᵢ) ∩ {x₁,...,xᵢ} = ∅`, where
 	 Var(tᵢ) denotes the variables occurring in tᵢ
 
-The unification problem is defined as given two terms `t₁` and `t₂` in
-`Term(S,V)`, the problem is to compute (if possible) a variable
-assignment under which the terms become equal. We will see in class
+The *unification problem*: Given two terms `t₁` and `t₂` in
+`Term(S,V)` as input, compute (if possible) a *telescopic variable
+assignment* under which the terms become equal. We will see in class
 that the algorithm computes the most general such assignment.
 
 The assignment is a preparatory assignment for building a full fledged
@@ -76,10 +76,17 @@ unification algorithm. As a first step we set up the machinary.
    things if required.
 
 3. Define the `Term` functor that takes as arguments two structures
-   (S : SIG) and V : ORD_KEY and builds a type that captures terms
-   over the signature S and variable set V. Write the helper functions
-   like `occurs : term * V.t -> bool` that checks whether the variable
-   occurs in the term or not.
+   (S : SIG) and V : VAR and builds a type that captures terms over
+   the signature S.symbol and variable set V.var. Write the helper
+   functions like `occurs : term * V.t -> bool` that checks whether
+   the variable occurs in the term or not.
 
-4. Use the `ORD_MAP` structure to implement an efficient data structure
-   for telescopes.
+4. Use the `ORD_MAP` structure to implement an efficient data
+   structure for telescopes. We maintain the telescope as a ORD_MAP
+   data structure and the problem to solve is to figure out of a new
+   equation (xᵢ ≡ tᵢ) can be added to a given map. This finite map
+   keeps track of the variable assignment, i.e. the map uses the
+   variable as a key and the term associated with it as the value.
+
+   x₁ ≡ t₁, .... xᵢ ≡ tᵢ ... xₙ ≡ tₙ then the map will have n keys
+   x₁,....,xₙ with t₁,...,tₙ as the associated values.

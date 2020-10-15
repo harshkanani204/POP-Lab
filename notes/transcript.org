@@ -4265,3 +4265,200 @@ g = fn n => if n <= 0 then 1 else n * (g (n - 1))
 : stdIn:6.48-6.51 Error: operator is not a function [circularity]
 :   operator: 'Z
 :   in expression:
+* TODO Unification algorithm.
+
+The main reason for studying Unification algo is for type inference.
+
+#+BEGIN_SRC sml
+
+(* Domain of map is ('a -> 'b)  and range is ( 'a list to 'b list) *)
+
+(* The domain of map can it be 'c list -> ('c * 'c) list  for some choice of 'a and 'b *)
+(* Is it possible to make 'c list -> ('c * 'c) list ≡ 'a -> 'b for some choice of 'a and 'b  ?
+
+Unifying 'c list -> 'c * 'c list  with 'a -> 'b
+
+Solve the eqn
+
+    'c list -> ('c * 'c) list ≡ 'a -> 'b  symbolically.
+
+*)
+
+val map : ('a -> 'b) -> ('a list -> 'b list)
+val f : 'c list -> ('c * 'c) list`
+
+val map f
+
+(*
+
+1. Is map f well typed       (type checking problem)
+
+2. What is the type of map f (inference problem)
+
+
+*)
+
+#+END_SRC
+
+** Type checking and unification.
+
+ base types are ~nat~ and ~bool~.
+
+ - S = { nat, bool, -> , list, *  } signature.
+
+   arity of nat = arity of bool = 0
+   arity of -> is 2.
+   arity of *  is 2.
+   arity of list = 1.
+
+   ~Term(S)~, this is just the mono-types in simply typed calculus.
+
+   #+BEGIN_EXAMPLE
+   nat -> boo     -> (nat, boo)
+
+   #+END_EXAMPLE
+
+   Suppose one wants to add the list type.
+
+- Terms(S,V) is polymorphic types.
+
+
+** Unification problem is.
+
+Given two terms t₁ and t₂ find an assignment that will make the two terms the same.
+
+t₁ = 'a -> 'b
+t₂ = 'c list -> ('c * 'c) list
+
+Then these terms can be unified with the assignment
+
+'a ≡ 'c list   'b ≡ ('c * 'c) list
+
+ t₁ = int
+ t₂ = bool
+
+** Telescopic assignment.
+
+ It is a sequence of variable assignment
+
+ σ = x₁ ≡ t₁ , ... , xₘ ≡ tₘ  with the following property.
+
+- t₁ does *not* have variable x₁
+- t₂ does *not* have variable x₁ and x₂
+- t₃ does *not* have variable x₁, x₂ and x₃.
+
+- tᵢ should not have variables x₁, x₂ ....xᵢ
+
+Var(tᵢ) ∩ {x₁,...,xᵢ} = ∅
+
+
+
+Think of the telescope σ as a substitution. Suppose t[σ] is the term obtained from t
+but substituting the assignments in σ in that order.
+
+I.e.
+
+t[σ] = t [x₁ := t₁] [x₂ := t₂] ......[xₘ := tₘ]
+t[σ] will not have x₁,....,xₘ in it
+
+
+** Unification problem stated in terms of telescopes.
+
+Given terms t₁ and t₂ compute (if possible) a telescope σ such that
+ t₁[σ] = t₂[σ] This telescopic substitution σ is called a *unifier*
+ for t₁ and t₂. The unification algorithm, will compute the *most
+ general* unifier of two terms.
+
+
+Capturing signatures in ML. a Type say symbol + a function that gives
+the arity : symbol -> int.
+
+
+#+BEGIN_EXAMPLE sml
+
+signature SIG = sig
+  (* the type of function symbols *)
+  (* the arity function *)
+
+  structure Ord : ORD_KEY (* with the additional constraint that the Ord.ord_key type
+                             is the same as the type for functional symbols
+                          *)
+
+end (* SIG *)
+signature VAR = sig
+  (* a type for variables *)
+  (* additional interface for the variable
+     type like pretty printing can go here *)
+
+  structure Ord : ORD_KEY (* with the additional condition
+                             that it matches with the type of variable
+                          *)
+
+end
+
+#+END_EXAMPLE
+
+
+The term functor
+
+#+BEGIN_EXAMPLE sml
+
+functor Term (S : SIG, V : VAR) = struct
+
+  datatype term = (* *)
+
+  (* helper functions *)
+
+end
+
+#+END_EXAMPLE
+
+
+#+BEGIN_EXAMPLE sml
+
+datatype ('f, 'v) term = (* definition of terms with function symbols f and v variables *)
+
+
+functor Unify (S : SIG, V : VAR) = struct
+
+  val unify : (S.symbol, V.var) term -> (S.symbol, V.var) term -> (S.symbol, V.var) telescope
+
+end
+
+#+END_EXAMPLE
+
+
+** Challenge of maintaining a telescope
+
+Consider a telescope implemented via the Map data structure in SML. The
+empty map is a telescope.
+
+The challenge to solve is when is it allowed to add an equation x ≡ t to
+the map.
+
+1. Really we want to avoid the recursion when doing the substitution.
+
+ 2. We want to know whether x "occurs" in t
+
+#+BEGIN_EXAMPLE
+
+Current key value map is t
+ x  -> f(y,z)
+ y  -> g(u,v)
+
+ u   -> h(x,x)
+
+ u ≡ h(x,x)
+
+
+#+END_EXAMPLE
+
+ 1. Find the set S₀ of variables that occurs in t
+ 2. For each such variable compute the assoicated term and compute the variables that occur in it.
+    Sₒ ∪ that set.
+ 3. Keep doing this till there is no more updates.
+
+Suppose σ is the current telescope. We can add x ≡ t into this telescope if and only if
+{x} ∩ Occurs(t[σ]) = \empty set.
+
+Occurs(t) is the set of variables that occurs in t.
