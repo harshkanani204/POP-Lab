@@ -1751,6 +1751,112 @@ You can also use the additional Rules
 fn x y => x y   is same as fn x => (fn y => x y)
 
 #+END_EXAMPLE
+* TODO Polymorphism and Hindley-Milner types                      :CLASSROOM:
+
+** Types
+
+*** Monotypes
+
+Mono-types or monomorphic types.
+
+#+BEGIN_EXAMPLE
+τ = nat
+  | α        type variable
+  | τ₁ -> τ₂
+#+END_EXAMPLE
+
+- Explanations ::
+  These types are called mono-morphic types.
+
+  "fixed but arbitrary"
+
+   Should distinguish the mono-type ~α~ from the
+   poly type ~∀ α . α~.
+
+
+#+BEGIN_EXAMPLE
+
+nat -> ∀ α. α -> ∀ β. β -> nat
+
+#+END_EXAMPLE
+
+
+*** Poly types.
+
+- Type schemes ::
+    #+BEGIN_EXAMPLE
+
+  σ = τ  (where τ is a mono type)
+    | ∀ α . σ₁  where (α is some type variable and σ₁ is some type scheme.
+  #+END_EXAMPLE
+
+  In general a type scheme ~σ = ∀α₁∀α₂ ...∀αₙ τ~.  In our type
+                  checking/inference algorithms we only allow for
+                  these types.
+
+  - Note : If σ₁ and σ₂ are type schemes, then it is not always
+    the case that ~σ₁ → σ₂~ is a type scheme.
+    If σ₁ = ∀α. α → α and σ₂ = ∀ β. β  ~σ₁ → σ₂~ is  (∀α. α → α) →  (∀ β. β)
+    Which is clearly not a type scheme.
+
+- Background ::
+  We cannot have arbitrary polytypes as that would make the type
+  checking problem undecidable.  For Hindley-Milner
+  types we assume all the type variables are quantified
+  in the /outer most layer/.
+
+| Example types                    | Hindley-Milner or not |
+|----------------------------------+-----------------------|
+| nat                              | yes                   |
+|----------------------------------+-----------------------|
+| α -> β                           | yes                   |
+|----------------------------------+-----------------------|
+| σ₁ = ∀ α . (α -> β)              | yes                   |
+|----------------------------------+-----------------------|
+| σ₂ = ∀ α . (α -> (∀ β . α -> β)) | no                    |
+
+
+- Without the Hindley-Milner restriction, type checking itself becomes undecidable.
+  System-F is the lambda calculus where the ∀ quatification is allowed at any layer.
+  For System-F type checking is undecidable. That is the reason we restrict to only
+  that fragment of System-F where all the quatification is in the outer most layer.
+
+** Type inference rules
+
+We have the same rules as that of simply types lambda calculus (i.e. VAR, APP and ABS) for
+all monotypes.
+
+*** Some additional rules.
+
+- Specialisation ::
+
+ Γ ⊢ e : σ
+ σ₁ ≤ σ
+========================
+Γ ⊢ e : σ₁
+
+
+- Generalisation ::
+
+Γ ⊢ e : σ
+=============== (α ∉ FTV(Γ))
+Γ ⊢ e : ∀ α . σ
+
+
+Γ = { x₁ : σ₁, ..... , xₙ : σₙ }
+
+FTV(Γ) = FV(σ₁) ∪ ... ∪ FV(σₙ)
+
+If α ∉ FTV(Γ) then the judgement Γ ⊢ e : σ  can be proved for all α because it
+is not part of the assumption Γ.
+
+- This is a wrong proof as it violates the side condition
+  α ∉ FTV(Γ)
+
+1. {x : α} ⊢ x : α
+2. {x : α} ⊢ x : ∀ α . α  (violation of side condition)
+3. {x : α} ⊢ x : ∀ β . β
+
 * Information.
 - Youtube play list ::
 https://www.youtube.com/playlist?list=PLhMQ0_-r9W5-LeXeXQtW8UcmtdJk98hfH
