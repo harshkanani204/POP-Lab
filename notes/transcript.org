@@ -3384,6 +3384,161 @@ A proof is a sequence of judgements that satisfy
 
 A proof of a judgement J is just a valid proof whose last judgement is J.
 
+* DONE Simply Typed lambda calculus                                 :LECTURE:
+- Video :: https://youtu.be/V5voaE9BiDk
+** Types of the language.
+
+- Basic types :: Fix a set of basic types B = { nat, bool}.
+
+- Types are defined inductively as follows.
+
+
+#+BEGIN_EXAMPLE
+τ = t  where t ∈ B
+  | τ₁ -> τ₂ where τ₁ and τ₂ are types.
+
+#+END_EXAMPLE
+
+** The calculus with nat and bool
+
+
+#+BEGIN_EXAMPLE
+<expr> = n                         for all n ∈ ℕ
+       | true                      boolean constant
+       | false                     boolean constant
+       | and                       builtin function
+       | or                        builtin function
+       | not                       builtin function
+       | plus                      builtin function
+       | <variable>                  Variable
+       | <expr>₁ <expr>₂             application
+       | λ <variable> : τ . <expr>   abstraction
+
+#+END_EXAMPLE
+
+** Typing rules.
+
+For every construct in the language, there should be a typing rule.
+
+*** Builtins
+
+#+BEGIN_EXAMPLE
+
+===============  for all n ∈ ℕ
+⊢ n : nat
+
+#+END_EXAMPLE
+
+
+#+BEGIN_EXAMPLE
+
+===============
+⊢ true : bool
+
+#+END_EXAMPLE
+
+... (the rest is exercise)
+
+#+BEGIN_EXAMPLE
+
+===========================
+⊢ plus : nat -> nat -> nat
+
+
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+
+====================
+⊢ and : bool -> bool -> bool
+
+#+END_EXAMPLE
+
+*** Variables
+
+To determine the type of x, a variable, we need to assume its type.
+
+#+BEGIN_EXAMPLE
+
+===================
+ {x : τ}  ⊢ x : τ
+
+#+END_EXAMPLE
+
+*** Application
+
+#+BEGIN_EXAMPLE
+
+Γ ⊢ e₁ : τ₁ → τ₂
+Γ ⊢ e₂ : τ₁
+====================
+Γ ⊢ e₁ e₂ : τ₂
+
+#+END_EXAMPLE
+
+1. Make sure that ~e₁ : τ₁ -> τ₂~
+
+2. Make sure that ~e₂ : τ₁~
+
+*** Abstraction
+
+#+BEGIN_EXAMPLE
+
+Γ ∪ { x : τ₁ } ⊢ e : τ₂
+========================================
+Γ              ⊢ (λ x : τ₁ . e)  : τ₁ → τ₂
+
+#+END_EXAMPLE
+
+λ x : τ₁ . e  is that function that takes x : τ₁ and gives out e : τ₂
+*** Structural rules.
+**** Weakening
+
+#+BEGIN_EXAMPLE
+
+Γ               ⊢ e : τ
+====================
+Γ ∪ { x : τ₁ }  ⊢ e : τ
+#+END_EXAMPLE
+
+**** Contraction
+
+#+BEGIN_EXAMPLE
+
+Γ ∪ { x : τ₁ } ∪  { x : τ₁ }  ⊢ e : τ
+===================================
+Γ ∪ { x : τ₁ }  ⊢ e : τ
+
+#+END_EXAMPLE
+
+** Some Proofs.
+
+*** plus 1 : nat -> nat
+
+| # | Judgement                  | Rule                  |
+|---+----------------------------+-----------------------|
+| 1 | ⊢ plus : nat -> nat -> nat | builtin for plus      |
+| 2 | ⊢ 1    : nat               | builtin for 1 ∈ ℕ     |
+| 3 | ⊢ plus 1 : nat -> nat      | application using 1,2 |
+
+
+*** (λ x . x ): nat -> nat
+
+| # | Judgement                      | Rule                  |
+|---+--------------------------------+-----------------------|
+| 1 | { x : nat } ⊢ x : nat          | Var                   |
+| 2 | ⊢ λ (x : nat) . x : nat -> nat | abstraction using 1   |
+
+
+*** (λ x . λ y . x ) : nat -> bool -> nat
+
+| # | Judgement                            | Rule                |
+|---+--------------------------------------+---------------------|
+| 1 | { x : nat } ⊢ x : nat                | Var                 |
+| 2 | { x : nat , y : bool } ⊢ x : nat     | Weakening using 1   |
+| 3 | { x : nat } ⊢ λ y . x : bool -> nat  | abstraction using 2 |
+| 4 | ⊢ λ x . λ y . x : nat -> bool -> nat | abstraction using 3 |
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
