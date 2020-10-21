@@ -3174,7 +3174,7 @@ free occurance of x in e.
 
 
 
-* DONE Typed lambda calculi
+* DONE Typed lambda calculi                                         :LECTURE:
 
 - Video :: https://youtu.be/O7-W3lVFAyI
 
