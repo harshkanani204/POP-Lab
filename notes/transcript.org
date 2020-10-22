@@ -4767,7 +4767,7 @@ val unify' : (option telescope * (term * term)) -> option telescope
 
 fun unify σ (App f slist)(App g tlist) = ...
   | unify σ (Var x) t                  = ... (Cannot just add x ≡ t to the telescope σ)
-         (* Figure out s such that x[σ] = s and then unify sigma (s,t) *)
+         (* Figure out s such that x[σ] = s and then unify σ (s,t) *)
   |
 
 
@@ -4785,6 +4785,18 @@ In sml one should use 'and' keyword for mutual recursion
 
 f( g(x,y) , z  )   ≡ f ( g(h(u),v) , h(y)     )
 
+f( s₁, s₂)   ≡ f ( t₁ , t₂)
+  means
+   unify s₁ ≡ t₁ and s₂ ≡ t₂
+
+g(x,y) ≡ g(h(u),v) and z ≡ h(y)
+
+
+σ₁ = x₁ ≡ t₁,.... xₘ ≡ tₘ  got after solve s₁ ≡ t₁.
+
+s₂[σ₁] ≡ t₂ [σ₁]  will give you y₁ = t₁' .... yₙ = tₙ'
+
+x₁ ≡ t₁ ..... xₘ ≡ tₘ , y₁ ≡ t₁' .... yₙ ≡ tₙ'
 
 x ≡ h(u), z ≡ h(y), y ≡ v,
 
