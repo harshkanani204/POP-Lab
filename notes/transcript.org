@@ -3253,7 +3253,7 @@ free occurance of x in e.
 
   1. x [ x := M ]  ≡ M
 
-  2. y [ x := M ]  ≡ y  (if y ≠ x
+  2. y [ x := M ]  ≡ y  (if y ≠ x)
 
 - Substitution in application :: (e₁ e₂) [ x := M ] ≡ (e₁ [x := M]) (e₂ [x := M])
 
@@ -3292,7 +3292,7 @@ I have used calculi (the plural) instead of the calculus.
   much more complicated say involving polymorphism etc.
 
 - Typing Judgements :: Let ~e~ be a term in the calculus and let ~τ~
-     be a type. Judgements kill be assertions of the kind ~e~ has type
+     be a type. Judgements are assertions of the kind ~e~ has type
      ~τ~ Judgements are written in the notation ~e : τ~
 
 - Typing rules :: These are a set of rules which tell you what judgements
