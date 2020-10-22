@@ -1,5 +1,7 @@
 # Unification algorithm.
 
+Deadline: 29 Oct, 2020
+
 The unification algorithm is a recursive algorithm on the structure of
 the terms. Recall that a *term* over the signature `S` with variable
 set `V`, denoted by `Term(S,V)` is defined inductively as follows.
@@ -19,7 +21,12 @@ The essence of unification of two terms `s` and `t` is the following.
 
 3. Unification of terms `f(s₁,....,sₙ)` and `g(t₁,...,tₘ)` is possible
    if and only if the function symbol `f` and `g` are the same (thus
-   `n = m`) and sᵢ unifies with tᵢ 's respectively.
+   `n = m`) and sᵢ unifies with tᵢ 's respectively. The term `f(s₁,...,sₙ)`
+   unifies with `f(t₁,...,tₙ)` under the telescope σ if and only if each
+   sᵢ unifies with tᵢ under σ.
+
+
+
 
 
 However, getting this in practice requires writing the mutually
