@@ -72,6 +72,19 @@ unification algorithm. As a first step we set up the machinary.
    You will need to assert here that the type `Ord.ord_key` and the
    symbol type should be the same.
 
+   As an example, someone who wants to use your unification algorithm
+   for say Peano arithmetic will define the following structure and
+   use it with the `Term` functor given below.
+
+   ```
+   structure Peano : SIG where
+      datatype symbol = Zero | Succ
+	  fun arity Zero = 0
+	    | arity Succ = 1
+   end
+   ```
+
+
 2. Define a similar signature `VAR` to capture variables. Essentially
    we only need a ORD structure on the variable type but it is good to
    have a separate signature here so that latter on we can add more
