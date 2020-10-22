@@ -1,5 +1,7 @@
 # Unification algorithm: Preparation
 
+Deadline: 25 Oct 2020, Sunday
+
 The unification algorithm is probably one of the most useful algorithm
 available for symbolic processing and is the bed rock of many
 algorithms like type inference, Logic resolution etc. In this
