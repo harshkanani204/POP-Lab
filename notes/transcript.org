@@ -4707,10 +4707,18 @@ Current key value map is t
  x  -> f(y,z)
  y  -> g(u,v)
 
+
  u   -> h(x,x)
 
  u ≡ h(x,x)
 
+Make sure u is not in h(x,x)
+means u is not in x and u is not in x
+i.e. u is not in f(y,z)
+u is not in y and u is not in z
+u is not in g(u,v) which is false
+
+x ≡ x
 
 #+END_EXAMPLE
 
@@ -4723,3 +4731,99 @@ Suppose σ is the current telescope. We can add x ≡ t into this telescope if a
 {x} ∩ Occurs(t[σ]) = \empty set.
 
 Occurs(t) is the set of variables that occurs in t.
+
+** Unification algorithm
+
+ Given two terms ~s~ and ~t~, we need to find a telescope σ (if
+ possible) such that ~s[σ] ≡ t[σ]~
+
+ Recall that the telescope σ is a sequence σ = x₁ ≡ t₁ , .... , xₙ ≡
+tₙ such that the term tᵢ does not have the variables x₁,...,xᵢ in it.
+
+~s[σ]~ the term obtained by (s[x₁ := t₁]) .....[xₙ := tₙ])~
+
+ The telescopica property ensures that s[σ] will not have x₁,....,xₙ in
+ it.
+
+*** Unification under a telescope.
+
+`unify`
+- Input :: terms ~s~ and ~t~ and a telescope ~σ~.
+- Output :: If possible an extension σ' of σ such that σ' unifies s[σ] and t[σ].
+
+*** Unification of a list of pairs of terms.
+
+`unifyList`
+- Input :: a list [ (s₁,t₁), ... (sₖ, tₖ) ] of terms  and a telescope σ.
+- Output  :: If possible an extension σ' of σ such that σ' unifies
+             sᵢ[σ] and tᵢ[σ] for all i ≤ k.
+
+Notice unification of a list of pairs is just a fold over the list.
+
+#+BEGIN_SRC sml
+
+val unify' : (option telescope * (term * term)) -> option telescope
+(* unify' is written interms of unify *)
+
+fun unify σ (App f slist)(App g tlist) = ...
+  | unify σ (Var x) t                  = ... (Cannot just add x ≡ t to the telescope σ)
+         (* Figure out s such that x[σ] = s and then unify sigma (s,t) *)
+  |
+
+
+fun unifyList σ ts = List.foldl unify' σ ts ....
+
+open List
+
+
+#+END_SRC
+
+In sml one should use 'and' keyword for mutual recursion
+
+
+#+BEGIN_EXAMPLE
+
+f( g(x,y) , z  )   ≡ f ( g(h(u),v) , h(y)     )
+
+
+x ≡ h(u), z ≡ h(y), y ≡ v,
+
+
+Solve  g(x,y) ≡ g (h(u),v )   and z ≡ h(y)
+
+  σ₁ x ≡ h(u) , y ≡ v         z ≡ h (v)
+
+fun unify
+    |    (App f slist) (App g tlist) = ......
+
+slist = s₁,....,sₙ
+tlist = t₁,....,tₙ
+#+END_EXAMPLE
+
+Even if your task was to unify f(t₁,...,tₙ) with f(s₁,....,sₙ)
+
+1. Solve f(t₁,...,tₙ) ≡ f(s₁,....,sₙ)
+
+   Will be forced to solve s₁≡ t₁, s₂≡ t₂ ....., sₙ ≡ tₙ simultaneously.
+
+2. Given a sequence of equations s₁ ≡ t₁, s₂≡ t₂ ....., sₙ ≡ tₙ how
+   will you solve it.
+
+   2.1. Solved s₁ ≡ t₁ to get a telescope σ₁ then
+   2.2. Solve  s₂ ≡ t₂ under the telescope σ₁ to get σ₂.
+          Compute an extension σ₂ of σ₁  such that s₂[σ₁] ≡ t₂[σ₁] under σ₂
+
+          Consider the term t and a telescope σ = { x₁ ≡ t₁,...., xₙ ≡ tₙ }.
+   Vars(t[σ]) ∩ {x₁,....,xₙ} = ∅
+
+
+#+BEGIN_SRC sml
+fun even x = if x = 0 then true
+             else not (odd x)
+and odd x = if x = 1 then true
+            else even (x - 1)
+#+END_SRC
+
+#+RESULTS:
+: val even = fn : int -> bool
+: val odd = fn : int -> bool
