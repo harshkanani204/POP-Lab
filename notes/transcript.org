@@ -5060,3 +5060,138 @@ and odd x = if x = 1 then true
 #+RESULTS:
 : val even = fn : int -> bool
 : val odd = fn : int -> bool
+* TODO Unification algorithm clarification.
+
+#+BEGIN_EXAMPLE
+
+x₁ ≡ t₁, ......., xₙ ≡ tₙ
+
+tᵢ does not have variables {x₁,...,xᵢ}
+
+#+END_EXAMPLE
+
+unify (App f ts) (App g xs) tel = check if f and g are the same if not fail
+                                  else unifyList ts xs tel
+unify (Var x) t tel = Find the term that x is mapped to let us say t'
+                      unify t' and t tel
+                      otherwise add x ≡ t to tel
+
+
+#+BEGIN_SRC sml
+
+signature SIG = sig
+  type something
+  val mysomething : something
+end
+
+functor Term ( S : SIG ) = struct
+   structure TS = S
+end
+
+structure A : SIG = struct
+  type something = int
+  val mysomething = 42
+end
+
+
+functor Unify ( S : SIG , V : VAR) = struct
+
+  structure telescopes = Telescope(S,V)
+  structure terms = telescope.term
+
+x₁ ≡ y₁ y₁ ≡ z₁ .....
+
+unify y₁ x₁
+
+Equivlance relation + genuine telescope
+
+structure B = Term (A)
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+signature SIG =
+  sig
+    type something
+    val mysomething : something
+  end
+functor Term(S: sig
+                  type something
+                  val mysomething : something
+                end) :
+            sig
+              structure TS : <sig>
+            end
+structure A : SIG
+structure B :
+  sig
+    structure TS : <sig>
+  end
+#+end_example
+
+#+BEGIN_EXAMPLE
+
+x₁ ≡ t₁  x₂ ≡ t₂ | x₃ ≡ t₃     t₃ = f(x₂)
+
+x₁ < x₃ < x₂
+
+x₁ ≡ t₁ ..... xₙ ≡ tₙ
+
+#+END_EXAMPLE
+
+
+x₁ ≡ y₁
+
+Unify y₁ x₁
+
+Telescope functor
+
+add : variable -> term -> tele -> tele option
+
+checkRecursion : variable -> term -> tele -> bool
+
+
+Unify return an tele option ?
+
+Handle failure of unification.
+
+System call open If it returls filePtr option
+that is much better than returning nullPtr
+
+
+
+
+Exception way of doing things.
+
+Raise an exception whenever you fail.
+
+Think of the exception style code as the low-level
+code.
+
+unifyExp : term -> term -> telescope
+
+unify : term -> term -> telescope option
+ calls unifyExp and catches the exception and
+ returns NONE
+
+Term is either a variable
+ or f (t₁,...,tₙ) where n is the arity of f.
+
+You will have one constructor for variable
+You will have a constructor for
+App of (symbol * term list)
+
+
+You cannot ensure that the argument list for a
+symbol is of length the arity of the symbol.
+
+
+
+Smart constructors.
+
+Datatype with some constraints.
+
+App constructor takes a symbol and a list of terms and produces a term.
+
+fun app (s : symbol) (l : term list) : term  = if List.length l = ...) App ....
