@@ -3539,6 +3539,227 @@ To determine the type of x, a variable, we need to assume its type.
 | 3 | { x : nat } ⊢ λ y . x : bool -> nat  | abstraction using 2 |
 | 4 | ⊢ λ x . λ y . x : nat -> bool -> nat | abstraction using 3 |
 
+* DONE Hindley-Milner type system                                   :LECTURE:
+
+- Video :: https://youtu.be/Uc2m_ZxSpG8
+
+Supports polymorphic types and is the basis for the type system
+of languages like Standard ML or Haskell.
+
+
+** Types
+
+#+BEGIN_SRC sml
+val map : ('a -> 'b) -> 'a list -> 'b list
+#+END_SRC
+
+~map : ∀ α ∀ β . (α -> β) -> α list -> β list~
+
+It is assumed that there is an /outer layer/ of forall quantification.
+
+- Base types :: A set like B = {nat, bool }
+- Type variables :: A set V = {α, α₁,...αₙ,.., β, β₁...}
+
+*** Monomorphic types (monotype)
+#+BEGIN_EXAMPLE
+τ := t        t ∈ B  (base types)
+  |  τ₁ → τ₂
+  |  α        α ∈ V  (type variables)
+
+#+END_EXAMPLE
+
+*** Type schemes (polymorphism).
+
+In essence a type scheme σ is a ∀-quantified monotype.
+
+σ = ∀ α₁...∀ αₙ τ.
+
+#+BEGIN_EXAMPLE
+σ = τ
+  | ∀ α . σ₁
+
+#+END_EXAMPLE
+
+
+** Typing rules.
+
+All these rules carry over to the Hindley-Milner setting where types
+τ are monotypes.
+
+*** Builtins
+
+#+BEGIN_EXAMPLE
+
+===============  for all n ∈ ℕ
+⊢ n : nat
+
+#+END_EXAMPLE
+
+
+#+BEGIN_EXAMPLE
+
+===============
+⊢ true : bool
+
+#+END_EXAMPLE
+
+... (the rest is exercise)
+
+#+BEGIN_EXAMPLE
+
+===========================
+⊢ plus : nat -> nat -> nat
+
+
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+
+====================
+⊢ and : bool -> bool -> bool
+
+#+END_EXAMPLE
+
+*** Variables
+
+To determine the type of x, a variable, we need to assume its type.
+
+#+BEGIN_EXAMPLE
+
+===================
+ {x : τ}  ⊢ x : τ
+
+#+END_EXAMPLE
+
+*** Application
+
+#+BEGIN_EXAMPLE
+
+Γ ⊢ e₁ : τ₁ → τ₂
+Γ ⊢ e₂ : τ₁
+====================
+Γ ⊢ e₁ e₂ : τ₂
+
+#+END_EXAMPLE
+
+1. Make sure that ~e₁ : τ₁ -> τ₂~
+
+2. Make sure that ~e₂ : τ₁~
+
+*** Abstraction
+
+#+BEGIN_EXAMPLE
+
+Γ ∪ { x : τ₁ } ⊢ e : τ₂
+========================================
+Γ              ⊢ (λ x : τ₁ . e)  : τ₁ → τ₂
+
+#+END_EXAMPLE
+
+λ x : τ₁ . e  is that function that takes x : τ₁ and gives out e : τ₂
+*** Structural rules.
+**** Weakening
+
+#+BEGIN_EXAMPLE
+
+Γ               ⊢ e : τ
+====================
+Γ ∪ { x : τ₁ }  ⊢ e : τ
+#+END_EXAMPLE
+
+**** Contraction
+
+#+BEGIN_EXAMPLE
+
+Γ ∪ { x : τ₁ } ∪  { x : τ₁ }  ⊢ e : τ
+===================================
+Γ ∪ { x : τ₁ }  ⊢ e : τ
+
+#+END_EXAMPLE
+
+
+
+** Typing rules for type schemes
+
+*** Generalisation (GEN)
+
+#+BEGIN_EXAMPLE
+
+Γ ⊢ e : σ
+
+α should not be free in Γ
+==================
+Γ ⊢ e : ∀ α . σ
+
+#+END_EXAMPLE
+
+Γ = {x₁ : σ₁, ...., xₙ : σₙ }
+
+Then α should not be free in any of the type scheme σᵢ
+
+**** Intuition
+
+|   # | Judgement                               | Rule                |
+|-----+-----------------------------------------+---------------------|
+|   1 | { x : α } ⊢ x : α                       | Var                 |
+|   2 | { x : α , y : β } ⊢ x : α               | Weakening using 1   |
+|   3 | { x : α } ⊢ λ y . x : β -> α            | abstraction using 2 |
+| 3.5 | { x : α } ⊢ λ y . x : ∀ β .  β -> α     | Gen using 3         |
+
+
+
+|   4 | ⊢ λ x . λ y . x : α -> β -> α           | abstraction using 3 |
+|   5 | ⊢ λ x . λ y . x : ∀ α ∀ β . α -> β -> α | Gen rule twice      |
+
+
+1. e : ∀ α ∀ β α -> β -> α should really be seen as a family of judgements
+   e : α -> β -> α for whatever α and β you want.
+
+2. e₁ : ∀ α ∀ β . α -> β -> α  vs  e₂ : ∀ β . α -> β -> α
+
+In the lattter case i.e for e₂ : ∀ β . α -> β -> α, while β can be freely
+set to any type α cannot be.
+
+
+ ~map : ∀ α ∀ β ∀ γ (α -> β -> γ) -> α list -> (β -> γ) list~
+*** Specialisation (SPEC)
+
+
+#+BEGIN_EXAMPLE
+
+Γ ⊢ e : σ
+
+σ' is a specialisation of σ  (which we denote by σ' ≤ σ)
+==================
+Γ ⊢ e : σ'
+
+#+END_EXAMPLE
+
+**** When is σ' ≤ σ
+
+Consider ~map : ∀ α ∀ β . (α → β) → α list → β list~
+
+σ = ∀ α₁...∀ αₙ τ
+
+***** When σ' is a mono-type
+
+map : (nat -> bool) -> nat list -> bool list
+
+
+τ [α₁ := τ₁] .... [αₙ := τₙ] ≤ σ
+
+
+***** The general cases.
+
+~map : ∀ γ₁ γ₂ γ₃ . (γ₁ → (γ₂ → γ₃)) → γ₁ list → (γ₂ → γ₃) list~
+
+
+∀ β₁ ... βₘ . τ [α₁ := τ₁] .... [αₙ := τₙ] ≤ σ
+
+Provided βᵢ's are not free in σ
+
+
+map : ∀ γ₁ ... ∀ γ₃ . (γ₁ → (γ₂ → γ₃)) → γ₁ list → (γ₂ → γ₃) list~
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
