@@ -1800,7 +1800,8 @@ nat -> ∀ α. α -> ∀ β. β -> nat
     Which is clearly not a type scheme.
 
 - Background ::
-  We cannot have arbitrary polytypes as that would make the type
+
+-  We cannot have arbitrary polytypes as that would make the type
   checking problem undecidable.  For Hindley-Milner
   types we assume all the type variables are quantified
   in the /outer most layer/.
@@ -1821,6 +1822,14 @@ nat -> ∀ α. α -> ∀ β. β -> nat
   For System-F type checking is undecidable. That is the reason we restrict to only
   that fragment of System-F where all the quatification is in the outer most layer.
 
+#+BEGIN_SRC sml
+
+val map : ('a -> 'b) -> 'a list -> 'b list
+
+#+END_SRC
+
+~map : ∀ α ∀ β . (α → β) → α list → β list~
+
 ** Type inference rules
 
 We have the same rules as that of simply types lambda calculus (i.e. VAR, APP and ABS) for
@@ -1830,10 +1839,55 @@ all monotypes.
 
 - Specialisation ::
 
- Γ ⊢ e : σ
- σ₁ ≤ σ
-========================
-Γ ⊢ e : σ₁
+  Γ ⊢ e : σ
+  σ₁ ≤ σ
+  ========================
+  Γ ⊢ e : σ₁
+
+
+
+
+~map : ∀ α ∀ β . (α → β) → α list → β list~
+
+Let τ₁ and τ₂ be any monotype then clearly I can have the judgement
+map : (τ₁ → τ₂) → τ₁ list → τ₂ list
+
+map : ∀ γ₁ ∀ γ₂ ∀ γ₃ . (γ₁ -> (γ₃ * γ₂)) -> γ₁ list -> (γ₃ * γ₂) list
+
+By substituting α with γ₁  and β with γ₃ * γ₂
+
+map : (γ₁ -> (γ₃ * γ₂)) -> γ₁ list -> (γ₃ * γ₂) list
+
+
+.
+.
+.
+⊢ map : ∀ α ∀ β . (α → β) → α list → β list~
+
+
+.
+.
+.
+⊢ map : (γ₁ -> (γ₃ * γ₂)) -> γ₁ list -> (γ₃ * γ₂) list
+⊢ map : ∀ γ₁ ∀ γ₂ ∀ γ₃ . (γ₁ -> (γ₃ * γ₂)) -> γ₁ list -> (γ₃ * γ₂) list
+
+
+Let σ = ∀ α₁ ... ∀ αₙ . τ
+
+1. τ [α₁ := τ₁]...[αₙ := τₙ] = τ' ≤ σ
+
+2. ∀ β₁ ... ∀ βₘ . τ [α₁ := τ₁]...[αₙ := τₙ] = σ' ≤ σ
+
+    Provided βᵢ's are not free variables of σ
+
+
+~map : ∀ α ∀ β . (α → β) → α list → β list~
+
+(map (fn x => [x]))
+
+In the above context map should have type
+
+∀ α . (α -> α list ) -> α list -> α list list
 
 
 - Generalisation ::
@@ -1856,6 +1910,19 @@ is not part of the assumption Γ.
 1. {x : α} ⊢ x : α
 2. {x : α} ⊢ x : ∀ α . α  (violation of side condition)
 3. {x : α} ⊢ x : ∀ β . β
+
+
+- THis proof is correct
+
+1. {x : α} ⊢ x : α     (VAR rule)
+
+2. ⊢ λ x . x : α → α   (ABS rule with 1)
+
+         (No matter what is α we have a proof of the Judgement λ x . x : α → α)
+
+3. ⊢ λ x . x : ∀ α . α → α (GEN on 2)
+
+
 
 * Information.
 - Youtube play list ::
