@@ -3827,6 +3827,31 @@ Provided βᵢ's are not free in σ
 
 
 map : ∀ γ₁ ... ∀ γ₃ . (γ₁ → (γ₂ → γ₃)) → γ₁ list → (γ₂ → γ₃) list~
+* TODO Type inference                                               :LECTURE:
+
+
+Fix an enriched λ-calculus (this serves as our programming language).
+
+#+BEGIN_EXAMPLE
+<expr> = n                         for all n ∈ ℕ
+       | true                      boolean constant
+       | false                     boolean constant
+       | and                       builtin function
+       | or                        builtin function
+       | not                       builtin function
+       | plus                      builtin function
+       | <variable>                  Variable
+       | <expr>₁ <expr>₂             application
+       | λ <variable> . <expr>   abstraction
+
+#+END_EXAMPLE
+
+- Input :: An expression ~e~ in the above calculus.
+- Output :: A type scheme ~σ~ such that ~ ⊢ e : σ~ is a valid
+            judgement using the type inference rules that we saw.
+            Or if not possible flag an error.
+
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
@@ -5262,3 +5287,291 @@ Datatype with some constraints.
 App constructor takes a symbol and a list of terms and produces a term.
 
 fun app (s : symbol) (l : term list) : term  = if List.length l = ...) App ....
+* TODO Type inference algorithm.
+
+
+B = {nat , bool}
+
+** Mono-types
+
+#+BEGIN_EXAMPLE
+τ = t            t ∈ B
+  | τ₁ → τ₂      τ₁, τ₂ are monotypes
+  | α            α is a type variable
+#+END_EXAMPLE
+
+** Type schemes
+
+σ = ∀ α₁....∀αₙ . τ
+
+#+BEGIN_EXAMPLE
+σ = τ
+  | ∀ α . σ'
+#+END_EXAMPLE
+
+
+** Typing rules
+
+
+1. For monotypes it is the same as that of simply typed lambda calculus.
+
+*** Bultins
+
+#+BEGIN_EXAMPLE
+
+================ for all n ∈ ℕ
+ ⊢ n : nat
+
+#+END_EXAMPLE
+
+
+*** Var
+
+=============
+x : τ ⊢ x : τ
+
+
+*** App
+
+#+BEGIN_EXAMPLE
+
+
+Γ ⊢ e₁ : τ₁ -> τ₂
+Γ ⊢ e₂ : τ₁
+
+===================
+
+Γ ⊢ e₁ e₂ : τ₂
+
+
+#+END_EXAMPLE
+
+
+*** Abs
+
+#+BEGIN_EXAMPLE
+
+Γ , x : τ₁ ⊢ e : τ₂
+====================
+Γ         ⊢  λ x . e : τ₁ -> τ₂
+
+#+END_EXAMPLE
+
+
+** For type schemes
+
+*** Specialisation
+
+Γ ⊢ e : σ
+σ'  ≤ σ
+==========
+Γ ⊢ e : σ'
+
+*** Generalisation
+
+Γ ⊢ e : σ
+α ∉ FV (Γ)
+================
+Γ ⊢ e : ∀ α . σ
+
+
+Notice that σ  ≤  ∀ α . σ
+
+
+** Type inference problem
+
+Given a set of typing assumption Γ and an expression e in the calculus
+ find a type scheme σ such that Γ ⊢ e : σ.
+
+1. We want σ to be the most general possible type. Suppose σ' is
+   another type scheme such that Γ ⊢ e : σ' then we should have σ' ≤ σ
+
+2. If e is ill-typed under Γ, i.e there is no type σ such that Γ ⊢ e :
+   σ then the algorithm should flag a typing error
+
+#+BEGIN_EXAMPLE
+
+e = n     n ∈ ℕ
+  | true
+  | false
+  | plus
+  | and
+  | x    x is a variable
+  | e₁ e₂
+  | λ x . e
+
+#+END_EXAMPLE
+
+** Algorithm W
+
+- Main idea :: e is recursively defined so do a recursion on the
+               structure of e.
+
+- Second idea :: The algorithm will compute a monotype τ such that
+                 the closure σ of τ under Γ is the most general possible type scheme such
+                 that Γ ⊢ e : σ
+
+- Third idea :: The algorithm should also keep track of all substitutions that it performed
+                during the APP recursion step.
+
+** Algorithm W
+
+- Input  :: Γ a type assumption, A substitution Sᵢₙ and an expression e
+- Output :: a monotype τ and a substitution Sₒᵤₜ such that Sᵢₙ (Γ) ⊢ e : τ'
+  such that Closure (τ', Sᵢₙ(Γ)) is the most general such type and
+  τ' = Sₒᵤₜ(τ)
+
+
+
+Closure(τ, Γ) = ∀ α₁....∀ αₙ . τ  where {α₁,....,αₙ} = FV(τ) ∖ FV(Γ)
+
+Γ = x : α
+
+e = λ y . x  : β -> α = τ
+
+THen Closure(τ,Γ) = ∀ β . β -> α
+
+
+#+BEGIN_EXAMPLE
+.
+.
+.
+Γ ⊢ e : τ
+Γ ⊢ e : ∀ α₁ ....∀ αₙ . τ  (GEN n-times)
+
+
+
+#+END_EXAMPLE
+
+
+
+*** For builtins
+
+ e = n for some n ∈ ℕ
+
+ Then we know that the most general type scheme
+ σ such that Γ ⊢ e : σ is just ~nat~.
+
+*** Variable
+
+Let us say e is some variable x
+
+Let σ be the type assigned to x in the type assumption Γ
+
+Γ = Γ' ∪ {x : σ}
+
+
+Let σ = ∀ α₁,...∀ αₙ . τ
+
+Compute fresh type variables β₁,...,βₙ.  return the type e : τ' = τ
+[α₁ := β₁] .... [αₙ := βₙ] i.e replace all type variables αᵢ with the
+corresponding fresh variable βᵢ
+
+e is x
+the returned type is Sᵢₙ(τ')
+
+Closure of τ' is  ∀ β₁...̱∀ βₙ . τ'  = σ
+
+
+
+
+
+
+
+WHat ever output we give say τ, we need the fact that
+
+Γ ⊢ e : τ
+
+*** App case
+
+e = e₁ e₂
+
+1. Recursively compute the type τᵢ associated with eᵢ under the type assumption Γ
+   If any of this fails then failure. Otherwise
+
+   W(Γ, Sᵢₙ, e₁) = (S₁, τ₁) and
+   W(Γ, S₁, e₂)  = (S₂, τ₂)
+
+   However I should have the property that  e₁ : α -> β and e₂ : α
+
+   Get hold of fresh type variables α and β.
+
+   Unify (α -> β ≡ τ₁ , α ≡ τ₂)  Will get a substitution S.
+
+   Return (S, S(β))
+
+
+
+*** Abs case
+
+e = λ x . e' . If at all e is well typed then it should be something like
+e : τ₁ → τ₂
+
+
+Γ' = Γ ∪ {x : α} for some fresh type variable α.
+
+W(Γ', e', Sᵢₙ) = (Sₒᵤₜ, τ)
+
+Return of W(Γ, e, Sᵢₙ) = ( Sₒᵤₜ, τ' -> τ)  where τ' is Sₒᵤₜ (α)
+
+#+BEGIN_EXAMPLE
+
+e = λ x . plus x 1
+
+#+END_EXAMPLE
+
+Γ = ∅
+
+{x : α}  Compute type of plus x 1 Abs setp
+
+{x : α} : Compute type of (plus x)  Compute the type of (1)  App
+
+{x : α} : Compute type of plus, Compute type of x (App rule)
+
+
+plus : nat -> nat -> nat
+
+x : alpha
+
+Unify (β -> γ) ≡ nat -> (nat -> nat), β ≡ α
+
+α ≡ nat
+
+
+
+#+BEGIN_EXAMPLE
+
+Γ , x : τ₁ ⊢ e : τ₂
+====================
+Γ         ⊢  λ x . e : τ₁ -> τ₂
+
+#+END_EXAMPLE
+
+
+
+
+
+
+
+#+BEGIN_EXAMPLE
+
+
+Γ ⊢ e₁ : τ₁ -> τ₂
+Γ ⊢ e₂ : τ₁
+
+===================
+
+Γ ⊢ e₁ e₂ : τ₂
+
+
+#+END_EXAMPLE
+
+
+#+BEGIN_SRC sml
+val e = map (fn x => x + 1) : int list -> int list
+#+END_SRC
+
+map : ('a -> 'b) -> 'a list -> 'b list
+
+'a = int
+ 'b = int
