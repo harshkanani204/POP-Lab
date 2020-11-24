@@ -9,7 +9,6 @@ and the constants, `true`, `false`, `and`.
 
 2. Design a type inference algorithm for this language.
 
-
 You will need to use the unification algorithm that you designed in
 the previous assignment for completing the algorithm. We will do the
 algorithm in the class.
