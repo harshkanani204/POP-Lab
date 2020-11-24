@@ -1602,7 +1602,7 @@ There should be a rule for all the three term construction rules.
 
   - Pre-condition :: With the assumption ~x : τ₁~ suppose I derive ~e : τ₂~ then
   - Conclusion  :: (λ x : τ₁ . e) : τ₁ -> τ₂
-* TODO Typed Lambda calculus Contd                                :CLASSROOM:
+* DONE Typed Lambda calculus Contd                                :CLASSROOM:
 
 ** Typing rule review
 
@@ -1751,7 +1751,7 @@ You can also use the additional Rules
 fn x y => x y   is same as fn x => (fn y => x y)
 
 #+END_EXAMPLE
-* TODO Polymorphism and Hindley-Milner types                      :CLASSROOM:
+* DONE Polymorphism and Hindley-Milner types                      :CLASSROOM:
 
 ** Types
 
@@ -1922,6 +1922,934 @@ is not part of the assumption Γ.
 
 3. ⊢ λ x . x : ∀ α . α → α (GEN on 2)
 
+
+* DONE Type inference algorithm.                                  :CLASSROOM:
+
+
+B = {nat , bool}
+
+** Mono-types
+
+#+BEGIN_EXAMPLE
+τ = t            t ∈ B
+  | τ₁ → τ₂      τ₁, τ₂ are monotypes
+  | α            α is a type variable
+#+END_EXAMPLE
+
+** Type schemes
+
+σ = ∀ α₁....∀αₙ . τ
+
+#+BEGIN_EXAMPLE
+σ = τ
+  | ∀ α . σ'
+#+END_EXAMPLE
+
+
+** Typing rules
+
+
+1. For monotypes it is the same as that of simply typed lambda calculus.
+
+*** Bultins
+
+#+BEGIN_EXAMPLE
+
+================ for all n ∈ ℕ
+ ⊢ n : nat
+
+#+END_EXAMPLE
+
+
+*** Var
+
+=============
+x : τ ⊢ x : τ
+
+
+*** App
+
+#+BEGIN_EXAMPLE
+
+
+Γ ⊢ e₁ : τ₁ -> τ₂
+Γ ⊢ e₂ : τ₁
+
+===================
+
+Γ ⊢ e₁ e₂ : τ₂
+
+
+#+END_EXAMPLE
+
+
+*** Abs
+
+#+BEGIN_EXAMPLE
+
+Γ , x : τ₁ ⊢ e : τ₂
+====================
+Γ         ⊢  λ x . e : τ₁ -> τ₂
+
+#+END_EXAMPLE
+
+
+** For type schemes
+
+*** Specialisation
+
+Γ ⊢ e : σ
+σ'  ≤ σ
+==========
+Γ ⊢ e : σ'
+
+*** Generalisation
+
+Γ ⊢ e : σ
+α ∉ FV (Γ)
+================
+Γ ⊢ e : ∀ α . σ
+
+
+Notice that σ  ≤  ∀ α . σ
+
+
+** Type inference problem
+
+Given a set of typing assumption Γ and an expression e in the calculus
+ find a type scheme σ such that Γ ⊢ e : σ.
+
+1. We want σ to be the most general possible type. Suppose σ' is
+   another type scheme such that Γ ⊢ e : σ' then we should have σ' ≤ σ
+
+2. If e is ill-typed under Γ, i.e there is no type σ such that Γ ⊢ e :
+   σ then the algorithm should flag a typing error
+
+#+BEGIN_EXAMPLE
+
+e = n     n ∈ ℕ
+  | true
+  | false
+  | plus
+  | and
+  | x    x is a variable
+  | e₁ e₂
+  | λ x . e
+
+#+END_EXAMPLE
+
+** Algorithm W
+
+- Main idea :: e is recursively defined so do a recursion on the
+               structure of e.
+
+- Second idea :: The algorithm will compute a monotype τ such that
+                 the closure σ of τ under Γ is the most general possible type scheme such
+                 that Γ ⊢ e : σ
+
+- Third idea :: The algorithm should also keep track of all substitutions that it performed
+                during the APP recursion step.
+
+** Algorithm W
+
+- Input  :: Γ a type assumption, A substitution Sᵢₙ and an expression e
+- Output :: a monotype τ and a substitution Sₒᵤₜ such that Sᵢₙ (Γ) ⊢ e : τ'
+  such that Closure (τ', Sᵢₙ(Γ)) is the most general such type and
+  τ' = Sₒᵤₜ(τ)
+
+
+
+Closure(τ, Γ) = ∀ α₁....∀ αₙ . τ  where {α₁,....,αₙ} = FV(τ) ∖ FV(Γ)
+
+Γ = x : α
+
+e = λ y . x  : β -> α = τ
+
+THen Closure(τ,Γ) = ∀ β . β -> α
+
+
+#+BEGIN_EXAMPLE
+.
+.
+.
+Γ ⊢ e : τ
+Γ ⊢ e : ∀ α₁ ....∀ αₙ . τ  (GEN n-times)
+
+
+
+#+END_EXAMPLE
+
+
+
+*** For builtins
+
+ e = n for some n ∈ ℕ
+
+ Then we know that the most general type scheme
+ σ such that Γ ⊢ e : σ is just ~nat~.
+
+*** Variable
+
+Let us say e is some variable x
+
+Let σ be the type assigned to x in the type assumption Γ
+
+Γ = Γ' ∪ {x : σ}
+
+
+Let σ = ∀ α₁,...∀ αₙ . τ
+
+Compute fresh type variables β₁,...,βₙ.  return the type e : τ' = τ
+[α₁ := β₁] .... [αₙ := βₙ] i.e replace all type variables αᵢ with the
+corresponding fresh variable βᵢ
+
+e is x
+the returned type is Sᵢₙ(τ')
+
+Closure of τ' is  ∀ β₁...̱∀ βₙ . τ'  = σ
+
+
+
+
+
+
+
+WHat ever output we give say τ, we need the fact that
+
+Γ ⊢ e : τ
+
+*** App case
+
+e = e₁ e₂
+
+1. Recursively compute the type τᵢ associated with eᵢ under the type assumption Γ
+   If any of this fails then failure. Otherwise
+
+   W(Γ, Sᵢₙ, e₁) = (S₁, τ₁) and
+   W(Γ, S₁, e₂)  = (S₂, τ₂)
+
+   However I should have the property that  e₁ : α -> β and e₂ : α
+
+   Get hold of fresh type variables α and β.
+
+   Unify (α -> β ≡ τ₁ , α ≡ τ₂)  Will get a substitution S.
+
+   Return (S, S(β))
+
+
+
+*** Abs case
+
+e = λ x . e' . If at all e is well typed then it should be something like
+e : τ₁ → τ₂
+
+
+Γ' = Γ ∪ {x : α} for some fresh type variable α.
+
+W(Γ', e', Sᵢₙ) = (Sₒᵤₜ, τ)
+
+Return of W(Γ, e, Sᵢₙ) = ( Sₒᵤₜ, τ' -> τ)  where τ' is Sₒᵤₜ (α)
+
+#+BEGIN_EXAMPLE
+
+e = λ x . plus x 1
+
+#+END_EXAMPLE
+
+Γ = ∅
+
+{x : α}  Compute type of plus x 1 Abs setp
+
+{x : α} : Compute type of (plus x)  Compute the type of (1)  App
+
+{x : α} : Compute type of plus, Compute type of x (App rule)
+
+
+plus : nat -> nat -> nat
+
+x : alpha
+
+Unify (β -> γ) ≡ nat -> (nat -> nat), β ≡ α
+
+α ≡ nat
+
+
+
+#+BEGIN_EXAMPLE
+
+Γ , x : τ₁ ⊢ e : τ₂
+====================
+Γ         ⊢  λ x . e : τ₁ -> τ₂
+
+#+END_EXAMPLE
+
+
+
+
+
+
+
+#+BEGIN_EXAMPLE
+
+
+Γ ⊢ e₁ : τ₁ -> τ₂
+Γ ⊢ e₂ : τ₁
+
+===================
+
+Γ ⊢ e₁ e₂ : τ₂
+
+
+#+END_EXAMPLE
+
+
+#+BEGIN_SRC sml
+val e = map (fn x => x + 1) : int list -> int list
+#+END_SRC
+
+map : ('a -> 'b) -> 'a list -> 'b list
+
+'a = int
+ 'b = int
+
+* TODO Verification, Logic, Constructive Mathmatics
+
+1. Programming
+
+2. Correct programs. Want to ensure that programs are "correct"
+
+3. Specification. We say what the program needs to do rather than telling how to do.
+
+4. Correctness of programs means that programs satisfy the specification that it give for this.
+
+We want to sort a list of numbers. bubble sort, quick sort, merge sort (how to sort question)
+
+Give me a specification for a sorting algorithm.
+
+1. The sorted list should be of the same length as the input.
+
+2. ∀ x ∈ l, x ∈ sort l
+
+3. The output of the algorithm should be monotonically increasing.
+
+The identity function on list is satisfies the above spec but is not clearly a sorting algorithm.
+Reverse function.
+
+
+Formal specification
+
+1. There should be a language to express the properties
+2. The proofs should be machine checked.
+
+
+The type system is a formal system.
+
+Consider a language that does not enforce correctness of types at compile time.
+A lot of bugs escapes to the runtime where it is much more costly.
+
+1. Write test cases to catch bugs. TDD test-driven development.
+
+
+You want a mechanism for proving program correct.
+
+If you have a strong type system then clearly bugs like "hello" + 42 will be caught.
+
+
+You can think of the typing rules as proofs in a logic which is automatically checked.
+
+** Typing rules.
+
+*** Builtins
+
+#+BEGIN_EXAMPLE
+
+===============  for all n ∈ ℕ
+⊢ n : nat
+
+#+END_EXAMPLE
+
+
+#+BEGIN_EXAMPLE
+
+===============
+⊢ true : bool
+
+#+END_EXAMPLE
+
+... (the rest is exercise)
+
+#+BEGIN_EXAMPLE
+
+===========================
+⊢ plus : nat -> nat -> nat
+
+
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+
+====================
+⊢ and : bool -> bool -> bool
+
+#+END_EXAMPLE
+
+*** Variables
+
+To determine the type of x, a variable, we need to assume its type.
+
+#+BEGIN_EXAMPLE
+
+===================
+ {x : τ}  ⊢ x : τ
+
+
+====================   A rule in logic
+  A ⊢ A
+
+#+END_EXAMPLE
+
+*** Application
+
+#+BEGIN_EXAMPLE
+
+Γ ⊢ e₁ : τ₁ → τ₂
+Γ ⊢ e₂ : τ₁
+====================
+Γ ⊢ e₁ e₂ : τ₂
+
+
+Γ ⊢ A → B
+Γ ⊢ A
+===================
+Γ ⊢ B
+
+
+(modus-ponens)
+#+END_EXAMPLE
+
+1. Make sure that ~e₁ : τ₁ -> τ₂~
+
+2. Make sure that ~e₂ : τ₁~
+
+*** Abstraction
+
+#+BEGIN_EXAMPLE
+
+Γ ∪ { x : τ₁ } ⊢ e : τ₂
+========================================
+Γ              ⊢ (λ x : τ₁ . e)  : τ₁ → τ₂
+
+#+END_EXAMPLE
+
+
+Γ ∪ {A } ⊢ B
+================
+Γ ⊢ A → B
+
+
+
+Suppose I want to prove assuming Γ that  A => B. It is sufficient to prove B assuming A (and Γ)
+
+
+λ x : τ₁ . e  is that function that takes x : τ₁ and gives out e : τ₂
+
+
+
+A ∨ B
+
+
+#+BEGIN_EXAMPLE
+
+Γ ⊢ A
+========
+
+Γ ⊢ A ∨ B
+
+
+Γ ⊢ B
+========
+
+Γ ⊢ A ∨ B
+
+
+Γ ⊢ A -> C
+Γ ⊢ B ->  C
+=================
+Γ ⊢  A ∨ B ->  C
+
+
+#+END_EXAMPLE
+
+
+#+BEGIN_SRC sml
+
+(* or of logic *)
+datatype ('a, 'b) Sum = left of 'a
+                      | right of 'b
+
+
+fun either f g (left a) = f a
+  | either f g (right b)= g b
+
+(* like the and of logic *)
+type ('a,'b) prod = 'a * 'b
+
+
+#+END_SRC
+
+#+RESULTS:
+: datatype ('a,'b) Sum = left of 'a | right of 'b
+: val either = fn : ('a -> 'b) -> ('c -> 'b) -> ('a,'c) Sum -> 'b
+
+
+#+BEGIN_EXAMPLE
+
+Γ ⊢ e : 'a
+===========================
+Γ ⊢ left e : ('a , 'b) Sum
+
+
+Γ ⊢ f : 'a -> 'c
+Γ ⊢ g : 'b -> 'c
+==================
+Γ ⊢ either f g : ('a,'b) Sum -> 'c
+
+#+END_EXAMPLE
+
+
+** Curry-Howard Correspondence
+
+
+Think of types as Logical Statements and terms as purported proofs of
+statements. Type checking rules have a correspondence with that of
+proof checking.
+
+
+Suppose I have a language which very rich type system, Then The type
+checking algorithm can double up as a proof checking algorithm.
+
+In such languages.
+
+1. You capture a statement as a type T in the language
+
+2. You prove the statement T by giving an element x : T.
+
+
+Such a language can be used as
+
+1. A programming language
+
+2. As a proof assistant : means a program that checks whether the given proof
+   is correct
+
+3. Think of it as both.
+
+You can write programs and prove programs correct in the same language.
+
+Coq, Isabelle, HOL etc
+
+
+
+
+
+
+*** Structural rules.
+**** Weakening
+
+#+BEGIN_EXAMPLE
+
+Γ               ⊢ e : τ
+====================
+Γ ∪ { x : τ₁ }  ⊢ e : τ
+#+END_EXAMPLE
+
+**** Contraction
+
+#+BEGIN_EXAMPLE
+
+Γ ∪ { x : τ₁ } ∪  { x : τ₁ }  ⊢ e : τ
+===================================
+Γ ∪ { x : τ₁ }  ⊢ e : τ
+
+#+END_EXAMPLE
+
+
+* TODO Rust: An approach to safe, low-level programming
+
+** Main ideas.
+
+- C/C++ like low level language.
+
+C is like portable assembly. The advantages of this is that you can
+code pretty "close to the metal" the call it. The programming model
+and the processor model is not very different.
+
+C/C++ is extreamly unsafe. Addresses and integers can be confused. No
+array bound checking. Dangling pointers. Use without allocation etc.
+
+Some of these bugs do not manifest even at runtime.
+
+If there is a segmentation fault (which essentially is due to
+accessing locations that are invalid) there is no way to even
+reproduce these bugs often.
+
+In SML for example computation happens as a set of reductions/rewritings.
+
+- But safety like High level language.
+
+  Catch the above bugs.
+
+
+Rust "borrows" many interesting ideas from languages like SML (by
+default things are immutable) It also codifies some best practices
+from C++ programming (RIAA) making violation of this compile time
+bugs.
+
+- Targets low level programming.
+
+  Things like operating systems, device drivers, programming language
+  runtimes etc.
+
+
+Idea for language/library designers
+
+If possible push potential bugs from runtime to compile time.
+
+** Hello world program
+
+#+BEGIN_SRC rust
+// C++ like line comments
+/*
+
+/* Nested C like comments.
+
+*/
+
+*/
+fn main ()
+{
+  println!("hello world");  // semi-colon is a separator not a terminator
+  println!("goodbye world")
+}
+#+END_SRC
+
+** Mutability and type inference
+
+#+BEGIN_SRC rust
+
+fn main ()
+{
+
+let x = 10; // x is immutable
+x = 5 // is an error because x is immutable
+
+// Infinite loop
+
+}
+#+END_SRC
+
+1. Rust is careful about mutabililty and like SML things are immutable
+2. Rust can infer types.
+
+** Things that need resource
+
+Values in your language can be simple straight forward values like int
+bool etc but they might also be ID's for resources.
+
+For example an operating system lock is a resource.
+
+1. Values can be "names" to resources. Like for example a socket in
+   an OS can be represented by a integer but a socket really is much
+   more than an integers.
+
+2. Such values might need exclusive access
+
+3. Values might point to memory resources. Pointers ultimately are integers but
+   it is not the integral value of the pointer that is of interest to us.
+
+   1. What is being pointed
+   2. How much memory is available at this point etc
+
+Rust gives you a way to manage values that have such resources tied to it.
+It makes sure that "exclusivity" is maintained
+
+Ownership model of Rust.
+
+** Resource that I will discuss is Boxed values.
+
+There are two kinds of values
+
+-  Unboxed :: The value is the entire description of the object, examples are like boolean,
+   integer constant (within the word size of the machine).
+
+   Copying of unboxed value is easy
+
+-  Boxed :: The value is not the entire story. E.g pointers or multi-precision Integers (i.e
+       which cannot fit in the machine word)
+
+   Copying has to distinguish between shallow copy vs
+   deep copy.
+
+   - Shallow copying of the list type in C is just copying the list pointer
+
+   - A deep copying of a list is
+
+#+BEGIN_SRC C
+
+typedef struct Node
+           { int data;
+             struct Node *next;
+           } Node;
+
+typedef Node *List
+
+List x y z ptr qtr;
+
+x = SomeFunctionToCreateList()
+
+y = x ; // This is a shallow copy as you are only copying the pointer
+
+// Shallow copy leeds to dangling pointers.
+
+// This is a deep copying
+for(ptr = x; ptr != NULL; ptr = ptr -> next)
+{
+  qtr = malloc(...)
+  qtr -> datum = ptr -> datum;
+....
+ }
+
+// You might forget to free. Memory leaks
+
+
+}
+
+#+END_SRC
+
+
+In C++ one would want to overload the assignment operators.
+
+1. Should assignment operator do deep copy or shallow copy.
+
+In C++ since memory is managed manually the decision can have consequences.
+
+x = y ; in C++ might either be doing a shallow copy or a deep copy
+
+If it is a shallow copy, I should not free y if it is no more used
+If it is a deep copy, it makes sense to free y if it is no more used
+
+f(x)
+
+** Rusts ownership model
+
+
+There are two types of values. One that follows
+the Copy semantics and other that follows the move semantics
+
+An assignment of the kind ~x = y~ is treated differently
+depending on whether the type of x (and y) follows
+Copy semantics or move semantics.
+
+- Copy semantics :: x = y should seen as make a
+copy of the value in y and store it in x
+
+- Move semantics :: x = y should be seen as transfer
+the value (and its ownership) to x
+
+Example
+
+~u32~ is an example of a type (unsigned 32-bit integer)
+that follows the Copy semantics
+
+~Box<u32>~ is an example of a type that follows Move
+semantics.
+
+
+#+BEGIN_SRC rust
+
+fn main ()
+{
+   let x : Box<u32> = Box::new(10);
+   let v = 10
+
+   bar(v);
+
+   foo(x)
+
+
+/ foo(x); // let y = x
+
+// let u = x;
+// blah(u)
+
+// let z = x
+
+   ...
+   ...
+
+}
+
+// This is in a library
+
+fn foo (u : Box<u32>)
+{
+  blah(u)
+}
+#+END_SRC
+
+
+
+
+
+** Freeing of resources in rust
+
+In rust an object/resource is freed when it has no owner or
+equivalently as soon as the owner dies (when the last owner goes out
+of scope). (No manual freeing is required)
+
+
+This is correct because Rust ensures at compile time that
+there is only one owner for any value that satisfies the
+Move semantics.
+
+
+** Ownership and Borrowing.
+
+The two rules of Ownership and Borrow.
+
+1. There is at any point of time only one owner for any value
+2. There is atmost one mutable borrow of a resource
+
+
+- Owner ship transfers from x to y when we perform ~y = x~ ;
+- When the last owner of the value dies then resource is freed.
+
+
+Assignment to a reference variable should be seen as the reference
+variable borrowing the value/resource
+
+#+BEGIN_EXAMPLE rust
+
+let xbox = Box:new(10);
+let ybox = xbox; // ownership is with ybox.
+let ubox = Box::new(42);
+
+let zbox = &ybox;  // this is only a borrow the type of zbox is &Box<u32>
+
+let z = 5;
+let mut u = 5;
+
+/*
+let <var> = ...
+let mut <var> = ...
+
+*/
+// z = 10;  // is an error because z is immutable
+          // so z cannot be changed.
+
+u = 10 ; // This is okey because u is mutable
+
+//  zbox = &ubox // This is an error as zbox
+                 // is an immutable variable.
+                 //
+
+
+/*
+  (zbox is a immutable variable) that has the immutable reference to ybox
+*/
+
+
+let (mut vbox) = &ybox; //
+
+/*
+
+(vbox is a mutable variable) of ...
+
+So vbox can be reassigned
+
+*/
+vbox = &ubox ; // This is allowed
+              // The borrow from ybox is
+              // no more there but now vbox
+              // has a borrow from ubox
+// foo(&ubox) ;; fn foo(u : &Box<u32>)
+// u = &ubox ... body of the function
+// let vbox : &mut Box<u32> = &...
+
+// The reference allows you to update the
+// contents
+
+
+
+#+END_EXAMPLE
+
+
+
+
+#+BEGIN_SRC rust
+
+let x = value
+
+/*
+&x is immutable ref to x and &mut x is error
+
+*/
+
+let mut y = value
+let mut y' = ....
+/*
+  &y is an immutable reference to y and &mut y is a mutable reference to y
+
+Through &y you cannot change y but through &mut y you can change y.
+
+*/
+
+let xr = &mut y
+
+*xr = value'  // This is allowed
+
+xr = &mut y' // This is not allowd as xr is changed
+
+/* What happens here ? */
+
+#+END_SRC
+
+<
+
+1. If ~let x = value means &x has to be immutable
+      let mut x = value means &x is an immutable reference and &mut x is the mutable reference to x
+
+
+1. A ~&mut x~ (mutable reference of x) of a immutable variable x is error
+2. A ~*x = value~ is error unless x is of type ~&mut T~
+
+Rules of borrowing
+
+1. You can have any number of immutable reference
+
+2. You can have atmost one mutable reference. If there is a mutable reference then
+   no other borrowing is allowed (whether mutable or not). There can be only one
+   "route" to update the contents of a variable
+
+#+BEGIN_SRC rust
+
+let mut x = value
+{
+
+  let y = &mut x
+  let z = &x // is not allowd because the borrow y is a mutable borrow and thus
+                disallows any other borrow (mutable or not)
+
+} // y's life time is over so now you can have as many borrow as you want
+let z = &x  // is not allowed
+let z1 = &x//
+
+#+END_SRC
+
+The reason is
+
+With a immutable reference you can only "read" the contents not modify. It is okey to
+have any number of them
 
 
 * Information.
@@ -5287,291 +6215,3 @@ Datatype with some constraints.
 App constructor takes a symbol and a list of terms and produces a term.
 
 fun app (s : symbol) (l : term list) : term  = if List.length l = ...) App ....
-* TODO Type inference algorithm.
-
-
-B = {nat , bool}
-
-** Mono-types
-
-#+BEGIN_EXAMPLE
-τ = t            t ∈ B
-  | τ₁ → τ₂      τ₁, τ₂ are monotypes
-  | α            α is a type variable
-#+END_EXAMPLE
-
-** Type schemes
-
-σ = ∀ α₁....∀αₙ . τ
-
-#+BEGIN_EXAMPLE
-σ = τ
-  | ∀ α . σ'
-#+END_EXAMPLE
-
-
-** Typing rules
-
-
-1. For monotypes it is the same as that of simply typed lambda calculus.
-
-*** Bultins
-
-#+BEGIN_EXAMPLE
-
-================ for all n ∈ ℕ
- ⊢ n : nat
-
-#+END_EXAMPLE
-
-
-*** Var
-
-=============
-x : τ ⊢ x : τ
-
-
-*** App
-
-#+BEGIN_EXAMPLE
-
-
-Γ ⊢ e₁ : τ₁ -> τ₂
-Γ ⊢ e₂ : τ₁
-
-===================
-
-Γ ⊢ e₁ e₂ : τ₂
-
-
-#+END_EXAMPLE
-
-
-*** Abs
-
-#+BEGIN_EXAMPLE
-
-Γ , x : τ₁ ⊢ e : τ₂
-====================
-Γ         ⊢  λ x . e : τ₁ -> τ₂
-
-#+END_EXAMPLE
-
-
-** For type schemes
-
-*** Specialisation
-
-Γ ⊢ e : σ
-σ'  ≤ σ
-==========
-Γ ⊢ e : σ'
-
-*** Generalisation
-
-Γ ⊢ e : σ
-α ∉ FV (Γ)
-================
-Γ ⊢ e : ∀ α . σ
-
-
-Notice that σ  ≤  ∀ α . σ
-
-
-** Type inference problem
-
-Given a set of typing assumption Γ and an expression e in the calculus
- find a type scheme σ such that Γ ⊢ e : σ.
-
-1. We want σ to be the most general possible type. Suppose σ' is
-   another type scheme such that Γ ⊢ e : σ' then we should have σ' ≤ σ
-
-2. If e is ill-typed under Γ, i.e there is no type σ such that Γ ⊢ e :
-   σ then the algorithm should flag a typing error
-
-#+BEGIN_EXAMPLE
-
-e = n     n ∈ ℕ
-  | true
-  | false
-  | plus
-  | and
-  | x    x is a variable
-  | e₁ e₂
-  | λ x . e
-
-#+END_EXAMPLE
-
-** Algorithm W
-
-- Main idea :: e is recursively defined so do a recursion on the
-               structure of e.
-
-- Second idea :: The algorithm will compute a monotype τ such that
-                 the closure σ of τ under Γ is the most general possible type scheme such
-                 that Γ ⊢ e : σ
-
-- Third idea :: The algorithm should also keep track of all substitutions that it performed
-                during the APP recursion step.
-
-** Algorithm W
-
-- Input  :: Γ a type assumption, A substitution Sᵢₙ and an expression e
-- Output :: a monotype τ and a substitution Sₒᵤₜ such that Sᵢₙ (Γ) ⊢ e : τ'
-  such that Closure (τ', Sᵢₙ(Γ)) is the most general such type and
-  τ' = Sₒᵤₜ(τ)
-
-
-
-Closure(τ, Γ) = ∀ α₁....∀ αₙ . τ  where {α₁,....,αₙ} = FV(τ) ∖ FV(Γ)
-
-Γ = x : α
-
-e = λ y . x  : β -> α = τ
-
-THen Closure(τ,Γ) = ∀ β . β -> α
-
-
-#+BEGIN_EXAMPLE
-.
-.
-.
-Γ ⊢ e : τ
-Γ ⊢ e : ∀ α₁ ....∀ αₙ . τ  (GEN n-times)
-
-
-
-#+END_EXAMPLE
-
-
-
-*** For builtins
-
- e = n for some n ∈ ℕ
-
- Then we know that the most general type scheme
- σ such that Γ ⊢ e : σ is just ~nat~.
-
-*** Variable
-
-Let us say e is some variable x
-
-Let σ be the type assigned to x in the type assumption Γ
-
-Γ = Γ' ∪ {x : σ}
-
-
-Let σ = ∀ α₁,...∀ αₙ . τ
-
-Compute fresh type variables β₁,...,βₙ.  return the type e : τ' = τ
-[α₁ := β₁] .... [αₙ := βₙ] i.e replace all type variables αᵢ with the
-corresponding fresh variable βᵢ
-
-e is x
-the returned type is Sᵢₙ(τ')
-
-Closure of τ' is  ∀ β₁...̱∀ βₙ . τ'  = σ
-
-
-
-
-
-
-
-WHat ever output we give say τ, we need the fact that
-
-Γ ⊢ e : τ
-
-*** App case
-
-e = e₁ e₂
-
-1. Recursively compute the type τᵢ associated with eᵢ under the type assumption Γ
-   If any of this fails then failure. Otherwise
-
-   W(Γ, Sᵢₙ, e₁) = (S₁, τ₁) and
-   W(Γ, S₁, e₂)  = (S₂, τ₂)
-
-   However I should have the property that  e₁ : α -> β and e₂ : α
-
-   Get hold of fresh type variables α and β.
-
-   Unify (α -> β ≡ τ₁ , α ≡ τ₂)  Will get a substitution S.
-
-   Return (S, S(β))
-
-
-
-*** Abs case
-
-e = λ x . e' . If at all e is well typed then it should be something like
-e : τ₁ → τ₂
-
-
-Γ' = Γ ∪ {x : α} for some fresh type variable α.
-
-W(Γ', e', Sᵢₙ) = (Sₒᵤₜ, τ)
-
-Return of W(Γ, e, Sᵢₙ) = ( Sₒᵤₜ, τ' -> τ)  where τ' is Sₒᵤₜ (α)
-
-#+BEGIN_EXAMPLE
-
-e = λ x . plus x 1
-
-#+END_EXAMPLE
-
-Γ = ∅
-
-{x : α}  Compute type of plus x 1 Abs setp
-
-{x : α} : Compute type of (plus x)  Compute the type of (1)  App
-
-{x : α} : Compute type of plus, Compute type of x (App rule)
-
-
-plus : nat -> nat -> nat
-
-x : alpha
-
-Unify (β -> γ) ≡ nat -> (nat -> nat), β ≡ α
-
-α ≡ nat
-
-
-
-#+BEGIN_EXAMPLE
-
-Γ , x : τ₁ ⊢ e : τ₂
-====================
-Γ         ⊢  λ x . e : τ₁ -> τ₂
-
-#+END_EXAMPLE
-
-
-
-
-
-
-
-#+BEGIN_EXAMPLE
-
-
-Γ ⊢ e₁ : τ₁ -> τ₂
-Γ ⊢ e₂ : τ₁
-
-===================
-
-Γ ⊢ e₁ e₂ : τ₂
-
-
-#+END_EXAMPLE
-
-
-#+BEGIN_SRC sml
-val e = map (fn x => x + 1) : int list -> int list
-#+END_SRC
-
-map : ('a -> 'b) -> 'a list -> 'b list
-
-'a = int
- 'b = int
