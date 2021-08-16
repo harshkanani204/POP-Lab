@@ -1,16 +1,15 @@
 #+STARTUP: indent
-* DONE Getting started                                            :CLASSROOM:
+* TODO Getting started                                            :CLASSROOM:
 
 ** Basic Information
 
 - Instructor :: Piyush <ppk@.>
 - TAs
 
-  1. Chilankamol Sunny
-  2. Haritha Madhav C
-  3. Lijo M Jose
+  1. Lijo M Jose
+  2. Julin Shaji
 
-- Bitbucket Repository :: https://bitbucket.org/piyush-kurur/popl
+- Repository :: https://gitlab.com/piyush-kurur/popl
 
 Hosting site for git repositories
 
@@ -23,14 +22,14 @@ Hosting site for git repositories
 /Flipped classroom/ model of lectures
 
 - There will be weekly videos that I will post at the Youtube channel
-- Interactive session weekly once (Monday 11:00-12:00 hrs/9:30-10:30)
-- Lab Interactive session (PoPL Lab) (Thursdays 14:00-15:30 hrs)
+- Interactive session weekly once (Monday 10:00-11:00 hrs
+- Lab Interactive session (PoPL Lab) (Monday 14:00-midnight hrs)
 - TAs will have a surprise interaction with you to check you are not asleep
 
 ** Grading
 
-- Try have a lot of Short quizes (Monday 9:00-9:30 in the Even week). Over
-  moodle (best n-2 in n). best n-1 in n (60-80%)
+- Try have a lot of Short quizes (Consult the quiz schedule). Over
+  moodle (best n of n+1).  (60-80%)
 
 - End sem
 
@@ -4853,19 +4852,21 @@ git push origin -u master
 
 ** Assignment Submission Workflow
 
-1. Give readonly access to all TA's and me (piyush-kurur) (Using the webinterface of bitbucket)
+1. Give readonly access to your repository on gitlab
+   to all TA's and me (piyush-kurur). (One time step)
 
 2. Write your code in the repository (within the deadline) and commit
-   it.
+   it. (For each updated to your assignment)
 
-3. Push it to bitbucket.
+3. Push it to gitlab. We will pick the relevant submissions from
+   there.
 
 
 ** Few related things to try out
 
-1. You can fork my popl repository on bitbucket
+1. You can fork my popl repository on gitlab
 2. You should "Watch" my popl repository
-3. You can clone repositories from (say) bitbucket
+3. You can clone repositories from (say) gitlab
 4. If the repository above is your own, then you can push stuff there.
 
 * DONE SML Tutorial.                                                    :LAB:
