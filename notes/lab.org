@@ -1,0 +1,1438 @@
+#+STARTUP: indent
+* DONE Getting started                                                  :LAB:
+SCHEDULED: <2020-08-06 Thu>
+
+** Git
+
+1. Installation
+
+#+BEGIN_SRC
+sudo apt install git tig gitk
+#+END_SRC
+
+2. Set your name and email id.
+
+#+BEGIN_SRC
+
+git config --global --edit
+
+#+END_SRC
+
+3. Make a local repository
+
+#+BEGIN_SRC
+
+mkdir code/git/ROLLNO-popl -p
+cd code/git/ROLLNO-popl
+git init
+emacs README.md
+git add README.md # Asks git to keep track of changes in this file from now own
+git commit -m 'added readme' # This creates a commit with message "added readme"
+# or one can avoid the -m option
+git commit # will open an editor
+
+
+#+END_SRC
+
+4. Have a .gitignore file
+
+Controls what files should be ignored by git
+
+5. I often put a pre-commit hook
+
+This is to avoid committing changes with trailing spaces.
+
+#+BEGIN_SRC
+
+# Go to the top of the repository
+cd ~code/git/007-popl
+mv .git/hook/pre-commit.sample .git/hook/pre-commit # Enable the pre-commit hook
+
+#+END_SRC
+
+6. Learn more about git and you can also use magit (git operations from emacs)
+
+
+** Bitbucket stuff
+
+1. Create account on bitbucket
+2. Create a new repository in bitbucket
+3. Push changes from local to bitbucket repository
+
+#+BEGIN_SRC sh
+
+# Create a link to the remote repository on bitbucket and call it origin.
+git remote origin git@bitbucket.org:piyush-kurur/007-popl.git
+
+# Push things here to bitbucket.
+git push origin -u master
+
+#+END_SRC
+
+
+** Assignment Submission Workflow
+
+1. Give readonly access to your repository on gitlab
+   to all TA's and me (piyush-kurur). (One time step)
+
+2. Write your code in the repository (within the deadline) and commit
+   it. (For each updated to your assignment)
+
+3. Push it to gitlab. We will pick the relevant submissions from
+   there.
+
+
+** Few related things to try out
+
+1. You can fork my popl repository on gitlab
+2. You should "Watch" my popl repository
+3. You can clone repositories from (say) gitlab
+4. If the repository above is your own, then you can push stuff there.
+
+* DONE SML Tutorial.                                                    :LAB:
+* DONE Basic functions                                                  :LAB:
+
+** Pattern matching on tuples.
+
+#+BEGIN_SRC sml
+
+val x     = (2, "hello") (* create a tuple *)
+val (u,v) = x  (* binding by pattern matching *)
+val (_,z) = x
+
+(*
+fun foo pattern = ....
+*)
+
+
+(*
+
+fst : 'a * 'b -> 'a
+snd : 'a * 'b -> 'b
+
+foo (1 + 2)  ---> foo 3
+             -- function call of foo --->
+             let val pattern = 3 in ....
+
+*)
+#+END_SRC
+
+#+RESULTS:
+: val x = (2,"hello") : int * string
+: val u = 2 : int
+: val v = "hello" : string
+: val z = 2 : int
+
+** Patterns.
+
+ 1. A variable is a pattern
+ 2. An _ is a pattern
+ 3. If p1 and p2 are patterns then
+    (p1, p2) is also a pattern
+#+BEGIN_SRC sml
+
+val x = 10
+val _ = 10
+val (p1,p2) = ...
+
+#+END_SRC
+
+#+RESULTS:
+: stdIn:42.5-42.24 Error: pattern and expression in val dec don't agree [overload conflict]
+:   pattern:    ('Z * 'Y) * 'X
+:   expression:    [int ty] * [int ty]
+:   in declaration:
+** List patterns
+
+'a is type
+
+1. [] : 'a list
+2. Suppose x : 'a  and  xs : 'a list then
+   x :: xs is also an element of type 'a list
+
+
+#+BEGIN_SRC sml
+
+val x = [1,2,3]
+val x1 = 1 :: 2 :: 3 :: []
+(*  - [] is an int list
+    - 3 is an int and [] is an int list so
+    - 2 is an int and 3 :: [] is an int list
+
+
+*)
+
+
+(* isEmpty : 'a list -> bool *)
+fun isEmpty []        = true
+  | isEmpty (_ :: _) = false
+
+val z = isEmpty [1,3,4]
+
+(*  concat : 'a list -> 'a list -> 'a list
+
+*)
+fun concat (x :: xs) ys = x :: concat xs ys
+  | concat []        ys = ys
+
+val u = concat [1,2,3] [4,5 , 6]
+
+
+
+#+END_SRC
+
+
+
+#+RESULTS:
+: val x = [1,2,3] : int list
+: val x1 = [1,2,3] : int list
+: val isEmpty = fn : 'a list -> bool
+: val z = false : bool
+: val concat = fn : 'a list -> 'a list -> 'a list
+: val u = [1,2,3,4,5,6] : int list
+
+#+BEGIN_SRC sml
+
+fun append []       x = [x]
+  | append (y :: ys) x = y :: append ys x
+
+(* index : int -> 'a list -> 'a
+
+*)
+fun index ix xs = ...
+(*
+
+append [1,2,3] 4 => let val y = 1
+                        val ys = [2,3]
+                        val x  = 4
+                    in y :: append ys x
+
+  ---> 1 :: append [2,3] 4
+  ---> 1 :: let val y = 2
+                val ys = [3]
+                val x  = 4
+            in y :: append ys x
+
+---> 1 :: (2 :: append [3] 4)
+---> 1 :: 2 :: (let val y = 3
+                    val ys = []
+                    val x = 4
+                in y :: append ys x
+               )
+--> 1 :: 2 :: (3 :: append [] 4)
+--> 1 :: 2 :: ( 3 :: let val x = 4
+                     in [x])
+
+--> 1 :: 2 :: 3 :: [4]
+= 1 :: 2 :: 3 :: 4 :: []
+= [1,2,3,4]
+
+
+*)
+
+http://mlton.org/ValueRestriction
+
+#+END_SRC
+* DONE Fold functions
+SCHEDULED: <2020-09-03 Thu>
+
+#+BEGIN_SRC sml
+
+open List
+
+fun mynth n []        = NONE
+  | mynth n (x :: xs) = if n > 0 then mynth (n-1) xs
+                        else if n < 0 then NONE
+                             else SOME x
+
+val x = mynth 1 [1,2,3]
+
+ (* partition : ('a -> bool) -> 'a list -> 'a list * 'a list *)
+fun partition pred (x :: xs) = let val (tL , fL) = partition pred xs
+                               in
+                                  if pred x then ( x :: tL , fL)
+                                  else           ( tL, x :: fL)
+
+  | partition pred []        = ([] , [])
+
+(* 'summary = 'a list * 'a list
+    sfun : 'a * 'summary -> 'summary
+    s0  = ([], [])
+*)
+
+fun partition pred xs = let fun sfun = ...
+                        in foldl sfun s0 xs
+                        end
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+opening List
+  datatype 'a list = :: of 'a * 'a list | nil
+  exception Empty
+  val null : 'a list -> bool
+  val hd : 'a list -> 'a
+  val tl : 'a list -> 'a list
+  val last : 'a list -> 'a
+  val getItem : 'a list -> ('a * 'a list) option
+  val nth : 'a list * int -> 'a
+  val take : 'a list * int -> 'a list
+  val drop : 'a list * int -> 'a list
+  val length : 'a list -> int
+  val rev : 'a list -> 'a list
+  val @ : 'a list * 'a list -> 'a list
+  val concat : 'a list list -> 'a list
+  val revAppend : 'a list * 'a list -> 'a list
+  val app : ('a -> unit) -> 'a list -> unit
+  val map : ('a -> 'b) -> 'a list -> 'b list
+  val mapPartial : ('a -> 'b option) -> 'a list -> 'b list
+  val find : ('a -> bool) -> 'a list -> 'a option
+  val filter : ('a -> bool) -> 'a list -> 'a list
+  val partition : ('a -> bool) -> 'a list -> 'a list * 'a list
+  val foldr : ('a * 'b -> 'b) -> 'b -> 'a list -> 'b
+  val foldl : ('a * 'b -> 'b) -> 'b -> 'a list -> 'b
+  val exists : ('a -> bool) -> 'a list -> bool
+  val all : ('a -> bool) -> 'a list -> bool
+  val tabulate : int * (int -> 'a) -> 'a list
+  val collate : ('a * 'a -> order) -> 'a list * 'a list -> order
+  val unfoldl : ('a -> ('b * 'a) option) -> 'a -> 'b list
+  val unfoldr : ('a -> ('b * 'a) option) -> 'a -> 'b list
+  val reduce : ('a * 'a -> 'a) -> 'a -> 'a list -> 'a
+  val appi : (int * 'a -> unit) -> 'a list -> unit
+  val mapi : (int * 'a -> 'b) -> 'a list -> 'b list
+  val mapPartiali : (int * 'a -> 'b option) -> 'a list -> 'b list
+  val foldli : (int * 'a * 'b -> 'b) -> 'b -> 'a list -> 'b
+  val foldri : (int * 'a * 'b -> 'b) -> 'b -> 'a list -> 'b
+  val findi : (int * 'a -> bool) -> 'a list -> (int * 'a) option
+  val revMap : ('a -> 'b) -> 'a list -> 'b list
+  val revMapi : (int * 'a -> 'b) -> 'a list -> 'b list
+  val revMapPartial : ('a -> 'b option) -> 'a list -> 'b list
+  val revMapPartiali : (int * 'a -> 'b option) -> 'a list -> 'b list
+  val concatMap : ('a -> 'b list) -> 'a list -> 'b list
+  val concatMapi : (int * 'a -> 'b list) -> 'a list -> 'b list
+  val foldMapl : ('a * 'c -> 'c) -> ('b -> 'a) -> 'c -> 'b list -> 'c
+  val foldMapr : ('a * 'c -> 'c) -> ('b -> 'a) -> 'c -> 'b list -> 'c
+  val splitAt : 'a list * int -> 'a list * 'a list
+  val update : 'a list * int * 'a -> 'a list
+  val sub : 'a list * int -> 'a
+val mynth = fn : int -> 'a list -> 'a option
+val x = SOME 2 : int option
+#+end_example
+* DONE References                                                       :LAB:
+
+** Basics of Reference
+
+#+BEGIN_SRC sml
+val x = 10 + 2          (* value is 12 but no side effect *)
+val z = print "hello\n" (* value is () but there is a side effect *)
+val y = ref "hello"     (* y is bound to a new reference cell *)
+val z2 = !y             (* z2 is bound to "hello" *)
+
+(* !y is an impure expression.
+
+  1. Side effect is to read the value associated with the reference cell y
+  2. The reduced value is the value read in step 1
+
+!y here reduces to the value "hello" and that is assigned to z2.
+
+*)
+
+val z1 = (y := "foo")     (* the reference cell associated with y is filled with "foo" *)
+(* y := "foo" is an expression which when reduced
+has the side effect of storing the value "foo" in the ref cell bound to y *)
+
+val z3 = !y             (* z3 is bound to "foo" *)
+
+#+END_SRC
+
+#+RESULTS:
+: hello
+: val x = 12 : int
+: val z = () : unit
+: val y = ref "foo" : string ref
+: val z2 = "hello" : string
+: val z1 = () : unit
+: val z3 = "foo" : string
+
+#+BEGIN_SRC C
+
+int main ()
+{
+
+   /* y is a reference cell capable of storing int */
+   const int x = 10;
+   int y z1 z2;
+   y = 10;
+   z1 = y;
+   y  = 100;
+   z2 = y;
+}
+
+#+END_SRC
+
+** The semicolon operator.
+
+Suppose ~e~ is the expression ~e1 ; e2~
+
+1. What is the value associated with e
+2. How does e reduce to the corresponding value.
+
+*** Reduction of ~e~
+
+1. First reduce ~e1~ to ~v1~ (This might not be possible because *)
+2. Ignore the value ~v1~
+3. Reduce ~e2~ to ~v2~
+
+Then ~e~ gets reduced to ~v2~
+
+#+BEGIN_EXAMPLE
+e1 ----->* v1
+e2 ----->* v2
+e  ---->* v2
+
+#+END_EXAMPLE
+
+#+BEGIN_SRC sml
+
+val x = (print "hello\n"  ; 3)
+val x1 = 3
+
+val y = ref "hello"
+val z1 = ( y := "foo" ; !y )
+
+val y1 = ref "hello"
+
+val z2 = let val u = !y1
+         in
+             y1 := "foo"; u
+         end
+
+val y = ref 100
+fun incrY () = (y := !y + 1; !y)
+
+
+#+END_SRC
+
+#+RESULTS:
+: hello
+: val x = 3 : int
+: val x1 = 3 : int
+: val y = <hidden-value> : string ref
+: val z1 = "foo" : string
+: val y1 = ref "foo" : string ref
+: val z2 = "hello" : string
+: val y = ref 100 : int ref
+: val incrY = fn : unit -> int
+
+Semi colon is the sequencing operation. The order
+of evaluation is /important/
+
+** Atom
+
+#+BEGIN_SRC sml
+val hello = Atom.atom "hello"
+val foo   = Atom.atom "foo"
+
+datatype expr = V of string
+              | C of int
+              | Plus of expr * expr
+              | Mul  of expr * expr
+
+datatype exprA = VA of Atom.atom
+               | CA of int
+               | PlusA of exprA * exprA
+               | MulA  of exprA * exprA
+
+fun var (str : string) = VA (Atom.atom str)
+
+val xpone  = Plus (V "x", C 1)
+val xpone' = PlusA (var "x", CA 1)
+#+END_SRC
+
+#+RESULTS:
+: val hello = - : atom
+: val foo = - : atom
+: datatype expr
+:   = C of int | Mul of expr * expr | Plus of expr * expr | V of string
+: datatype exprA
+:   = CA of int | MulA of exprA * exprA | PlusA of exprA * exprA | VA of atom
+: val var = fn : string -> exprA
+: val xpone = Plus (V "x",C 1) : expr
+: val xpone' = PlusA (VA -,CA 1) : exprA
+
+
+#+BEGIN_SRC sml
+
+(* Definition of the atom structure *)
+
+signature ATOM = sig
+   .....
+end
+
+structure Atom : ATOM = struct
+
+  (* Internal counter that keeps track of how many atoms I have allocated *)
+
+  type atom = int
+  val nvars = ref 0
+  val stringToAtom = ref (* empty dictionary with key = string and value = int *)
+  val atomTOString = ref (* empty dictionary with key = int value = string *)
+
+  fun atom (x : string) = ...
+  fun toString (a : atom) = ....
+
+end
+
+
+
+#+END_SRC
+* DONE The lambda calculus                                              :LAB:
+
+** Alonzo Church's lambda calculus
+
+
+#+BEGIN_SRC sml
+
+val incr = fn x => x + 1
+fun incr1 x = x + 1
+
+#+END_SRC
+
+#+RESULTS:
+: val incr = fn : int -> int
+: val incr1 = fn : int -> int
+
+- Function Abstraction ::
+      ~fn x => x + 1~ is that function that maps ~x~ to ~x + 1~.
+     ~fn x => e~ is that function that maps ~x~ to ~e~
+
+- Function Application ::
+
+   ~f~ is a function and ~e~ is an expression then ~f e~ is
+   the application of ~f~ on ~e~
+
+
+
+*** Church thesis (1933)
+
+These are the only things one needs to have a full programming language.
+
+Church used the notation ~λ x . e~ for ~fn x => e~. I.e ~λ x . e~ is that
+function that takes ~x ↦ e~
+
+
+** Function application.
+
+
+What does it mean to say that ~fn x => e~ is that function that maps
+~x~ to ~e~ ?
+
+1. There is a notion of reduction of λ-calculus expression.
+
+   ~(fn x => e) M -–>   e [ x := M ]~
+
+~e [ x := M]~ . Replace ~M~ for ~x~ in ~e~
+
+Why do I say that in SML ~F = fn x => x + 1~ is the increment function ?
+
+~F y ≡  (fn x => x + 1) y –>  substitute y for x in x + 1.
+                          –> y + 1
+
+
+
+*** Infinite loops.
+
+#+BEGIN_SRC
+
+Id = fn x => x  (* is in normal form *)
+A = fn x => x x
+Ω = A A
+
+Ω = (fn x => x x) A
+  -> A A
+
+#+END_SRC
+
+
+** Problems with naive substitution
+
+Variable capture.
+
+1. ~(fn x => (fn x => x)) M~
+
+e = (fn x => x y) ≡ fn t => t y
+
+e [x := M]
+
+1        1
+∫ x y dx = ∫ t dt
+0        0
+
+
+Is ~fn x => x~ the same as ~fn t => t~
+
+
+~e [x := M]~ What I mean is substitute M for every /free/ occurrance
+of ~x~
+
+
+** Free variables (formal definition )
+
+The free variables of e is defined as follows.
+
+There are three possibilities e is either
+
+1. ~x~ in which case FV(e) = {x }
+
+2. ~e₁ e₂~ in which case FV(e) = FV(e₁) ⋃ FV(e₂)
+
+3. ~fn x => e'~ in which case FV (e) = FV(e') ∖ { x }
+
+
+~(fn x => fn y => x)(fn t => t)~ = ~M N~  reduces to ~fn y => (fn t => t)~
+
+where M = (fn x => fn y => x) and N = (fn t => t)
+
+(fn x => e) L —>  e [x := L]
+
+ In this context e is (fn y => x)
+
+
+
+
+1. (fn x => fn t => x) N  –> fn t => N
+
+  If N was fn t => t
+
+   fn t => fn y => y
+
+
+ When you substitute N for x, the context in which x occurs free should not bind any free variables
+ of N.
+
+ (fn x =>[ .....(fn t => ....x....)]) N
+
+#+BEGIN_SRC
+
+s0 = x00 x01 .......
+s1 = x10 x11 .......
+.
+.
+sn = xn0 xn1 ........
+
+s
+#+END_SRC
+
+
+ #+BEGIN_SRC sml
+
+val x = 10
+fun foo x = fn y => x
+
+
+ #+END_SRC
+
+ #+RESULTS:
+ : val x = 10 : int
+ : val foo = fn : 'a -> 'b -> 'a
+* DONE The λ-let and λ-letrec                                           :LAB:
+
+let x = e in e₁  -> (fn x => e₁) e
+
+1. The x in e₁ is the x bound in the let x = e
+2. The x in e  is a free variable
+
+let x = 5 in (let x = x + 1 in x*2)
+
+letrec x = e in e₁ -> lambda calculus
+
+1. F ∈ λ-calculus one can find a fixpoint X of
+of F.   F X = X
+
+1. We have a combinator Y ∈ λ-calculus such that Y F is the fixpoint
+   of F for all F ∈ λ-calculus.
+
+2.  letrec f = M(f) in e
+
+    ===> let f = Y (λ f. M(f)) in e
+
+ - letrec f = M (f) in e ::
+Compute  the expression e where the variable f
+is the solution to the recursion f = M(f)
+
+
+   Let g be the fixpoint of λ f . M (f) then this expression can be written
+   as let f = g in e.
+
+
+   Define F = λ f . M (f))
+   Let    g = Y F
+          g is the fixpoint of F
+          g = F g
+          g = (λ f . M(f)) g
+            = M (g)
+
+   g is the solution for the recursive equation.
+
+#+BEGIN_SRC sml
+val x = let fun fact n = if n <= 0 then 1
+                          else n * fact (n - 1)
+        in
+          fact 4
+        end
+
+#+END_SRC
+
+#+RESULTS:
+: val x = 24 : int
+
+#+BEGIN_EXAMPLE
+
+letrec fact = λ n . if n <= 0 then 1
+                    else n * fact (n - 1)
+   in fact 10
+
+
+#+END_EXAMPLE
+
+
+M f = λ n . if n <= 0 then 1 else n * f (n - 1)
+
+letrec f = M (f) in e
+
+1. Evaluate e where f is bound to the solution of
+   the recursive eqn f = M f
+
+2. Solution of the eqn f = M f is nothing but
+
+  Y ( λ f . M (f) )
+
+ Evaluate e in the environment where f is something
+ let f = something in e
+
+let f = Y ( λ f . M (f) ) in e
+
+ Something is the solution to Y ( λ f . M f)
+
+Think of M(f) as some λ-let program where f is free.
+
+
+#+BEGIN_EXAMPLE
+
+let x
+
+#+END_EXAMPLE
+
+
+letrec f1 = M(f1,f2)
+       f2 = N(f1,f2)  in e
+
+letrec (f1,f2) = ( M (f1,f2), N (f1,f2) ) = e
+
+
+
+
+ Imagine you have a way to pair elements and project their component.
+
+  pair : λ
+  fst : λ
+  snd : λ
+
+  fst (pair u v) = u
+
+  snd (pair u v) = v
+
+  pair = (λ u . λ v . λ f . f u v)
+  fst  = λ p . p K
+  snd  = λ p . p K₁
+
+  K  = λ x λ y . x  (K is the constant function )
+  K₁ = λ x λ y . y  (K₁ is the ignore function )
+
+K ignores the second argument
+K₁ ignores the first argument
+* TODO Higher order abstract syntax
+
+
+#+BEGIN_EXAMPLE sml
+
+(*
+   <expr> = <variable>                (* variable case    *)
+          | <expr>₁ <expr>₂           (* application case *)
+          | λ <variable> . <expr>     (* abstraction case *)
+
+
+(λ x . λ t₁ . x t₁) t₀  ->  (λ t₁ . x t₁) [x := t₀] -> λ t₁ . t₀ x
+       [   M     ]  N
+
+(λ x . M) N  =====>  M [x := N]
+
+The above beta reduction is allowed only if FV(N) ∩ Bound(M) = ∅
+
+Any beta reduction should not change variable binding
+
+*)
+
+datatype L = V  of String
+           | Ap of (L, L)
+           | Ab of (String, L)
+
+
+#+END_EXAMPLE
+
+SML itself is a λ-calculus.
+
+#+BEGIN_EXAMPLE sml
+
+datatype HL = HV  of String
+            | HAp of (HL, HL)
+            (* | Ab of (String, L)  *)
+            | HAb of (HL -> HL)
+
+
+(*
+C of τ
+
+C : τ -> Whatever is your type
+
+*)
+(*
+
+λ x . x           Ab ("x", V "x")
+
+                  HAb (fn e => e)
+λ x y . x        Ab ("x", Ab ("y", (V "x"))
+
+λ x . (λ y . x)
+                 HAb (fn x => (HAb (fn y => x))
+
+
+ A = λ f x . f (f x)
+
+(λ x . M) N -> M [x := N]
+
+HA (HAb f, N) = f N
+
+f : HL -> HL
+
+
+(λ x . λ t . x t y)) t
+
+Ab ("x" , (Ab ("t", Ap (V "x", V "t)))) V "t"
+
+ Ab ("t",  Ap (V "t", V "t"))
+
+HAb ( fn (x : HL) =>  HAb (fn (t : HL) => HAp x  t) HV "t"
+
+
+
+Hab : (HL -> HL) -> HL
+HAb (fn (t : HL)  => (HAp (HV "t"), t)
+
+
+HAb : (HL -> HL) -> HL
+
+HV : string -> HL
+
+
+
+*)
+
+
+#+END_EXAMPLE
+
+
+1. In our case the language of interest is λ-calculus (object
+   language), i.e. the language we are studying/implementing.
+
+2. Our implementation language is SML (meta-language).
+
+3. The constructs in the object language are expressed as datatypes in
+   the meta-language. (Using algebraic types to capture syntax)
+
+4. Capture the "binding" structure in the meta-language is what HOAS
+   ("Higher order abstract syntax") allows you to do. Often one needs
+   to substitute terms for a bound variable (like in the case of
+   β-reduction)
+
+
+HOAS is used in the internal representation of the language.
+
+1. Cannot be used to show results to user.
+
+2. When you parse what you get is a usual representation not HOAS.
+
+
+#+BEGIN_EXAMPLE sml
+
+subst : (string * lam) -> lam -> lam
+
+(*
+subst ("x",N) e  has to do  e [x := N]
+
+*)
+
+fun subst (x,N) (V y)       = ...
+  | subst (x,N) (A (e1,e2)) = A (subst (x,N) e1), (subst (x,N) e2))
+  | subst (x,N) (L (u, e))  = ..
+
+substH : (string * HL) -> HL -> HL
+fun substH (x,N) (HV y)       = ... same as above
+  | substH (x,N) (HA (e1,e2)) =  HA (substH (x,N) e1), (substH (x,N) e2))
+  | substH (x,N) (HAb f)      =
+           let fun fp t = subst (x,N) (f t )
+           in
+              HAb fp
+
+(*
+
+If f is (fn t => M) then fp should be
+
+       (fn t => substH (x,N) M)
+
+M = λ t . t x
+
+abstract "x" M  should give me (λ x λ t . t x)
+
+parse and get lam and then convert to the internal repsentation which is hlam
+
+hoas : lam -> hlam
+
+fun hoas (V x)       = HV x
+  | hoas (Ap (e1,e2) = HAp (hoas e1, hoas e2)
+  | hoas (L (x,e)    = ?
+
+
+(* internal representation to outside world *)
+
+fun syntax : hlam -> lam
+
+fun syntax (HV x)          = V x
+  | syntax (HAp (e1, e2)   = Ap (syntax e1, syntax e2)
+  | syntax (HAb f)         = ?
+
+(*
+  Generate a fresh variable name x and then just   L (x , syntax (f (HV x) ))
+
+
+HAbs f   -> Abs (u, syntax f (HV u))
+
+f = fn t => HAp (HV "x", t)
+
+HAp (HV "x", HV "y")
+
+["x", "y"]
+
+freeP M will generate a list which is a super set of the free variables of M
+
+λ x . x x
+
+λ u . x u
+
+*)
+
+*)
+
+(* substH ("x",N) (HAb (fn t => HA (t , (HV "x"))))
+
+ substH ("x", N) (HAb (fn t => t))
+
+ λ t . t  [ x := N]
+
+  HAb (fn t => N)
+*)
+(* f : HL -> HL *)
+#+END_EXAMPLE
+
+
+#+BEGIN_EXAMPLE
+
+Y = λ f . (λ x . f (x x)) (λ x . f (x x))
+
+
+#+END_EXAMPLE
+
+#+BEGIN_SRC sml
+
+val Y = fn f => (fn x => f ( x x ))(fn x => f (x x))
+
+val F f = fn n => if n <= 0 then 1 else n * f (n -1)
+
+g = Y F
+
+(*
+  = (fn f => fn x => f (x x)) (fn x => f (x x))) F
+  = (fn x => F (x x)) (fn y => F (y y))
+    F ((fn y => F (y y)) (fn y => F (y y))    )
+
+*)
+    F (Y F) = F g
+
+  = fn n => if (n <= 0) then 1 else n * ((Y F) (n-1))
+
+g is the fix point of F
+
+g satisfies the equation g = F g
+
+which is equivalent to
+
+g = fn n => if n <= 0 then 1 else n * (g (n - 1))
+#+END_SRC
+
+#+RESULTS:
+: stdIn:6.30-6.33 Error: operator is not a function [circularity]
+:   operator: 'Z
+:   in expression:
+:     x x
+: stdIn:6.48-6.51 Error: operator is not a function [circularity]
+:   operator: 'Z
+:   in expression:
+* TODO Unification algorithm.
+
+The main reason for studying Unification algo is for type inference.
+
+#+BEGIN_SRC sml
+
+(* Domain of map is ('a -> 'b)  and range is ( 'a list to 'b list) *)
+
+(* The domain of map can it be 'c list -> ('c * 'c) list  for some choice of 'a and 'b *)
+(* Is it possible to make 'c list -> ('c * 'c) list ≡ 'a -> 'b for some choice of 'a and 'b  ?
+
+Unifying 'c list -> 'c * 'c list  with 'a -> 'b
+
+Solve the eqn
+
+    'c list -> ('c * 'c) list ≡ 'a -> 'b  symbolically.
+
+*)
+
+val map : ('a -> 'b) -> ('a list -> 'b list)
+val f : 'c list -> ('c * 'c) list`
+
+val map f
+
+(*
+
+1. Is map f well typed       (type checking problem)
+
+2. What is the type of map f (inference problem)
+
+
+*)
+
+#+END_SRC
+
+** Type checking and unification.
+
+ base types are ~nat~ and ~bool~.
+
+ - S = { nat, bool, -> , list, *  } signature.
+
+   arity of nat = arity of bool = 0
+   arity of -> is 2.
+   arity of *  is 2.
+   arity of list = 1.
+
+   ~Term(S)~, this is just the mono-types in simply typed calculus.
+
+   #+BEGIN_EXAMPLE
+   nat -> boo     -> (nat, boo)
+
+   #+END_EXAMPLE
+
+   Suppose one wants to add the list type.
+
+- Terms(S,V) is polymorphic types.
+
+
+** Unification problem is.
+
+Given two terms t₁ and t₂ find an assignment that will make the two terms the same.
+
+t₁ = 'a -> 'b
+t₂ = 'c list -> ('c * 'c) list
+
+Then these terms can be unified with the assignment
+
+'a ≡ 'c list   'b ≡ ('c * 'c) list
+
+ t₁ = int
+ t₂ = bool
+
+** Telescopic assignment.
+
+ It is a sequence of variable assignment
+
+ σ = x₁ ≡ t₁ , ... , xₘ ≡ tₘ  with the following property.
+
+- t₁ does *not* have variable x₁
+- t₂ does *not* have variable x₁ and x₂
+- t₃ does *not* have variable x₁, x₂ and x₃.
+
+- tᵢ should not have variables x₁, x₂ ....xᵢ
+
+Var(tᵢ) ∩ {x₁,...,xᵢ} = ∅
+
+
+
+Think of the telescope σ as a substitution. Suppose t[σ] is the term obtained from t
+but substituting the assignments in σ in that order.
+
+I.e.
+
+t[σ] = t [x₁ := t₁] [x₂ := t₂] ......[xₘ := tₘ]
+t[σ] will not have x₁,....,xₘ in it
+
+
+** Unification problem stated in terms of telescopes.
+
+Given terms t₁ and t₂ compute (if possible) a telescope σ such that
+ t₁[σ] = t₂[σ] This telescopic substitution σ is called a *unifier*
+ for t₁ and t₂. The unification algorithm, will compute the *most
+ general* unifier of two terms.
+
+
+Capturing signatures in ML. a Type say symbol + a function that gives
+the arity : symbol -> int.
+
+
+#+BEGIN_EXAMPLE sml
+
+signature SIG = sig
+  (* the type of function symbols *)
+  (* the arity function *)
+
+  structure Ord : ORD_KEY (* with the additional constraint that the Ord.ord_key type
+                             is the same as the type for functional symbols
+                          *)
+
+end (* SIG *)
+signature VAR = sig
+  (* a type for variables *)
+  (* additional interface for the variable
+     type like pretty printing can go here *)
+
+  structure Ord : ORD_KEY (* with the additional condition
+                             that it matches with the type of variable
+                          *)
+
+end
+
+#+END_EXAMPLE
+
+
+The term functor
+
+#+BEGIN_EXAMPLE sml
+
+functor Term (S : SIG, V : VAR) = struct
+
+  datatype term = (* *)
+
+  (* helper functions *)
+
+end
+
+#+END_EXAMPLE
+
+
+#+BEGIN_EXAMPLE sml
+
+datatype ('f, 'v) term = (* definition of terms with function symbols f and v variables *)
+
+
+functor Unify (S : SIG, V : VAR) = struct
+
+  val unify : (S.symbol, V.var) term -> (S.symbol, V.var) term -> (S.symbol, V.var) telescope
+
+end
+
+#+END_EXAMPLE
+
+
+** Challenge of maintaining a telescope
+
+Consider a telescope implemented via the Map data structure in SML. The
+empty map is a telescope.
+
+The challenge to solve is when is it allowed to add an equation x ≡ t to
+the map.
+
+1. Really we want to avoid the recursion when doing the substitution.
+
+ 2. We want to know whether x "occurs" in t
+
+#+BEGIN_EXAMPLE
+
+Current key value map is t
+ x  -> f(y,z)
+ y  -> g(u,v)
+
+
+ u   -> h(x,x)
+
+ u ≡ h(x,x)
+
+Make sure u is not in h(x,x)
+means u is not in x and u is not in x
+i.e. u is not in f(y,z)
+u is not in y and u is not in z
+u is not in g(u,v) which is false
+
+x ≡ x
+
+#+END_EXAMPLE
+
+ 1. Find the set S₀ of variables that occurs in t
+ 2. For each such variable compute the assoicated term and compute the variables that occur in it.
+    Sₒ ∪ that set.
+ 3. Keep doing this till there is no more updates.
+
+Suppose σ is the current telescope. We can add x ≡ t into this telescope if and only if
+{x} ∩ Occurs(t[σ]) = \empty set.
+
+Occurs(t) is the set of variables that occurs in t.
+
+** Unification algorithm
+
+ Given two terms ~s~ and ~t~, we need to find a telescope σ (if
+ possible) such that ~s[σ] ≡ t[σ]~
+
+ Recall that the telescope σ is a sequence σ = x₁ ≡ t₁ , .... , xₙ ≡
+tₙ such that the term tᵢ does not have the variables x₁,...,xᵢ in it.
+
+~s[σ]~ the term obtained by (s[x₁ := t₁]) .....[xₙ := tₙ])~
+
+ The telescopica property ensures that s[σ] will not have x₁,....,xₙ in
+ it.
+
+*** Unification under a telescope.
+
+`unify`
+- Input :: terms ~s~ and ~t~ and a telescope ~σ~.
+- Output :: If possible an extension σ' of σ such that σ' unifies s[σ] and t[σ].
+
+*** Unification of a list of pairs of terms.
+
+`unifyList`
+- Input :: a list [ (s₁,t₁), ... (sₖ, tₖ) ] of terms  and a telescope σ.
+- Output  :: If possible an extension σ' of σ such that σ' unifies
+             sᵢ[σ] and tᵢ[σ] for all i ≤ k.
+
+Notice unification of a list of pairs is just a fold over the list.
+
+#+BEGIN_SRC sml
+
+val unify' : (option telescope * (term * term)) -> option telescope
+(* unify' is written interms of unify *)
+
+fun unify σ (App f slist)(App g tlist) = ...
+  | unify σ (Var x) t                  = ... (Cannot just add x ≡ t to the telescope σ)
+         (* Figure out s such that x[σ] = s and then unify σ (s,t) *)
+  |
+
+
+fun unifyList σ ts = List.foldl unify' σ ts ....
+
+open List
+
+
+#+END_SRC
+
+In sml one should use 'and' keyword for mutual recursion
+
+
+#+BEGIN_EXAMPLE
+
+f( g(x,y) , z  )   ≡ f ( g(h(u),v) , h(y)     )
+
+f( s₁, s₂)   ≡ f ( t₁ , t₂)
+  means
+   unify s₁ ≡ t₁ and s₂ ≡ t₂
+
+g(x,y) ≡ g(h(u),v) and z ≡ h(y)
+
+
+σ₁ = x₁ ≡ t₁,.... xₘ ≡ tₘ  got after solve s₁ ≡ t₁.
+
+s₂[σ₁] ≡ t₂ [σ₁]  will give you y₁ = t₁' .... yₙ = tₙ'
+
+x₁ ≡ t₁ ..... xₘ ≡ tₘ , y₁ ≡ t₁' .... yₙ ≡ tₙ'
+
+x ≡ h(u), z ≡ h(y), y ≡ v,
+
+
+Solve  g(x,y) ≡ g (h(u),v )   and z ≡ h(y)
+
+  σ₁ x ≡ h(u) , y ≡ v         z ≡ h (v)
+
+fun unify
+    |    (App f slist) (App g tlist) = ......
+
+slist = s₁,....,sₙ
+tlist = t₁,....,tₙ
+#+END_EXAMPLE
+
+Even if your task was to unify f(t₁,...,tₙ) with f(s₁,....,sₙ)
+
+1. Solve f(t₁,...,tₙ) ≡ f(s₁,....,sₙ)
+
+   Will be forced to solve s₁≡ t₁, s₂≡ t₂ ....., sₙ ≡ tₙ simultaneously.
+
+2. Given a sequence of equations s₁ ≡ t₁, s₂≡ t₂ ....., sₙ ≡ tₙ how
+   will you solve it.
+
+   2.1. Solved s₁ ≡ t₁ to get a telescope σ₁ then
+   2.2. Solve  s₂ ≡ t₂ under the telescope σ₁ to get σ₂.
+          Compute an extension σ₂ of σ₁  such that s₂[σ₁] ≡ t₂[σ₁] under σ₂
+
+          Consider the term t and a telescope σ = { x₁ ≡ t₁,...., xₙ ≡ tₙ }.
+   Vars(t[σ]) ∩ {x₁,....,xₙ} = ∅
+
+
+#+BEGIN_SRC sml
+fun even x = if x = 0 then true
+             else not (odd x)
+and odd x = if x = 1 then true
+            else even (x - 1)
+#+END_SRC
+
+#+RESULTS:
+: val even = fn : int -> bool
+: val odd = fn : int -> bool
+* TODO Unification algorithm clarification.
+
+#+BEGIN_EXAMPLE
+
+x₁ ≡ t₁, ......., xₙ ≡ tₙ
+
+tᵢ does not have variables {x₁,...,xᵢ}
+
+#+END_EXAMPLE
+
+unify (App f ts) (App g xs) tel = check if f and g are the same if not fail
+                                  else unifyList ts xs tel
+unify (Var x) t tel = Find the term that x is mapped to let us say t'
+                      unify t' and t tel
+                      otherwise add x ≡ t to tel
+
+
+#+BEGIN_SRC sml
+
+signature SIG = sig
+  type something
+  val mysomething : something
+end
+
+functor Term ( S : SIG ) = struct
+   structure TS = S
+end
+
+structure A : SIG = struct
+  type something = int
+  val mysomething = 42
+end
+
+
+functor Unify ( S : SIG , V : VAR) = struct
+
+  structure telescopes = Telescope(S,V)
+  structure terms = telescope.term
+
+x₁ ≡ y₁ y₁ ≡ z₁ .....
+
+unify y₁ x₁
+
+Equivlance relation + genuine telescope
+
+structure B = Term (A)
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+signature SIG =
+  sig
+    type something
+    val mysomething : something
+  end
+functor Term(S: sig
+                  type something
+                  val mysomething : something
+                end) :
+            sig
+              structure TS : <sig>
+            end
+structure A : SIG
+structure B :
+  sig
+    structure TS : <sig>
+  end
+#+end_example
+
+#+BEGIN_EXAMPLE
+
+x₁ ≡ t₁  x₂ ≡ t₂ | x₃ ≡ t₃     t₃ = f(x₂)
+
+x₁ < x₃ < x₂
+
+x₁ ≡ t₁ ..... xₙ ≡ tₙ
+
+#+END_EXAMPLE
+
+
+x₁ ≡ y₁
+
+Unify y₁ x₁
+
+Telescope functor
+
+add : variable -> term -> tele -> tele option
+
+checkRecursion : variable -> term -> tele -> bool
+
+
+Unify return an tele option ?
+
+Handle failure of unification.
+
+System call open If it returls filePtr option
+that is much better than returning nullPtr
+
+
+
+
+Exception way of doing things.
+
+Raise an exception whenever you fail.
+
+Think of the exception style code as the low-level
+code.
+
+unifyExp : term -> term -> telescope
+
+unify : term -> term -> telescope option
+ calls unifyExp and catches the exception and
+ returns NONE
+
+Term is either a variable
+ or f (t₁,...,tₙ) where n is the arity of f.
+
+You will have one constructor for variable
+You will have a constructor for
+App of (symbol * term list)
+
+
+You cannot ensure that the argument list for a
+symbol is of length the arity of the symbol.
+
+
+
+Smart constructors.
+
+Datatype with some constraints.
+
+App constructor takes a symbol and a list of terms and produces a term.
+
+fun app (s : symbol) (l : term list) : term  = if List.length l = ...) App ....
