@@ -1,4 +1,6 @@
 #+STARTUP: indent
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+
 * DONE Getting started                                                  :LAB:
 SCHEDULED: <2020-08-06 Thu>
 
