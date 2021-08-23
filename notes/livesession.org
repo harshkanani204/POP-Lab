@@ -77,6 +77,111 @@ languages.
   - Compilers course next semester some of these things will put into practice
 
 
+* DONE Functional Programming
+SCHEDULED: <2021-08-23 Mon>
+
+**  Why SML?
+
+Functional programming through Standard ML (SML)
+
+- ML :: means meta-language.
+
+- History is the implementation of a LCF proof assistant.
+
+  LCF  is the object language and ML was  designed to be the
+  meta language for LCF.
+
+- SML :: is probably the only programming language which has a /formal
+  semantics/ (meaning).
+
+  1. Syntax :: Grammar of the language.
+
+  2. Semantics :: Meaning of the language. There is a formal semantics
+     of SML that has been checked through a proof assistant.
+
+     SML is "type safe"
+
+  3. LCF system's correctness depends on SML's type safety and hence type safety of
+     SML was very important.
+
+     For each of the theorems you create a "proof object" and if SML was type unsafe you
+     can create "wrong proofs".
+
+  4. As a language it is really simple but some deep concepts are
+     available. SML has a concurrency mode (Concurrent ML which is
+     really advanced).
+
+  5. Introduces to a lot of programming language concepts.
+
+     1. Type systems
+     2. Continuations CPS system
+     3. Module systems.
+
+#+begin_src C
+
+  int main()
+  { int c=42;
+    char *hello = "hello";
+    double x y ;
+
+    double av = 1/2 * (x + y); // ill typed expression
+    printf("%s %d %p", c , hello, c + hello);
+    hello[c]= 0;
+    return 1;
+  }
+#+end_src
+
+- Type safety :: If the compiler says that your program has not "type mismatch", there
+should not be a illegal instruction executed during the run of the program.
+
+- Type Unsafe languages :: There are programs where the compiler will not flag a "type mismatch"
+  but will lead to a "Stuck" state.
+
+
+
+Accessing ~hello[i]~ can result in undefined behaviour.
+
+
+
+
+
+
+** Two SML compilers/interpreters.
+
+*** Two phases of development of an application
+
+- Development phase ::
+
+  + What is important ?
+
+    1. Speed of compilation
+    2. Quick feedback
+    3. Quickly checking out a piece of code (prototyping)
+    4. Better error messages when things are not okey.
+
+  + What you do not care about
+
+    1. Speed of the resulting executable
+    2. Space taken by the resulting code.
+    3. You do not care about efficiency of execution.
+
+
+- Deployment phase ::
+
+  + What you care about is efficiency of the executable and not the feedback to the developer.
+
+
+*** SML/NJ - New Jersey SML interpreter
+
+smlnj should be used in the development phase
+
+smlnj can be used to build a standalone executable but it is not
+recommended.
+
+*** Mlton - Compiler for SML
+
+mlton compiler should be used in the production phase.
+mlton is a compiler and not an interpreter.
 * DONE Basics of Standard ML                                      :CLASSROOM:
 SCHEDULED: <2020-08-10 Mon>
 
