@@ -185,12 +185,58 @@ mlton is a compiler and not an interpreter.
 * DONE Basics of Standard ML                                      :CLASSROOM:
 SCHEDULED: <2020-08-10 Mon>
 
+* Programming model for SML
+SCHEDULED: <2021-08-30 Mon>
+
+There are two views to the programming language.
+
+1. The view of the programmer ::
+
+   The things of interest are the high level info of what the given
+   program does.
+
+   The programmer needs to think of how to accompish the programming
+   task at hand using high level programming concepts.
+
+   1. How do I break the big task into smaller task ?
+
+   2. Can I generalise certain programming patterns and refactor them into
+      functions ?
+
+   3. Can I use already existing library ?
+
+   4. What should I do so that I make less errors ?
+
+   5. Is the following code understandable to others ?
+
+2. The view of the implementer.
+
+   The things of interest are those that guide efficient implementation
+   of the "programmer"s view.
+
+   1. Is it possible to vectorise certain code ?
+
+      a = a + c
+      ap = ap + cp
+
+      [a, ap] = [a , ap] + [c,cp]
+
+   2. Can a certain recursive code be converted to loops ?
+
+   3. Which variables need to be in registers at what point of time ?
+
+
+3. If you are working on Computer Arch, then the assembly language itself
+   is a "programmers view" ?
+
+
+
 ** The programming model for Languages
 
 - It is a mental model of what the program /is/ and what it /does/.
 
-- It might not be the actual implementation model. Is typically the
-  machine model.
+- It might not be the actual implementation model which is typically
+  the machine model.
 
 - The distinction between the programming model and the implementation
   model is important because the programming model is often
@@ -209,20 +255,62 @@ SCHEDULED: <2020-08-10 Mon>
 
 *** Variable Bindings
 
+- Variables :: x y z etc
+- Expressions/terms :: 10 , 5 + 2, can be a variable
+- Values :: are expressions that are in their "simplest" form.
+- Environment :: is a function from Variables to values.
+
+When an expression is a value ?
+
+Values ⊆ Expressions
+
+The programming model for sml is the following :
+
+
+1. The program consists of a sequence of /variable bindings/.
+
+2. A variable binding looks like ~val <variable> = <expr>~
+
+3. A subset of expressions are called /Values/. These are
+   those expressions that are in the simplest form.
+
+4. The SML language when it encounters a binding ~val x = e~,
+   evaluates (tries to) the Right Hand Side e of the binding (which is
+   an expression) to its simplified form (which is a value) ~v~. And
+   then it updates the /environment/ by binding the variable to ~x~ to
+   ~v~. At this point of "time" we say that the variable x is /bound/
+   to the value v.
+
+
+
+
+
 #+BEGIN_SRC sml
 
-val x = 10     (* Binds the variable x to the value 10 *)
-val y = 5 + 2  (* RHS = 5 + 2 (expression) ----> 7 (value)
-                  Bind the value 7 to y
-               *)
-val z = x + y  (* RHS is not value.
-                 x + y ----> 10 + y (substitution of x)
-                       ----> 10 + 7 (substitution of y)
-                       ----> 17
-                 Binds z to 17
-                 *)
-val amitabbachan = "Big B"
-val z1 = amitabbachan
+   (* Environment is stdlib + {}*)
+   val x = 10     (* Binds the variable x to the value 10 *)
+
+   (* Environment becomes stdlib + {x = 10} *)
+
+   val y = 5 + 2  (* RHS = 5 + 2 (expression) ----> 7 (value)
+                       Bind the value 7 to y
+                  ,*)
+    (* Env = stlib + { x =10 ; y = 7 }  *)
+
+
+   val z = x + y  (* RHS is not value.
+                      x + y ----> 10 + y (substitution of x)
+                            ----> 10 + 7 (substitution of y)
+                            ----> 17
+                      Binds z to 17
+                      ,*)
+
+  (* Env = stdlib + {x = 10 ; y = 7; z = 17 *)
+
+   val amitabbachan = "Big B"
+
+   val z1 = amitabbachan
+   (* Env = ? *)
 
 #+END_SRC
 
@@ -302,6 +390,14 @@ called a /pure expression/
 2. It reduces to the value ~()~
 3. The reduction has the side effect of printing "hello"
 4. However, the resulting value ~()~ has no side effect.
+
+
+An expression ~e~ which reduces to a value ~v~ is said to be /pure/
+if every binding of the form ~val x = e~ can be replaced by the binding
+~val x = v~ without changing the behaviour of the program.
+
+Any expression that does not have the above property is said to have
+"side-effects".
 
 *** SML is /not/ a pure functional programming language
 
