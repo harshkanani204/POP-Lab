@@ -235,6 +235,244 @@ append [1,2,3] 4 => let val y = 1
 http://mlton.org/ValueRestriction
 
 #+END_SRC
+
+
+* Tree Functions
+
+#+begin_src sml
+  val x           = 10
+                           (* The env has x = 10 *)
+  val z           = 2 * x
+                           (* The env has z = 20, x = 10 *)
+
+  fun f       x   = x + z
+                             (* The env has z = 20, x = 10 and f bound to the function which
+                              increments its argument
+                             ,*)
+  fun g       _   = 10
+  fun first (x, _ ) = x (* 'a * 'b -> 'a *)
+
+                      (* The environment here is η *)
+  val u = f (x + z)
+  val u = let val z = 100
+          in f 10
+          end
+
+  fun g ( (x,_) , y) = (x, y)  (*   ('a * 'b) * 'c  -> 'a * 'c *)
+
+  (* Map : ('a -> 'b) -> 'a list -> 'b list  *)
+  fun incr x          = x + 1
+  fun Map f []        = []              (* eqn 1 *)
+    | Map f (x :: xs) = f x :: Map f xs (* eqn 2 *)
+
+
+  (*  map incr [1,2,3]    [1,2,3] = 1 :: 2 :: 3 :: nil
+
+      f with incr    [] with 1 :: 2 :: 3 :: nil will fail
+
+      f with incr    (x :: xs) with 1 :: (2 :: 3 :: nil)
+                     x := 1 and xs := (2 :: 3 :: nil)  and you evaluate incr x :: Map f xs
+         to get the result.
+
+         incr 1 :: Map incr (2 :: 3 :: nil)
+         2 ::
+
+   ,*)
+
+      (* How to think about it
+         List has two possiblities, either it is
+         - [] in which case map f [] = [] or it is
+         - (x :: xs) for some x and xs in which case it is f x :: map f xs
+
+
+#+end_src
+
+#+RESULTS:
+: val x = 10 : int
+: val z = 20 : int
+: val f = fn : int -> int
+: val g = <hidden-value> : 'a -> int
+: val first = fn : 'a * 'b -> 'a
+: val u = <hidden-value> : int
+: val u = 30 : int
+: val g = fn : ('a * 'b) * 'c -> 'a * 'c
+
+When you have a line like ~val x = e~, SML reduces the expression e to
+a value and then binds x to that value.
+
+
+Consider the line ~val u = f z~. Reduce the rhs to a value which is ~f z~.
+
+Standard ML reduces f to f itself and (x + z) to 30 (by looking up the environment for
+values of x and z.  f 30 is not a value, we now reduce it.
+
+We have said that f x = x + 1  as an equation.
+
+We evaluate x + 1 in the environment η [ x := 30 ]
+
+Suppose there is a function f defined as ~fun f x₁ x₂ ... xₙ = e~ , where x₁ .... xₙ are its
+formal parameters.
+
+Consider reducing ~f e₁ ... eₙ~ in the environment η. SML proceeds as follows.
+
+- Eager evaluation :: First reduce e₁ to v₁ .... eₙ to vₙ using the environment η
+
+Now that we have the values of e₁ .. eₙ which is respectively v₁ .. vₙ
+
+We reduce ~f e₁ ... eₙ~ ====> f v₁ ... vₙ => e reduced in the environment η'
+
+η' is the environment η with x₁ bound to v₁, .... , xₙ bound to vₙ
+
+
+** Basic idea behind pattern matching
+
+The cartesian product type 'a * 'b
+
+1. How do you form an element of this type or what is a constructor of this type ?
+
+   Suppose ~x : 'a~ and ~y : 'b~ then ~(x, y)~ : 'a * 'b
+
+
+Some basic patterns are
+
+- Variable pattern :: x, y z
+
+- The wild card pattern ::  _
+
+- The tuple pattern ::  (p₁, p₂) , (p₁, p₂, p₃) .... where pᵢ's  are themselves pattern
+
+- The list pattern :: [], (x :: xs) where x is some element and xs is the rest of the list
+
+
+There are two things that happen with patterns.
+
+- Patterns match the parameters ::
+
+Suppose the function definition looks like ~fun f p = e~ where p is some pattern
+
+When f is evaluated at v (some value) first we check whether v /matches/ p
+
+
+- Patterns bind variables ::
+
+  Each match of a pattern produce additional binding. You evaluate the rhs e with this
+  additional binding.
+
+
+
+| Pattern       | Matching rule                                   | Binding                              |
+|---------------+-------------------------------------------------+--------------------------------------|
+| Variable x    | It will match any value v                       | x := v is the binding produced       |
+|---------------+-------------------------------------------------+--------------------------------------|
+| Wild card _   | It will match any value v                       | Produces no extra binding            |
+|---------------+-------------------------------------------------+--------------------------------------|
+| (p₁, p₂)      | It will match any value v                       | What ever binding that the           |
+|               | that looks (v₁, v₂) such that                   | matches p₁ := v₁ and p₂ := v₂        |
+|               | p₁ should match v₁ and p₂ should                | produces                             |
+|               | match v₂                                        |                                      |
+|---------------+-------------------------------------------------+--------------------------------------|
+| (p₁, p₂, p₃)  | Home work                                       | Home work                            |
+|---------------+-------------------------------------------------+--------------------------------------|
+|---------------+-------------------------------------------------+--------------------------------------|
+| List Patterms |                                                 |                                      |
+|---------------+-------------------------------------------------+--------------------------------------|
+| []            | Matches any list which is empty                 | No additional bindings are produced  |
+|---------------+-------------------------------------------------+--------------------------------------|
+| (p₁:: p₂)     | Will match any list that looks like             | bindings produced when p₁ matches v₁ |
+|               | v₁ :: v₂ and p₁ should match v₁ and p₂ match v₂ | and p₂ matches v₂                    |
+|---------------+-------------------------------------------------+--------------------------------------|
+
+*** Examples
+
+
+1. Suppose you try to match ( (x, _ ) , y)   with (10,"hello")
+
+   - Match  ( (x,_), y ) with (10, "hello") { Here p₁ = (x,_) and p₂ as y }
+   - match (x, _) with 10 and y with "hello"
+
+     p = (x, _) and it is matching with 10
+
+    (x, _) with 10 (this is not okey) and y with "hello" (this is okey)
+
+    This will fail.
+
+
+
+2. Match ( (x, _ ) , y)   with  ( (true, 10) , "hello")
+
+   Match (x,_) with (true, 10) and match y with "hello"
+
+   Match x with true and _ with 10 and match y with "hello"
+
+   This will succeed and the resulting binding will be
+
+   x := true , y := "hello"
+
+** Side note
+
+A * B is the type of cartesian product.  A + B to be the type of dijoint union.
+
+#+begin_example
+
+L 'a = Empty + 'a * L 'a
+
+L = 1 + a * L
+
+T = 1 + T * a * T
+T = 1 + a * T²
+
+
+(1 - a) L = 1
+
+L = 1 / (1 - a)
+  = 1 + a + a² + a³ .....
+
+  = 1 + a + a * a + a * a * a + .....
+
+
+
+a * T² - T + 1 = 0
+
+(1 -  sqrt (1 - 4 a) / 2 a)
+
+
+1 + a + 2 * a^2 + ..
+
+
+T = 1/(1 - a²)  = 1 +
+
+
+#+end_example
+
+
+#+begin_src sml
+
+    datatype 'a tree = Empty
+                     | Node of 'a tree * 'a * 'a tree
+
+    val x = Empty
+    fun singleton x = Node (Empty, x , Empty)
+    (* inorder : 'a tree -> 'a list *)
+
+                         (*
+    fun inorder Empty                 =  []
+      | inorder (Node (t1 , x , t2) ) =  ...
+
+  ,*)
+
+    val u = [1,2,3] @ [2,3]   (* u1 @ u2 means append the list u2 at the end of u1 which is
+                                    is also a list *)
+                              (* u1 :: u2 is take the element u1 and put it as the first element
+				       of u2 *)
+
+#+end_src
+
+#+RESULTS:
+: datatype 'a tree = Empty | Node of 'a tree * 'a * 'a tree
+: val x = Empty : 'a tree
+: val singleton = fn : 'a -> 'a tree
+: val u = [1,2,3,2,3] : int list
+
 * DONE Fold functions
 SCHEDULED: <2020-09-03 Thu>
 
