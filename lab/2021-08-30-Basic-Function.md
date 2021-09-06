@@ -4,9 +4,17 @@ Deadline: 6th Sep 2021, 11:59 hrs
 
 In this exercise you do some basic functions
 
-1. Write the tri-variate (i.e. 3 variable) versions of `curry` and
-   `uncurry` functions.  First step is to write down the type (in the
-   comments).
+1. In the tutorial, we have given two functions `curry` and `uncurry`
+   that converts between these two froms for bi-variate
+   functions. Write the tri-variate (i.e. 3 variable) versions of
+   `curry` and `uncurry` functions.  First step is to write down the
+   type (in the comments).
+
+   ```
+   curry   : ('a * 'b * 'c -> 'd) -> ('a -> 'b -> 'c -> 'd)
+   uncurry : ('a -> 'b -> 'c -> d) -> ('a * 'b * 'c -> 'd)
+
+   ```
 
 2. Write the functions `fst : 'a * 'b -> 'a` and `snd : 'a * 'b -> 'b`
    that project a tuple into its components.
