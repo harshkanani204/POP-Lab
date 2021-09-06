@@ -9,4 +9,4 @@ Palakkad.
 - [Course wiki][wiki]
 
 
-[wiki]: <https://bitbucket.org/piyush-kurur/popl/wiki> "PoPL Wiki"
+[wiki]: <https://gitlab.com/piyush-kurur/popl/wikis> "PoPL Wiki"
