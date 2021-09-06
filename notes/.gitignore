@@ -267,3 +267,6 @@ transcript.pdf
 transcript.tex
 recording
 youtube
+*.pdf
+*.html
+*.tex
