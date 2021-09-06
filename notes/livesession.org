@@ -443,6 +443,90 @@ val u1 = () : unit
 val u2 = () : unit
 #+end_example
 
+
+
+
+
+* Polymorphism (Parametric)
+
+** Recap
+
+#+begin_src sml
+  val x : int = 10     (* binds x to 10 *)
+  fun f x = x + 1	   (* can also be recusive,
+                              binds f to the function that takes x and returns x +1 *)
+
+  fun g (x : int) = x + 1
+#+end_src
+
+- Strong typing :: Every expression in SML has a type and the compiler
+  enforces type checking at compile time.
+
+- Type inference :: When ever an expression can be given a valid type, the compiler
+  infers the type (it infers the /most general type/).
+
+- Parametric polymorphism :: A function can work with different types.
+  poly-morphism morphism is another word for function and poly morphism means multiple
+  possible functions.
+
+  You can think of ident as a /family/ of functions one for each possible instantiation of
+  'a with types.
+
+  Note that SML does type checking at compile time unlike say Python. But the combination of
+  Type inference + Parametric polymorphism make it look like you do not have to worry about
+  declaring the types.
+
+ - Adhoc polymorphism or Overloading ::  C++ without template. Java without generics
+   provide a way to give same name to different functions. The actual function that is
+   used /depends on the type/
+
+   E.g overloading of + or << in C++   << is bitwise left shift as well as cout << "hello"
+
+   (1) << takes two ints then it should be the left shift of Int
+   (2) if it is a ostream and the right operator is string then it is a printing function
+
+  - SML does not have overloading but there are other ways for it.
+
+#+begin_src sml
+  fun ident x = x   (* int -> int, or string -> string,  (int -> string) -> (int -> string) *)
+  fun idInt (x : int) = x
+  fun curry f x y = f (x,y)
+#+end_src
+
+SML infers the type ~'a -> 'a~ here ~'a~ is a type variable
+
+
+What type really are ?
+
+1. Types are specifications to your value.
+
+2. As a client hiring you for writing code, I have to give you my requirements (or Specs)
+   It is your job to write the code for it.
+
+   'a -> 'a
+
+- Moral of the story :: whenever possible write the most general function.
+
+Map function. It takes a function f and a list l and gives the list
+obtained by applying f on every element of the list.
+
+
+~map : ('a -> 'b) -> 'a list -> 'b list~
+
+Let g be any function that has the above polymorphic type. g has to
+apply f on the list, drop or duplicate the elements of the list, and
+rearrange in some specific way
+
+
+
+
+
+
+
+
+
+
+
 * DONE Types and Functions                                        :CLASSROOM:
 SCHEDULED: <2020-08-17 Mon>
 
