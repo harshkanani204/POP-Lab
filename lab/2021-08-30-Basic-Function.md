@@ -13,7 +13,6 @@ In this exercise you do some basic functions
    ```
    curry   : ('a * 'b * 'c -> 'd) -> ('a -> 'b -> 'c -> 'd)
    uncurry : ('a -> 'b -> 'c -> d) -> ('a * 'b * 'c -> 'd)
-
    ```
 
 2. Write the functions `fst : 'a * 'b -> 'a` and `snd : 'a * 'b -> 'b`
