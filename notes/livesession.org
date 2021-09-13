@@ -77,7 +77,7 @@ languages.
   - Compilers course next semester some of these things will put into practice
 
 
-* DONE Functional Programming
+* Functional Programming
 SCHEDULED: <2021-08-23 Mon>
 
 **  Why SML?
@@ -182,7 +182,7 @@ recommended.
 
 mlton compiler should be used in the production phase.
 mlton is a compiler and not an interpreter.
-* DONE Basics of Standard ML                                      :CLASSROOM:
+* Basics of Standard ML                                           :CLASSROOM:
 SCHEDULED: <2020-08-10 Mon>
 
 * Programming model for SML
@@ -525,6 +525,156 @@ rearrange in some specific way
 
 
 
+
+
+
+* Pattern matching
+
+#+begin_src sml
+   val x = 10      (* an equantion that says in this context x is 10 *)
+   fun f x = x+1   (* we say f is that function that satisfies f x = x + 1 *)
+   fun konst _ = 10
+   fun first (x, _) = x (* I have used variable pattern, wild card and tuple pattern *)
+
+   fun foo ( _ , _ , y) = y + 1
+
+
+   (*
+      fun foo p = ... where p is the pattern (p₁, p₂)  p: 'a * b where p₁ : 'a, p₂ : 'b
+                            p₁ is the pattern (p₁₁, p₁₂)  'a = 'a₁ * 'a₂
+                            p₁₁ and p₁₂ are both _
+
+                            p₂ is the pattern y : 'b , 'b has to be int because RHS has y + 1
+                              RHS type is 'c so 'c and 'b has to be type int
+
+     foo : ('a₁ * 'a₂) * int -> int
+
+     foo : A * B -> C  where A = 'a₁ * 'a₂
+
+     foo : A * B * C -> D
+  ,*)
+
+   fun bar (   _   , y) = y + 1
+
+   (* length : 'a list -> int *)
+   (* fun length (xs : 'a list) = ... : int *)
+   fun length []        = 0
+     | length (_ :: ps) = 1 + length ps
+
+   (* map f [x₁,....,xₙ] = [ f x₁ , f x₂ , .... , f xₙ ]
+
+      map : 'a ->           'b           -> 'c
+      map : ('a₁ -> 'a₂) -> 'b₁ list     ->'c₁ list
+      map : ('a₁ -> 'a₂) -> 'a₁ list     -> 'a₂ list
+      map : ('a -> 'b) -> 'a list -> 'b list
+
+    ,*)
+   (* fun map f xs = ....  *)
+   fun map f (p :: ps) = f p :: map f ps
+     | map _ []        = []
+
+#+end_src
+
+#+RESULTS:
+: val x = 10 : int
+: val f = fn : int -> int
+: val konst = fn : 'a -> int
+: val first = fn : 'a * 'b -> 'a
+: val foo = fn : 'a * 'b * int -> int
+: val bar = fn : 'a * int -> int
+
+Patterns
+
+We define what are patterns. A pattern on the LHS servers two purposes In an equation
+like ~fun f p = e~ , p restrict the allowed values to certain forms and also leads
+to variable binding. We call this process "pattern matching"
+
+
+
+
+1. A variable :: A variable pattern ~x~ matches any value (of appropriate type) and binds
+   x to it for use in RHS
+
+2. A wild card  i.e ~_~.  The wild card patter ~_~ matches any value but that value is not
+   available as binding on the RHS. One uses a wild card when one does not care about the value.
+
+** Tuples
+
+What is the type ~A * B~ ? To answer that question I have to give you
+what are the elements of the type ~A* B~. Or in other words what are
+the values ~v~ such that ~v : A * B~ ?
+
+- Construct :: Let v₁ : A and v₂ : B be values of type A and B respectively then
+   (v₁ , v₂) is a value and is of type ~A * B~
+
+- Take apart ::  If ~v : A * B~ is a value then there is ~v₁ : A~ and ~v₂ : B~  such that
+   ~v = (v₁ , v₂)~
+
+   Which means if you want to write a function f: A*B -> C then what you need to specify
+   what the function value is on a tuple (v₁, v₂) where v₁ : A and v₂ : B.
+
+
+*** Tuple Pattern
+
+If p₁ and p₂ are patterns then (p₁ , p₂) is also a pattern.
+
+When you use the tuple pattern : The match is successful if and only if the value
+is of the form (v₁, v₂) where p₁ matches v₁ and p₂ matches v₂
+
+*** Generalising to n-tuples for any n ∈ ℕ
+
+If A₁ .... Aₙ are types then the type A₁ * ... * Aₙ consists of values
+
+- Construction :: If v₁ : A₁ .... vₙ : Aₙ then (v₁,....vₙ) : A₁ * ... * Aₙ
+- Taking apart :: The only possible values of the n-tuple type A₁ * ... * Aₙ
+  is the one obtained by applying the construction rule
+
+  The pattern for n-tuple would be
+
+  (p₁,...,pₙ) where pᵢ is a pattern of type Aᵢ
+
+
+** Lists
+
+What is a ~'a list~ ? Again I need to tell you what the elements of this type are.
+
+
+- Construction ::
+
+  1. The empty list ~[]~ is a /value/ of type ~'a list~.
+  2. If ~v : 'a~ and ~vs : 'a list~ then ~v :: vs : 'a list~ where ~v~ and ~vs~ are values
+
+- Taking apart :: The only possible values of type ~'a list~ are the ones created out of
+  the above two rules.
+
+This types that are defined by a set of finite rules together with the appropriate Taking apart
+condition
+
+The taking apart condition is the rule that says that the type is the "smallest" type with
+the Construction rules.
+
+*** List patterns.
+
+1. [] is a list pattern that matches an empty list of type 'a list
+
+2. If ~p~ and ~ps~ are patterns of types ~'a~ and ~'a list~ respectively then
+   ~p :: ps~ is a pattern of type ~'a list~.
+
+   p :: ps  matches a list v :: vs where p match v and ps matches vs
+
+   The bindings created are the bindings that is the result of matching p to v
+   and ps to vs.
+
+   #+begin_example sml
+     fun g x = x + 1
+     fun f (g y) = y - 1 (* Not Allowed *)
+
+                      (* Check if the value given to f as argument looks like g y for some y *)
+		            (* Then bind y to that value *)
+
+
+   #+end_example
+*  Old notes starts here
 
 
 * DONE Types and Functions                                        :CLASSROOM:
