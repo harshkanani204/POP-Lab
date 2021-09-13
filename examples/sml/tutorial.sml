@@ -503,4 +503,4 @@ tutorial.
 *)
 
 fun main _ = let val (question,answer) = aPair
-	     in map print [question, ": ", (Int.toString answer), "\n"]; 0 end
+	     in map print [question, ": ", Int.toString answer , "\n"]; 0 end
