@@ -1,5 +1,7 @@
 # Lists and Trees
 
+Deadline: 19 September 2021, 23:59
+
 In this assignment we look at functions on lists and binary trees.
 
 1. For lists define the function `map : ('a -> 'b) -> 'a list -> 'b
