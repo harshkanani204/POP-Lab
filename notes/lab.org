@@ -473,6 +473,222 @@ T = 1/(1 - a²)  = 1 +
 : val singleton = fn : 'a -> 'a tree
 : val u = [1,2,3,2,3] : int list
 
+* Folding functions
+SCHEDULED: <2021-09-13 Mon>
+
+
+#+begin_src sml
+
+    (* partition : ('a -> bool)        (* is a predicate on 'a *)
+                 -> 'a list
+                 -> ('a list, 'a list)
+    ,*)
+
+  fun partition _    []        = ( [] , [] )
+    | partition pred (x :: xs) = let val (us,vs) = partition pred xs
+                                 in
+                                     if pred x then (x :: us, vs)
+                                     else           (us, x :: vs)
+
+                                 end
+#+end_src
+
+#+RESULTS:
+: val partition = fn : ('a -> bool) -> 'a list -> 'a list * 'a list
+
+
+How to express partition in terms of foldl
+
+The type of foldl : (('elem * 'summary) -> 'summary) -> 'summary -> 'elem list -> 'summary
+
+#+begin_src sml
+
+    (*
+      fun parition pred xs = let fun sfun (x, (us, vs) ) = if pred x then (x :: us, vs)
+                                                           else           (us , x :: vs)
+                             in foldl sfun ( [], [])  xs
+                             end
+    ,*)
+
+      fun partition pred  = let fun sfun (x, (us, vs) ) = if pred x then (x :: us, vs)
+                                                          else           (us , x :: vs)
+                             in foldl sfun ( [], [])
+                             end
+
+      fun add x y = x + y
+      fun incr y = (add 1) y
+      val incr = add 1
+
+      val x = 10 + 1
+
+  (*
+     fun partition pred xs = foldl sfun ( [], [] ) xs
+     partition pred is that function which maps xs to (foldl sfun ([], [])) xs
+      g'                                                g
+
+    g' = g
+
+    partition pred = foldl sfun ([],[])
+
+
+      fun partition pred = let fun sfun ....
+                             in foldl sfun ([], [])
+
+            (partion pred) xs = (foldl sfun ([],[])) xs
+
+
+                                                   partiion pred = foldl sfun ([],[])
+                         (* We know that partition pred [] = ... ?
+                              And we know foldl sfun s0 [] = s0 : 'summary
+                            ,*)
+      fun (f x₁ x₂ ... xₙ₋₁) xₙ = g xₙ
+      fun f x₁ x₂ ... xₙ₋₁      = g     (* provided xₙ does not occur in g *)
+
+      fun g' x = g x
+
+          I am saying that g' is that function which on x gives me g x
+
+      val g' = g
+
+          g' is g
+
+      val x = 10
+      val p = value
+
+  ,*)
+
+#+end_src
+
+#+RESULTS:
+: - - = = = = = = = = = = = = = = = = = = = = = = = = = val parition = fn : ('a -> bool) -> 'a list -> 'a list * 'a list
+
+
+1. What should be the 'summary type in the case of partition ?
+    'summary should be 'a list * 'a list
+
+2. What should be the starting summary ?
+
+   s0 = ( [] , [] )
+
+3. What is the type of sfun : 'a * ('a list * 'a list)  -> 'a list * 'a list ?
+
+
+
+#+begin_src sml
+  datatype 'a option = SOME of 'a | NONE
+
+
+  fun default (x : 'a) NONE     = x
+    | default _        (SOME x) = x
+
+#+end_src
+
+1. A type 'a option is born
+2. Two constructors for this type is also born
+
+    -  SOME  : 'a -> 'a option
+    -  NONE  : 'a option
+
+- COnstruction ::
+
+  + NONE is a value of type 'a option
+  + If v is value of type 'a then SOME v is also a value of type 'a option
+
+    What are the possible option patterns ?
+
+    1. NONE is a pattern of 'a option
+    2. SOME p where p is itself a pattern of
+       of type 'a
+
+       i.e. if p is a pattern of type 'a then
+       SOME p is a pattern of type 'a option
+
+    #+begin_example sml
+      (* foo : int option -> string *)
+      (* fun foo x = ...  *)
+      fun foo NONE     = ...
+        | foo (SOME x) = ...
+
+
+    #+end_example
+
+#+begin_src sml
+    datatype 'a List   = Nil | Cons of 'a * 'a List
+
+    datatype ('a, 'b, 'c) T = C1
+                            | C2 of τ  (* τ is a type involving the variables 'a, 'b , 'c *)
+                            | C2 of int
+
+  (* A new type ('a,'b,'c) T is born
+     With constructors
+     - C1 :  ('a, 'b , 'c) T
+     - C2 : τ -> ('a, 'b , 'c) T
+     - C3 : int -> ('a, 'b, 'c) T
+  ,*)
+
+
+#+end_src
+
+1. A new type 'a List is born
+
+2. It has two constructors
+   - Nil  : 'a List
+   - Cons : 'a * 'a List -> 'a List
+
+    The constructors of 'a List are
+
+      (1) Nil : 'a List
+      (2) Cons : 'a * 'a List -> 'a List
+
+  SO the  Patterns would be
+
+
+    In the context of list the list patterns are either
+
+    1. []  : 'a list
+    2. p :: ps where p is a pattern of type 'a and ps is a pattern of type 'a list
+
+      (_ , x ) :: xs
+
+
+       ,*)
+#+end_src
+
+#+RESULTS:
+: datatype 'a option = NONE | SOME of 'a
+: datatype 'a List = Cons of 'a * 'a List | Nil
+: val default = fn : 'a -> 'a option -> 'a
+
+#+begin_src sml
+
+  fun double x = 2 * x
+  fun fourtimes x = double (double x)
+  fun fourtimes x = (double o double) x
+
+  fun foo x = g₁ ( g₂ (g₃ x)
+  fun foo x = (g₁ o g₂ o g₃) x
+  val foo   = g₁ o g₂ o g₃
+  val fourtimes = double o double
+
+  fun square (x : real) = x * x
+  fun sumOfSq0 xs =  sum  ( (map square) xs) )
+  fun sumOfSq1 xs = (sum o map square) xs
+
+  val sumOfSq = sum o map square
+
+                        (* Function application associates towards the left and has
+			     precedence over operators *)
+
+
+
+#+end_src
+
+* Previous lab sessions
+
+
+
+
+
 * DONE Fold functions
 SCHEDULED: <2020-09-03 Thu>
 
