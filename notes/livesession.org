@@ -674,6 +674,190 @@ the Construction rules.
 
 
    #+end_example
+
+* Algebraic data types and pattern matching
+
+** Recap
+
+We briefly discussed pattern matching and how to use it to define
+functions.
+
+#+begin_example sml
+  val x     = expr
+  fun f x y = exp
+
+  (* The general form of bindings *)
+  val pat = expr  (*
+                    1. expr is reduced to a value  say v
+                    2. v is matched with the pattern pat
+                    3. If the match failed it is a runtime error
+                       (typically due to non-exhaustive pattern matching )
+                    4. If the pattern pat matches with v the associated bindings
+                       are done at the top level.
+                       *)
+
+  fun f p₁₁ ... p₁ₙ = e₁
+    | f p₂₁ ... p₂ₙ = e₂
+    | ....
+	| f pₘ₁ ... pₘₙ = eₘ
+
+  val x = let val pat = e1    (* Only applicable within this let and the
+                                 associated expression betwen "in" and "end"
+                              *)
+              fun f p1 = e2
+          in
+             exp
+          end
+
+
+#+end_example
+
+#+begin_src sml
+  val (x,y) = ("hello", 2)
+  val _     = print "hello\n"
+  val _     = 2
+  fun head (x :: xs) = x
+  (* val (x,_) = "hello"  (* This is an error because tuple pattern cannot match string *)  *)
+  (* val x::xs  = []  (* This is a pattern match failure that manifest itself at run time *) *)
+  val x :: xs = [1,2]
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+stdIn:28.5-28.20 Warning: binding not exhaustive
+          x :: xs = ...
+stdIn:25.5-25.23 Warning: match nonexhaustive
+          x :: xs => ...
+
+hello
+val x = <hidden-value> : string
+val y = 2 : int
+val head = fn : 'a list -> 'a
+val x = 1 : int
+val xs = [2] : int list
+#+end_example
+
+
+
+
+
+
+** Basics of Algebraic types.
+
+#+begin_example sml
+
+  datatype ('a, 'b, 'c) Name = C1
+                             | C2 of <τ>
+                             (* where <τ> is some type in SML that may involve the type variables 'a, 'b, 'c etc *)
+
+#+end_example
+
+The result of the above definition is
+
+1. A new type ~('a, 'b, 'c) Name~ is born
+
+2. Constructors are new functions ~C1 : ('a,'b,'c) Name~
+   and ~C2 : τ -> ('a,'b,'c) Name~
+
+
+
+*** What are the values of type ('a,'b,'c) Name ?
+
+Recall values are subset of expressions that are in reduced form (SML
+does not reduce it any further. e.g 1 is a value where as 1 + 1 is not
+value.
+
+
+
+1. ~C1~ is a value of type ('a,'b,'c) Name
+2. If ~v~ is a value of type ~τ~ then  ~C2 v~ is a value of type
+   ~('a,'b,'c ) Name~
+
+   #+begin_src sml
+     datatype Foo = Foo1
+                  | Foo2 of int
+
+			  (* Here ~Foo2 1~ is a value but Foo2 (1 + 1) is not value *)
+   #+end_src
+
+3. Suppose we have an expression of the kind ~C2 e~ then SML tries to reduce ~e~ to value
+   ~v~ and suppose it succeeds then the value to which ~C2 e~ reduces is ~C2 v~
+
+
+*** What are the patterns of type ('a,'b,'c) Name ?
+
+There are two possible patterns of type ('a, 'b, 'c) Name
+
+1. ~C1~ is a pattern of type ~('a, 'b, 'c) Name~ and it matches only
+   the value ~C1 : ('a,'b,'c) Name~.  No bindings are created as a result.
+
+2. ~C2 p~ is a pattern of type ~('a,'b,'c) Name~ for all pattern ~p :
+   τ~.  It matches all values of the kind ~C2 v~ where ~p~ matches
+   ~v~. The resulting bindings are the bindings created out of the
+   match of ~p~ with ~v~.
+
+
+#+begin_src sml
+
+  (* binary tree with nodes decorated by elements of type 'a *)
+    datatype 'a Tree = Empty
+                     | Node of 'a Tree * 'a * 'a Tree
+
+                                (* inorder :  'a Tree -> 'a list  *)
+    (* fun inorder t = ... *)
+    fun inorder Empty             = ...
+      | inorder (Node (lt,a,rt) ) = ...
+
+    (* depth : 'a Tree -> int *)
+    (* fun depth t = ... *)
+    fun depth  Empty              = 0
+      | depth (Node (lt, _, rt))  = let val dl = depth lt
+                                        val dr = depth rt
+                                    in  if dl > dr then dl + 1
+                                        else dr + 1
+
+#+end_src
+
+#+RESULTS:
+: datatype 'a Tree = Empty | Node of 'a Tree * 'a * 'a Tree
+
+
+** Algebraic data types in action
+
+We want to design a calculator.
+
+You capture the AST (abstract syntax tree/parse tree) of your language
+(in this case expressions) as an algebraic data type.
+
+
+#+begin_src sml
+
+  datatype Expr = Const of int
+                | Plus  of Expr * Expr
+                | Mul   of Expr * Expr
+
+  fun eval (Const x)        = x
+    | eval (Plus (e1, e2))  = e1 + e2
+    | eval (Mul  (e1, e2))  = e1 * e2
+
+  val parse : string -> Expr option (* this converts user input given as
+                                       string to expression To actually
+                                       run your calculated you need
+                                       parse but the essence of the
+                                       calculator program is present in
+                                       the type Exp and the function
+                                       eval.
+                                     *)
+
+#+end_src
+
+#+begin_src sml
+
+datatype 'a option = SOME of 'a | NONE
+
+#+end_src
+
 *  Old notes starts here
 
 
