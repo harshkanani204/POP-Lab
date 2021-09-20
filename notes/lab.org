@@ -683,6 +683,232 @@ The type of foldl : (('elem * 'summary) -> 'summary) -> 'summary -> 'elem list -
 
 #+end_src
 
+* Foldl in terms of foldr
+SCHEDULED: <2021-09-20 Mon>
+
+foldl ⊗ s0 [x₁,......, xₙ] =   ((s0 ⊗ x₁) ⊗ x₂ ...... ⊗ xₙ)
+
+For each x : 'a consider trₓ : 'summary -> 'summary, trₓ s = s ⊗ x
+
+So { trₓ : x ∈ 'a } gives a family of functions.
+
+foldl ⊗ s0 [ x₁,....,xₙ] =      trₓₙ ... trₓ₂ (trₓ₁ s0)
+                         =     (trₓₙ o ... o trₓ₁) s0
+
+       [x₁,....,xₙ] -> [trₓ₁,....,trₓₙ]   map (fn x => fn s => sfun (x,s) )
+
+   sfun' (t,old) = old o t
+foldr sfun' [trₓ₁, ..., trₓₙ]
+
+foldl sfun s0 = let
+
+
+
+
+               id
+              [tr₁]              tr₁ o id
+              [tr₁, tr₂]         tr₂ o tr₁
+              [tr₁, tr₂, tr₃] =  tr₃ o tr₂ o tr₁
+
+              old = trₙ o ... o trₙ₋ᵢ
+
+#+begin_src sml
+
+   fun foldLeft sfun = let fun sfun' (t,old) = old o t
+                           fun tr x = fn s => sfun (x,s)
+                           val transform = map tr
+                       in
+                           foldr sfun' (fn x => x) o transform
+                       end
+
+  val foo = foldLeft (op ::) [1,2,3] []
+  val bar = foldl    (op ::) [] [1,2,3]
+
+#+end_src
+
+#+RESULTS:
+: val foldLeft = fn : ('a * 'b -> 'b) -> 'a list -> 'b -> 'b
+: val foo = [3,2,1] : int list
+: val bar = [3,2,1] : int list
+
+
+
+
+
+
+
+* Structures, Signatures and Functors
+
+We saw that there is the map function for list.
+
+Suppose you define a binary tree datatype
+
+#+begin_src sml
+  signature TREE = sig
+      type 'a Tree
+      val empty     : 'a Tree
+      val node      : 'a Tree -> 'a -> 'a Tree -> 'a Tree
+      val singleton : 'a -> 'a Tree
+      val map       : ('a -> 'b) -> 'a Tree -> 'b Tree
+  end (**)
+
+  structure Tree  : TREE
+        (*
+  structure Tree : sig
+                type 'a Tree
+                val empty     : 'a Tree
+                val node      : 'a Tree -> 'a -> 'a Tree -> 'a Tree
+                val singleton : 'a -> 'a Tree
+                val map       : ('a -> 'b) -> 'a Tree -> 'b Tree
+            end (* end of signature *)
+
+        ,*)
+  = struct
+
+   datatype 'a Tree = Empty
+                    | Node of 'a Tree * 'a * 'a Tree
+
+   val empty       = Empty
+   fun node lt x rt = Node (lt,x,rt)
+   fun singleton x = Node (Empty , x , Empty)
+
+   (* fun map f t = ... *)
+   fun map f Empty              = Empty
+     | map f (Node (lt, a, rt)) = Node (Empty , f a, Empty)
+
+   fun foo x = x + 1
+
+
+   end (* end of Tree structure *)
+
+  val foo = let open Tree
+            in map (fn x => x + 100) (singleton 0)
+            end
+  val bar = Tree.empty
+
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+signature TREE =
+  sig
+    type 'a Tree
+    val empty : 'a Tree
+    val node : 'a Tree -> 'a -> 'a Tree -> 'a Tree
+    val singleton : 'a -> 'a Tree
+    val map : ('a -> 'b) -> 'a Tree -> 'b Tree
+  end
+structure Tree :
+  sig
+    datatype 'a Tree = Empty | Node of 'a Tree * 'a * 'a Tree
+    val empty : 'a Tree
+    val node : 'a Tree -> 'a -> 'a Tree -> 'a Tree
+    val singleton : 'a -> 'a Tree
+    val map : ('a -> 'b) -> 'a Tree -> 'b Tree
+    val foo : int -> int
+  end
+val foo = Node (Empty,100,Empty) : int Tree.Tree
+val bar = Empty : 'a Tree.Tree
+#+end_example
+
+#+begin_src sml
+
+  (* All types which have a notion of a map function *)
+    signature MAP = sig
+      type 'a t
+      val map : ('a -> 'b) -> 'a t -> 'b t
+    end
+
+    structure ListMap : MAP = struct
+      type 'a t = 'a list
+      val map = List.map
+    end
+
+    structure TreeMap : MAP = struct
+       datatype 'a t = Empty
+                     | Node of 'a t * 'a * 'a t
+
+       fun map f Empty          = Empty
+         | map f (Node (lt,x,rt)) = Node (Empty, f x , Empty)
+    end
+
+    functor Foo (T : MAP) = struct
+      (*  Some stuff here *)
+    end
+
+
+#+end_src
+
+#+RESULTS:
+: signature MAP =
+:   sig
+:     type 'a t
+:     val map : ('a -> 'b) -> 'a t -> 'b t
+:   end
+: structure ListMap : MAP
+: structure TreeMap : MAP
+
+#+begin_src sml
+
+    signature ORD = sig
+      type t
+      val lt : t -> t -> bool
+    end
+
+    functor Inv(O : ORD) : ORD = struct
+       type t = O.t
+       fun  lt x y = O.lt y x
+    end
+
+
+    functor Qsort (O : ORD) = struct
+      fun sort []      = []
+        | sort (x::xs) =
+          let val (us,vs) = List.partition (fn a => O.lt a x) xs
+          in  sort us @ (x :: sort vs)
+          end
+    end
+    structure IntOrd : ORD = struct
+      type t = int
+      fun  lt x y = x < y
+    end
+
+    structure IntQSort   = Qsort (IntOrd)
+    structure IntInvSort = Qsort(Inv (IntOrd))
+    val x = IntQSort.sort [1,5,2,3,100,10,1000]
+    val y = IntInvSort.sort [1,5,2,3,100,10,1000]
+
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+signature ORD =
+  sig
+    type t
+    val lt : t -> t -> bool
+  end
+functor Inv(O: sig
+                 type t
+                 val lt : t -> t -> bool
+               end) :
+           sig
+             type t
+             val lt : t -> t -> bool
+           end
+functor Qsort(O: sig
+                   type t
+                   val lt : t -> t -> bool
+                 end) :
+             sig val sort : O.t list -> O.t list end
+structure IntOrd : ORD
+structure IntQSort : sig val sort : O.t list -> O.t list end
+structure IntInvSort : sig val sort : O.t list -> O.t list end
+val x = [1,2,3,5,10,100,1000] : IntOrd.t list
+val y = [1000,100,10,5,3,2,1] : IntOrd.t list
+#+end_example
+
 * Previous lab sessions
 
 
