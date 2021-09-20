@@ -676,6 +676,7 @@ the Construction rules.
    #+end_example
 
 * Algebraic data types and pattern matching
+SCHEDULED: <2021-09-20 Mon>
 
 ** Recap
 
