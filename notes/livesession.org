@@ -859,6 +859,410 @@ datatype 'a option = SOME of 'a | NONE
 
 #+end_src
 
+
+* Modular programming.
+SCHEDULED: <2021-09-27 Mon>
+
+Modular programming means break down the program into smaller
+components which are separtely programmed, tested and linked together.
+
+1. We want to control namespace
+
+   #+begin_src sml
+     val x = 10
+   #+end_src
+
+   i.  I want to be able to use the same names for different (but
+       often similar things)
+
+       In SML it is done by wrapping things inside a structure.
+
+       #+begin_src sml
+         structure A = struct
+            val x = 10
+         end (* end of structure A *)
+
+         structure B = struct
+            val x = "hello"
+         end (* end of structure B *)
+
+         val z1 = A.x
+         val z2 = B.x
+       #+end_src
+
+       #+RESULTS:
+       : structure A : sig val x : int end
+       : structure B : sig val x : string end
+       : val z1 = 10 : int
+       : val z2 = "hello" : string
+
+   ii. I should be able to say that a name (for example ~x~) in a
+       context it means some particular ~x~ that has been defined.
+
+       #+begin_src sml
+         structure A = struct
+            val x = 10
+         end (* end of structure A *)
+
+         structure B = struct
+            val x = "hello"
+         end (* end of structure B *)
+
+         (* There is no x here only A.x and B.x *)
+
+         open B
+         val z1 = let open A
+                     (*
+                      Local bindings that are only valid
+                        inside the expression between "in" and "end"
+                          let
+                               <val or fun bindings>
+                          in
+
+                            end
+                      ,*)
+                 in x + x  (* x comes from A *)
+                 end
+
+          val z2 = x (* This comes from B *)
+          val z3 = A.
+
+       #+end_src
+
+       #+RESULTS:
+       : structure A : sig val x : int end
+       : structure B : sig val x : string end
+       : opening B
+       :   val x : string
+       : val z1 = 20 : int
+       : val z2 = "hello" : string
+       : val z3 = 10 : int
+
+   iii. Abstraction over modular structures. I should be able to build
+        newer modular components based on other modular components.
+
+        Point iii. is unique to SML (ocaml, Coq ....)
+
+        For this SML introduces two important constructs namely signatures and functors.
+
+
+
+**  Signatures
+
+        #+begin_src sml
+
+          structure A :
+                    sig (* Hides y because it is not present in the signatures *)
+                        val x : int
+                    end
+          = struct
+            val x = 10
+            val y = 100
+          end
+
+
+        #+end_src
+
+        #+RESULTS:
+        : structure A : sig val x : int end
+
+        There are reasons to make sure that certain functions should not be exposed to
+        the outside world.
+
+        #+begin_src sml
+          structure Counter :
+                    sig
+                        val incr : unit -> unit
+                        val showValue : unit -> int
+                    end =
+          struct
+               val ctrRef = ref 0
+                     (* Counter implementation *)
+
+               fun incr () = ()      (* silly increment not correct *)
+               fun showValue () = 42 (* silly show value that always gives the answer *)
+          end
+        #+end_src
+
+        #+RESULTS:
+        : structure Counter :
+        :   sig
+        :     val incr : unit -> unit
+        :     val showValue : unit -> int
+        :   end
+
+
+        Implementation of Binary search tree. Assumes that the "BST"
+        property is true on all internal nodes. If you allow the user
+        to "see" the actual type, they could potentially violate the
+        property. So you would want to hide
+
+        1. Functions, values etc
+
+        2. And also types.
+
+
+        #+begin_src sml
+          structure A :  (* Transparent signature *)
+                    sig type t
+                        val pub : t
+                    end
+          = struct
+               type t = int
+               val pub = 42
+               val prv = 100
+          end
+          val z = A.pub + A.pub
+
+          structure B :>  (* Opaque/translucent signature *)
+                    sig type t
+                        type t1 = int
+                        val pub : t
+                            val pub1 : t1
+                    end
+          = struct
+               type t = int
+               type t1 = int
+               val pub  = 42
+
+               val pub1 = pub + pub
+               val prv = 100
+          end
+          (* val z1 = B.pub + B.pub (* error *) *)
+          val z11 = B.pub1 + B.pub1 (* not
+                             an error *)
+          val z2 = B.pub
+
+        #+end_src
+
+        #+RESULTS:
+        #+begin_example
+        structure A :
+          sig
+            type t = int
+            val pub : t
+          end
+        val z = 84 : int
+        structure B :
+          sig
+            type t
+            type t1 = int
+            val pub : t
+            val pub1 : t1
+          end
+        val z11 = 168 : int
+        val z2 = - : B.t
+        #+end_example
+
+        - NOTICE: In the result, A's signature mentions that A.t is
+          int whereas B's signature does not mention it The reason for
+          this difference is because of ":" vs ":>"
+
+
+
+        Clearly by using the translucent signature (i.e using :>
+        instead of :) scheme we can hide the data type behind BST and
+        allow the creation of BST only through controlled interface.
+
+** Functors
+
+#+begin_src sml
+
+   datatype ordering = LT | EQ | GT
+
+   signature KEY = sig
+     type key
+     val compare : key -> key -> ordering
+   end
+
+   datatype 'a Tree = NullTree
+                    | Node of 'a Tree * 'a * 'a Tree
+
+   signature DICT = sig
+     structure Key : KEY
+     type key = Key.key
+     type 'value t   (* this is your dictionary type
+                            polymorphic in value that it stores against
+                            key of type Key.key
+                          ,*)
+     val empty : 'a t
+     val single : key -> 'a -> 'a t
+     (* val insert : Key.key -> 'a -> 'a t -> 'a t *)
+   end
+
+   (* BST functor takes a structure of signature KEY and gives a structure of signature
+      DICT.
+
+     structure BST  :> DICT =
+       struct
+
+       end
+
+      BST is a "function" that takes a structure K of signature KEY and "returns"
+      a structure of signature DICT.
+
+      compare it with something like this.
+      fun foo (x : int) : int = x + 42
+
+   ,*)
+   functor BST ( K : KEY ) :> DICT
+   = struct
+        structure Key = K
+        type key = Key.key
+
+        (*
+        type 'a t     =  (key * 'a) Tree  (* binary tree with nodes
+                                                 decorated by elements of type key * 'a
+	                                      *)
+
+        ,*)
+        datatype 'a t = Null
+                      | Node of 'a t * (K.key *  'a) * 'a t
+
+        val empty = Null
+        fun single k a = Node (empty, k , a , empty)
+   end
+
+   functor ListDict ( K : Key) :> DICT
+   = struct
+        structure Key = K
+        type key K.key
+        type 'a t = (key, 'a) list
+        val empty = []
+        val single k a = [ (k,a) ]
+   end
+
+   structure IntKey : KEY = struct
+      type key = int
+      fun compare x y = if x < y then LT
+                        else if x = y then EQ
+                        else GT
+   end
+
+   structure IntDict = BST (IntKey)
+
+                         (* IntDict is a polymorphic (in value)
+                            dictionary data structure where the key is int
+                             ,*)
+
+   fun foo (x : int) : int = x + x
+  val x = IntDict.empty
+
+  (* val single : Key.key -> 'a -> 'a t  *)
+
+  (* val y = IntDict.single 42 (* "The answer to Life, Universe and everything" *) *)
+
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+datatype ordering = EQ | GT | LT
+signature KEY =
+  sig
+    type key
+    val compare : key -> key -> ordering
+  end
+datatype 'a Tree = Node of 'a Tree * 'a * 'a Tree | NullTree
+signature DICT =
+  sig
+    structure Key :
+      sig
+        type key
+        val compare : key -> key -> ordering
+      end
+    type key = Key.key
+    type 'a t
+    val empty : 'a t
+    val single : key -> 'a -> 'a t
+  end
+functor BST(K: sig
+                 type key
+                 val compare : key -> key -> ordering
+               end) :
+           sig
+             structure Key : <sig>
+             type key = Key.key
+             type 'a t
+             val empty : 'a t
+             val single : key -> 'a -> 'a t
+           end
+structure IntKey : KEY
+structure IntDict : DICT
+val foo = fn : int -> int
+val x = - : 'a IntDict.t
+#+end_example
+
+
+Analogy between modular programming and typed functional programming
+
+| Modular programming     | Typed functional programming   |
+|-------------------------+--------------------------------|
+| structures              | values                         |
+|-------------------------+--------------------------------|
+| signatures              | types                          |
+|                         |                                |
+| interface of the        | types govern what can be done  |
+| structure               | to/by values                   |
+|                         |                                |
+| specification of the    | specification of the value     |
+| structure               |                                |
+|-------------------------+--------------------------------|
+| functors                | functions                      |
+|                         |                                |
+| Takes structures        |                                |
+| to new structures       |                                |
+|                         |                                |
+| Interface is controlled | takes values of a specfic type |
+| by the spec (signature) | to values of another type      |
+| of the said structurres |                                |
+|-------------------------+--------------------------------|
+
+
+There are two levels in which you do functional programming
+
+1. The usual values level
+
+2. At the module level.
+
+3. Both are "typed functional programming language". At the module
+   level "values" are structures (modular structures), "types" are
+   signatures and "functions" are functors.
+
+
+
+** Key point of SML-style modules.
+
+
+1. Any programming language can be equipped with a module system similar
+   to SML. Unfortunately lot of the "modern" languages do not yet have
+   anything even close to it.
+
+
+2. Modules are zero cost abstractions. In fact mlton has a
+   "defunctorisation step" where it actually "removes" all structures
+   and modules.
+
+
+
+#+begin_src C
+   /* This is just a product type and has nothing to do with SML style structures (modulues)
+   */
+    struct A {
+       int x;
+       int y;
+    };
+
+#+end_src
+
+#+begin_src sml
+val u = { x = 10, y = 100 }  (* A product type int * int but with names for fields *)
+
+#+end_src
+
+#+RESULTS:
+: val u = {x=10,y=100} : {x:int, y:int}
+
 *  Old notes starts here
 
 
