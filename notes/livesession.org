@@ -1263,6 +1263,202 @@ val u = { x = 10, y = 100 }  (* A product type int * int but with names for fiel
 #+RESULTS:
 : val u = {x=10,y=100} : {x:int, y:int}
 
+
+* Application: Atom type and Hash consing.
+SCHEDULED: <2021-10-11 Mon>
+
+- Docs for Atom structure ::
+
+  https://www.classes.cs.uchicago.edu/archive/2015/spring/22620-1/atom-sig.html
+
+
+Let us take strings. What is the time it takes to compare two strings of length n.
+
+- n * comparison of a Byte = n instructions on your processor
+
+- The time taken to compare for example two words in processor  1 instruction.
+
+
+1. Instead of comparing two strings we compare the corresponding pointers.
+
+   String = Pointer * length
+
+   - Good :: It is fast (1 instruction per comparison)
+
+   - Bad  :: It is incorrect. If two strings are represented by the
+     same pointer then they are indeed equal. But there can be strings
+     which are same but are saved in different locations of the
+     memory.
+
+   - Worse :: If you use pointers to order strings (let us say to put it in
+     a BST). The transitivity property of ordering is no more true. It is not
+     an "ordering"
+
+
+2. Structural vs referentially equality/comparison.
+
+   What we want is structural equality/comparison what we get is
+   referential equality/comparison
+
+
+** Question is
+
+Can I do essentially structural comparison at the speed of referential comparison ?
+Hash consing is a way to do this.
+
+
+- Observation :: Suppose you maintain the property that given any two
+  strings "of interest" are the same if and only if they are
+  referentially same, then referential equality is enough.
+
+- Observation :: If the above property is true then the comparison of
+  the references should give an ordering (not necessarily the
+  structural ordering, i.e. Dictionary ordering in the case of
+  strings) .
+
+**  Atom Structure
+
+Atom.atom is a representation of string which is fast to compare,
+i.e. typically 1 instruction.
+
+Application is typically in compilers/symbolic processors where you
+want to look up strings often. In the compiler, this usually comes
+up in symbol table lookups.
+
+If s₁ and s₂ are two strings such that a₁ = atom s₁ and a₂ = atom s₂ then
+
+1. same (a₁, a₂) if and only if s₁ == s₂ (however it is expected that
+   same (a₁, a₂) will be faster
+
+
+2. compare (a₁, a₂) need not be the same as compare(s₁, s₂). However
+   the ordering that one gets via compare (a₁, a₂) should give a total
+   ordering.
+
+
+#+begin_src sml
+  open Atom
+  val x = atom "hello"
+  val y = atom "world"
+
+
+  datatype var Expr = Const of int
+                    | Plus of Expr * Expr
+                    | Var of v
+
+  (* Internal expression, i.e. the representation of expression used inside the compiler *)
+  type IExpr = Atom.atom Expr
+
+  type UExpr = string Expr (* Expression as seen by the user of the compiler *)
+
+  type 'value Env = 'value AtomMap.map  (* A key value store where the keys are atoms *)
+
+  (* fun eval (env : int Env) (e : IExpr) = ... *)
+
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[autoloading]
+[autoloading done]
+opening Atom
+  type atom
+  val atom : string -> atom
+  val atom' : substring -> atom
+  val toString : atom -> string
+  val same : atom * atom -> bool
+  val sameAtom : atom * atom -> bool
+  val compare : atom * atom -> order
+  val lexCompare : atom * atom -> order
+  val hash : atom -> word
+val x = - : atom
+val y = - : atom
+datatype Expr = Const of int | Plus of Expr * Expr | Var of atom
+type 'a Env = 'a AtomRedBlackMap.map
+#+end_example
+
+
+
+** Implementation of Atom
+
+#+begin_src sml
+   fun hash_string (x : string) : int = 0  (* A good hash function *)
+   signature ATOM = sig
+     type atom
+     val atom : string -> atom
+     val toString : atom -> string
+     val compare  : atom * atom -> order
+   end
+
+   structure Atom1 :> ATOM = struct
+      type atom               = { hashcode : int , symbol : string }
+      fun atom x              = { symbol = x , hashcode = hash_string x }
+
+      (* If hash_string is a good hash function then very likely
+         the hash values of different strings are different *)
+
+
+      fun toString (a : atom) = #symbol a
+                                      (* Note that toString (atom x) = x *)
+      fun compare (a1 : atom , a2 : atom)  =
+          case Int.compare  (#hashcode a1 , #hashcode a2) of
+               EQUAL => String.compare ( #symbol a1 , #symbol a2)
+             | x     => x
+
+                                      (* The comparison is fast  because it is int comparison *)
+   end
+
+
+  (*
+    Benign side effect, i.e observationally pure computation *)
+
+   structure Atom2 :> ATOM = struct
+
+      type atom               = { hashcode : int , symbol : string }
+
+
+      val counter = ref 0    (* We have a counter which will be used to assign hash codes *)
+      val ht : atom StringHashTable.hash_table = IntHashTable.mkTable (100, exn)
+
+      fun mkAtom x              = let val cur = !counter
+                                      val atm = { symbol = x , hashcode = cur }
+                                  in counter := cur + 1;
+                                     StringHashTable.insert ht (x, atm);
+                                     atm
+                                  end
+
+      fun atom x = case StringHashTable.find ht x of
+                       NONE => mkAtom x
+                    | SOME a => a
+
+
+      fun toString (a : atom) = #symbol a
+                                      (* Note that toString (atom x) = x *)
+      fun compare (a1 : atom , a2 : atom)  = Int.compare  (#hashcode a1 , #hashcode a2)
+
+                                      (* The comparison is fast  because it is int comparison *)
+   end
+
+
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+val hash_string = fn : string -> int
+signature ATOM =
+  sig
+    type atom
+    val atom : string -> atom
+    val toString : atom -> string
+    val compare : atom * atom -> order
+  end
+structure Atom1 : ATOM
+structure Atom2 : ATOM
+#+end_example
+
+
 *  Old notes starts here
 
 
