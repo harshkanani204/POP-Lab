@@ -992,6 +992,65 @@ Suppose ~e₁~ and ~e₂~ are expressions, then ~e₁ ; e₂~ is also an express
   2. Now reduce ~e₂~ to a value ~v₂~ (if possible)
 
   3. The value associated with ~e₁; e₂~ is ~v₂~
+
+* Expression evaluator.
+SCHEDULED: <2021-10-11 Mon>
+
+- [[https://www.classes.cs.uchicago.edu/archive/2015/spring/22620-1/ord-key-sig.html][ORD_KEY signature]] :: By giving an ordering for a type k what we mean is
+  to implement a structure ~K : ORD_KEY~ where K.ord_key is the type k
+
+  For example in the case of string
+
+  #+begin_src sml
+
+    structure StringOrd_Key : ORD_KEY = struct
+      type ord_key = string
+      val compare  = String.compare
+    end
+
+    val x = StringOrd_Key.compare ("hello", "world")
+
+    structure StringMap : ORD_MAP = RedBlackMapFn(StringOrd_Key)
+
+    val theAnswer = StringMap.singleton ("The Answer", 42)
+
+    val x = Atom.atom "x"
+    val y = Atom.atom "y"
+
+    val u : int AtomMap.map = AtomMap.empty
+    val ulist = AtomMap.listItemsi u
+    val v = AtomMap.insert (u, x, 10)
+    exception KeyNotFound
+
+    val tbl : int AtomTable.hash_table = AtomTable.mkTable (10, KeyNotFound)
+
+
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  structure StringOrd_Key : ORD_KEY
+  val x = <hidden-value> : order
+  structure StringMap : ORD_MAP
+  val theAnswer = - : int StringMap.map
+  val x = - : Atom.atom
+  val y = - : Atom.atom
+  val u = - : int AtomRedBlackMap.map
+  val ulist = [] : (Atom.atom * int) list
+  val v = - : int AtomRedBlackMap.map
+  exception KeyNotFound
+  val tbl =
+    HT
+      {n_items=ref 0,not_found=KeyNotFound(-),
+       table=ref [|NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,...|]}
+    : int hash_table
+  #+end_example
+
+
+
+
+
+
 * Previous lab sessions
 
 
