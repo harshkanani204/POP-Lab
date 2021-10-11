@@ -21,7 +21,7 @@ value of `e2`.
    exposes the three functions, `incr : unit -> unit`, `decrement :
    unit -> unit`, `get : unit -> int`. The outside world should not
    have any other access to the counter.  Hint: You will have to
-   define a signature say COUNTER and restrict he signature of your
+   define a signature say COUNTER and restrict the signature of your
    Counter structure appropriately.
 
 2. What if your program requires two or more counter ? Instead of a
