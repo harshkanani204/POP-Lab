@@ -909,6 +909,89 @@ val x = [1,2,3,5,10,100,1000] : IntOrd.t list
 val y = [1000,100,10,5,3,2,1] : IntOrd.t list
 #+end_example
 
+
+* References.
+
+You should use pure functions and values whenever possible.  For
+certain application we are forced to use references to make the
+computation efficient or to do what call observationally pure but
+implementationally side effect-full compuation.
+
+#+begin_src sml
+  val x = 10  (* variable x is bound to the value 10 *)
+  val y = ref "hello"
+  val _ = (y := "world")  (* Updation of the reference cell bound to y  by the value "world" *)
+  val z = y
+
+            (* The general syntax is that val <variable> = ref <value> *)
+
+  datatype 'a option = SOME of 'a | NONE
+
+
+#+end_src
+
+#+RESULTS:
+: val x = 10 : int
+: val y = ref "world" : string ref
+: val z = ref "world" : string ref
+
+The above code means that y is a value which is a reference to a memory location
+which currently contains "hello".
+
+** Operations on references
+
+- Creation :: A value which is a reference containing 0 is created by ref 0.
+
+  #+begin_src sml
+    val y = ref 0   (* this is the first reference *)
+    val z = ref 42  (* This is the the second reference *)
+  #+end_src
+
+  ~ref 0~ is an expression that when reduced gives a value of type ~int ref~
+
+- Update :: Let ~y : 'a ref~ and let ~e : 'a~ be any expression then the
+  /expression/  ~y := e~  reduces as follows.
+
+  1. Reduce ~e~ to a value ~v : 'a~ (if possible).
+
+  2. Update the reference cell that y is bound to by the value v.
+
+  3. The overall value of the expression ~y := e~ is ~() : unit~.
+
+     In other words, ~y := e~ is a /side effectfull expression/ or an
+     /impure expression/ i.e. during reduction it changes the world.
+     Much like the ~print "hello"~ example, ~y := e~ is an impure expression
+     of value ~() : unit~.
+
+- Read the contents ::   If ~e~ is any expression of type ~'a ref~, then  ~!e~ is a value
+  of type ~'a~ and its actual value depends on the contents of the reference cell when the
+  expression ~!e~ is being evaluated.
+
+#+begin_src C
+
+
+  int main ()
+  /* whatever */
+  FILE * fp;
+  fp = fopen("foobarbiz", ..);
+
+  /* used fp  */
+
+
+#+end_src
+
+
+** The Semi-colon operators.
+
+Suppose ~e₁~ and ~e₂~ are expressions, then ~e₁ ; e₂~ is also an expression.
+
+- How does ~e₁; e₂~ reduce ? ::
+
+  1. First reduce the expression ~e₁~ to a value ~v₁~ (if possible) and throw it off
+
+  2. Now reduce ~e₂~ to a value ~v₂~ (if possible)
+
+  3. The value associated with ~e₁; e₂~ is ~v₂~
 * Previous lab sessions
 
 
