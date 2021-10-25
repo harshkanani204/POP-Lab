@@ -1,5 +1,8 @@
 # Expression evaluator
 
+Deadline: 26th October 2021, 23:59
+
+
 1. Design an algebraic data type to capture expressions over real constants. You can
    have operators + and *.
 
