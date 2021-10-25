@@ -1,5 +1,7 @@
 # The Lambda calculus : A small functional language
 
+Deadline: 1st November 2021 23:59.
+
 We look at the following simple functional programming language whose
 abstract syntax is given as follows.
 
