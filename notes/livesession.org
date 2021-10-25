@@ -1459,6 +1459,186 @@ structure Atom2 : ATOM
 #+end_example
 
 
+* Lambda calculus
+
+1. We study (untyped) lambda calculus
+2. The typed version
+3. Typing rules
+4. Type inference algorithm.
+
+
+
+** Lambda calculus as the simplest functional programming language.
+
+
+*** Syntax of the language.
+
+1. Variables
+2. Apply functions on other values.
+3. Some way to create functions.
+
+   The lambda calculus "programs" are actually expressions that are defined
+   by the following grammar.
+#+begin_example
+
+e  := x        (where x is a variable)
+   | e₁ e₂     (e₁ and e₂ are expressions and this the application rule)
+               (Application)
+   | λ x . e   ( where x is a variable and e is an expression)
+               (Abstraction)
+
+
+#+end_example
+
+**** Application
+The understanding is that the expression ~e₁ e₂~ should read as ~e₁~ applied on ~e₂~.
+We will follow the conventions of Standard ML.
+
+~e₁ e₂ e₃~ is the same as ~((e₁ e₂) e₃)~. That is "application"
+associates towards the left
+
+You can think of the "space" as the apply operator
+
+x +ₗ y +ᵣ z     = ((x +ₗ y) +ᵣ z)  : Associates towards the left
+x *ₗ y *ᵣ z     = x *ₗ (y *ᵣ z)    : Associates towards the right
+
+**** Abstraction.
+
+λ x . e should be read as that function that takes x to e (e will have x in it).
+
+fn x => e
+
+λ x . x
+λ x . λ y . x  (The K function or constant function )
+
+K takes an x and gives that constant function
+that always gives out x.
+
+
+Church gave λ-calculus as a way to study substitution in mathematics
+formally. Calculus in this setting means a "set of rules"
+
+λ x . λ y . e   will be written  λ x y . e
+
+
+
+*** Semantics of the language.
+
+**** Free and bound variables.
+
+Idea is any variable that does not occur in the "shadow of a λ" is a
+free variable.
+
+λ x . x t
+
+The variable x is /bound/ in the above expression where as the variable t is
+free.
+
+How to formally define what are the free variables of a λ-calculus expression.
+
+FV : λ-calculus expressions -> Subset of Variables.
+
+FV ( x     )   = { x }
+FV (e₁ e₂  )   = FV(e₁) ∪ FV(e₂)
+FV (λ x . e)   = FV(e) ∖ { x }
+
+   FV (λ x . x t) = FV(x t) ∖ { x }
+                  = (FV (x) ∪ FV (t)) ∖ { x }
+                  = ({x} ∪ {t}) ∖ {x}
+                  = {t}
+
+Variables that occur in e but are not free are called bound.
+
+(λ x₁ . x₁) x     x₁ is bound but x is free
+
+Free/bound really depends on the position where the variable occurs.
+
+**** Bound variables can be renamed but not free variables.
+
+e = (λ x . x t) ≡ λ y . y t ≢ λ t . t t
+
+e is that function which takes x to x t
+e is that function which takes y to y t
+
+- Change of Bound variables :: I am allowed to change the bound
+  variables (with some care) without changing the meaning of the
+  expression.
+
+I should not change x to t because in the expression e the t was free,
+where as if I change x to t then all the t becomes bound.
+
+Variable capture.
+
+
+(λ t . λ x . x t). I still cannot change x to t because the binding of t
+changes.
+
+
+- Change of Bound variables (safe version) :: I am allowed to change the
+  bound variable to any fresh variable. A fresh variable is a variable that
+  does not occur in the expression either as free or bound.
+
+  The safe version of change of bound variables is called α-reduction
+  or α-conversion.
+
+₀∫∞  f(x, t) dx ≡  ₀∫∞  f(y, t) dy  ≢ ₀∫∞ f(t, t) dt
+
+
+The main idea behind studying substitution carefully is to avoid
+problems like the above.
+
+
+**** Substitution.
+
+e [ x := e']  :: Substitute e' for every /free/ occurance of x in e.
+
+y [ x := e'] =  e'   if x = y
+             =  y    otherwise
+
+
+(e₁ e₂) [x := e']   = (e₁ [x := e']) (e₂ [x := e'])
+
+(λ x . e) [x := e'] = (λ x . e)
+(λ y . e) [x := e'] = λ y . e [x := e']  whenever y ≠ x
+
+
+
+
+
+
+
+**** β-reduction (semantics)
+
+(λ x . e) N ====> e [ x := N ]  (careful with variable capture)
+
+
+M = λ x . e
+
+M is that function that takes x to e
+
+M N  = (λ x . e) N  (that function that takes x to e(x)) applied on N
+
+e[x := N]
+
+To avoid captures we might have to rename x in (λ x . e) to some fresh
+variable before we do reduction.
+
+
+
+(λ x . λ t . x t) t
+
+M = λ x . (λ t . x t) ≡ λ x . (λ y . x y)
+N = t
+
+M N ===> λ t . N t  = λ t . t t
+
+In M N the variable t is free whereas in the reduced form the variable is not free.
+
+
+*** Church-Turing hypothesis is
+
+λ calculus with β-reduction is as powerful as any other computation
+model.
 *  Old notes starts here
 
 
