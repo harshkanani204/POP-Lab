@@ -30,7 +30,7 @@ brackets to disambiguate the application order.
    ```
 
 
-3. Consider an expression like `fn x => x y`. Here `x` is a _bound
+2. Consider an expression like `fn x => x y`. Here `x` is a _bound
    variable_ because it occurs in the shadow of the binder `fn x =>
    ..`. However, `y` is a _free variable_. Write a functions `free :
    expr -> var list` to compute the list of free and all the
@@ -41,9 +41,37 @@ brackets to disambiguate the application order.
    2. A function application `e₁ e₂`
    3. An function abstraction `fn x => e`
 
-   In each of these case what is the set of free variables ?
+   In each of these case what is the set of free variables ? Write SML
+   functions that compute the free, bound and all variables of a given
+   lambda calculus expression.
 
-4. Write a function `subst : var * expr -> expr -> expr` where `subst
+   You can use the standard ML library set implementation.
+
+
+   ```sml
+   (*
+   Define a structure of type ORD_KEY for your variables (which is string or you can use Atom)
+
+   In case you are using Atom.atom for your varialbes AtomSet already gives you an implementation
+   of sets over Atom.atom. You can use that.
+
+   https://www.classes.cs.uchicago.edu/archive/2015/spring/22620-1/ord-key-sig.html
+
+   *)
+
+   structure StringKey : ORD_KEY = struct
+    ...
+	...
+
+   end (* structure StringKey *)
+
+
+   structure StringSet = RedBlackSetFn (StringKey) (* Can use this for string set implementation *)
+
+   ```
+
+
+3. Write a function `subst : var * expr -> expr -> expr` where `subst
    (x,N) M` substitutes all _free_ occurrence of x in M with N. In
    mathematical notation it is written as `M [x:=N]`.
 
