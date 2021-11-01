@@ -1,5 +1,7 @@
 # Lambda Calculus with let and let-rec
 
+Deadline : 9th November 23:59
+
 Consider variants of lambda calculus λ-calculus ⊆ λ-let ⊆ λ-letrec
 where the former adds the syntactic sugar of non-recursive `let` and
 the latter adds `letrec`. It adds the construct `let x = e₁ in e₂ end`
