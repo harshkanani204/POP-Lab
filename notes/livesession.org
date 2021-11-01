@@ -1639,6 +1639,303 @@ In M N the variable t is free whereas in the reduced form the variable is not fr
 
 λ calculus with β-reduction is as powerful as any other computation
 model.
+
+
+* Simply typed lambda calculus.
+
+** Recap of untyped lambda calculus
+
+#+begin_example
+
+e = x        (x, y z etc are variables)
+  | e₁ e₂
+  | λ x . e
+
+#+end_example
+
+- e₁ e₂  ::  denotes the expression e₁ (which
+  is some function) applied on the argument e₂.
+
+- λ x . e :: denotes that function that takes
+  the argument x and produces e.
+
+
+Semantics is captured by what is known as β-reduction
+
+(λ x . M) N --------->    M [ x := N ]
+
+M [ x := N ] denotes the expression obtained by
+replacing every "free" occurance of x in M with
+the expression N
+
+M = x
+
+λ x . M = (λ x . x)
+
+
+(λ x . (λ x . x) ) x
+
+#+begin_src C
+
+  char c = 'a';  /* global c */
+
+  int main()
+  {
+     int c;         /* local c */
+
+     .... c /* This is local c */
+
+       ...;
+
+     for(int c = 10 /* loop c */
+
+           ; c < 100; ++c)
+     {
+         c /* this is loop c */
+     }
+
+
+  }
+
+  void bar()
+  {
+    ....c ....  /* This is  global c */
+  }
+
+#+end_src
+
+
+*** Untyped lambda calculus can do whatever Turing machines can do.
+
+Church-Turing hypothesis.
+
+*** The language is Untyped or Unityped.
+** Simply Typed calculus.
+
+Typed lambda calculus is the same lamda calculus which are
+well types with respect to the typing rules.
+
+*** Intuition
+#+begin_example
+e = x        (x, y z etc are variables)
+  | e₁ e₂
+  | λ x . e
+
+#+end_example
+
+In each of the above three cases, we have to distinguish between ill-typed and well-typed
+expression.
+
+The various typed λ-calculi they all are built on top of the untyped lambda calculus.
+The simplest typed λ-calculi is the simply typed lambda calculus.
+
+
+- For a variable x what is the type
+
+- e₁ e₂ ::
+
+  The type system should enforce that e₁ : function type whose domain is the same as the
+  type of e₂.
+
+- λ x . e :: Some how one needs to assign a functional type.
+
+*** What are the types ?
+
+- Base types :: A fixed set B = { nat , bool } of basic types.
+- The types are given by the following inductive definition.
+  (I will use the letter τ with subscripts to denote types)
+
+  #+begin_example
+
+  τ := b              b ∈ B  Any basic type b is a type
+    | τ₁ -> τ₂               The type of functions from domain τ₁
+                             to range τ₂
+
+B = { bool , nat }
+
+Examples of types over B.
+
+bool
+nat
+bool -> nat
+bool -> bool
+(bool -> nat) -> nat
+
+  #+end_example
+
+*** Typing Rules.
+
+Now we give a set of rules by which you can assign types to lambda
+calculus terms (or you can decide that the lambda calculus term is ill
+typed.
+
+#+begin_example
+e = n        for every n ∈ ℕ
+  | true             (builtin constant true)
+  | false            (builtin constant false)
+  | and
+  | not
+  | plus
+  --------------------------------------------------
+  | x        (x, y z etc are variables)  (VAR)
+  | e₁ e₂                                (APP)
+  | λ x : τ . e  (Every abstraction should mention the type of the abstracted variable) (ABS)
+
+#+end_example
+
+Typing rules do not give you type inference. It merely says what is the type of a given
+expression or decides that the expression is ill-typed.
+
+
+There should be a typing rule for each construct of your language
+
+**** How do I express typing rules ?
+
+My logical judgements are of the form e : τ.  The expression e is of type τ.
+
+
+1. I cannot say anything about the value of an expression e without knowing the
+   value of the free variables in it.  x + 1,   fn x => x + 1
+
+   - Types are in some sense an "approximation" of the values.
+   - Types are specifications of values.
+
+2. You cannot say anything about the type of e unless you specify the types
+   of all free variables in e.
+
+   We will have to make the judgement e : τ in the context where its free variables
+   have already been assigned a type.
+
+   We have Γ which is a typing environment. A typing environment assigns types
+   to variables.
+
+   Γ ⊢ e : τ  :: In the typing environment Γ, e has type τ.
+
+   { x₁ : τ₁, x₂ : τ₂ .... , xₙ : τₙ } ⊢ e : τ
+
+
+
+#+begin_center
+
+Pre-conditions
+=============================
+ Conclusion
+
+#+end_center
+
+
+#+begin_example
+
+ n ∈ ℕ                   If I have the pre-condition that n is a natural number
+====================
+  n : nat                Then I can conclude n as a λ-calculus expression is of
+                         type nat.
+
+#+end_example
+
+
+
+#+begin_example
+
+                         No pre-condition
+====================
+  true : bool            I have the conclusion true : bool
+
+#+end_example
+
+Ex. Give the typing rules for false and plus
+
+#+begin_center
+
+==========================
+plus : nat -> nat -> nat      (remember -> associates towards right)
+
+#+end_center
+
+
+*** VAR rule
+
+#+begin_example
+
+                             No pre-condition
+=======================
+ Γ ∪ { x : τ } ⊢ x : τ       In the environment where x has type τ, I can conclude x has type τ.
+
+#+end_example
+
+*** APP rule
+
+What should this rule enforce ?
+
+1. e₁ should be a function type of domain say α and range β; i.e   e₁ : α -> β
+
+
+2. e₂'s type should be the domain type of e₁ ; e₂ : α
+
+
+
+#+begin_center
+
+Γ ⊢ e₁ : τ₁ -> τ
+Γ ⊢ e₂ : τ₁
+=====================
+Γ ⊢ e₁ e₂ : τ
+
+
+#+end_center
+
+To apply the APP rule you need to already have concluded the typing judgements e₁ : τ₁ -> τ
+and e₂ : τ₁. If your expression e is got by the APP rule, i.e. e = e₁ e₂ then the only way
+e can be well typed is to make sure that e₁ : τ₁ -> τ and e₂ is of type τ₁ for some types
+τ₁ and τ₂
+
+*** ABS rule
+
+
+#+begin_center
+
+Γ ∪ { x : τ₁ } ⊢ e : τ₂
+===================================
+Γ ⊢ λ (x : τ₁) . e      : τ₁ -> τ₂
+
+
+Suppose that in an environment where x : τ₁ I conclude that e : τ₂ then
+
+=======================================================================
+
+In the environment  (without the assumption on x) I can conclude (λ x : τ₁ . e ) : τ₁ -> τ₂.
+
+
+#+end_center
+
+
+*** Structural rules
+
+The structural rules look silly but there is an interesting case of
+type lambda calculus which does not have the structural rules (linear
+lambda calculus)
+
+**** Weakening.
+
+Γ ∪ {x : τ} you should assume that Γ does not say anything about x.
+
+#+begin_example
+
+ Γ ⊢ e : τ
+ =====================
+ Γ ∪ {x : τ₁} ⊢ e : τ
+
+#+end_example
+
+**** Contraction
+
+ Γ ∪ { x : τ₁ , x : τ₁ } ⊢ e : τ
+ ===============================
+ Γ ∪ {x : τ₁}            ⊢ e : τ
+
+
+
+
 *  Old notes starts here
 
 
