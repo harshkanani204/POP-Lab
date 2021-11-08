@@ -1046,6 +1046,27 @@ SCHEDULED: <2021-10-11 Mon>
     : int hash_table
   #+end_example
 
+
+* Lambda calculus
+
+#+begin_src sml
+
+  datatype 'v lambda = VAR of v
+                       ...
+                       ...
+
+  type internal = Atom.atom lambda
+  type external = string lambda
+
+  val rename : ('a -> 'b) -> 'a lambda -> 'b lambda
+
+  intToExt  = rename Atom.toString
+
+
+
+
+#+end_src
+
 * DONE Let and Letrec for lambda calculus.
 
 #+begin_example
