@@ -1815,6 +1815,27 @@ My logical judgements are of the form e : τ.  The expression e is of type τ.
 
 
 
+Γ = { x₁ : τ₁ , ...... , xₙ : τₙ } ; A set of type assumptions or you
+can think of it as a partial function from the variable set to the set
+of types.  To deduce the type xᵢ ∈ dom (Γ) just to mean { xᵢ : τᵢ } ⊂
+of Γ
+
+Γ ⊢ e : τ  is the judgement that in the typing context Γ, we can deduce e: τ.
+
+- Important note :: Γ ⊢ e : τ can only be deduced if FreeVars(e) ⊆ dom
+  Γ.  Even when FV(e) ⊆ Γ, it is possible that e is ill-typed and
+  hence the judgement Γ ⊢ e : τ cannot be deduced.
+
+
+- Two important questions ::
+
+  + Type checking problem :: Given Γ, e and τ check whether Γ ⊢ e : τ
+
+  + Type inference problem :: Given Γ, e find a τ (if possible) such
+    that Γ ⊢ e : τ. The algorithm should as much as possible fail only
+    if e is ill-typed.
+
+
 #+begin_center
 
 Pre-conditions
@@ -1854,6 +1875,10 @@ plus : nat -> nat -> nat      (remember -> associates towards right)
 
 
 *** VAR rule
+
+
+is only possible in a typing context Γ where all free variables
+have been assigned types.
 
 #+begin_example
 
@@ -1932,6 +1957,391 @@ lambda calculus)
  Γ ∪ { x : τ₁ , x : τ₁ } ⊢ e : τ
  ===============================
  Γ ∪ {x : τ₁}            ⊢ e : τ
+
+
+
+
+* Hindley Milner type system.
+
+
+ Consider this type ~(α -> β) -> α list -> β list~. We have a polymorphic
+ type here and the understanding is that the type variables ~α~ and ~β~ can be
+ uniformly replaced by appropriate types.
+
+
+ So a type like the one above in the context of Standard ML is
+ actually more precisely described by explicit quantification, i.e. the
+ above polymorphic type is expressed as
+
+ ~∀ α ∀ β . (α -> β) -> α list -> β list~
+
+ That is there is an implicit ∀-quantification over all type variables
+ in the polymorphic type.
+
+
+ The Hindley-Milner type system captures such polymorphic types. Note that
+ quantification is /only allowed/ at the outer most layer. For example,
+
+ ∀ α ∀ β . α -> β -> α is okey but not ∀ α . α -> (∀ β .  β -> α))
+
+ What this means is that whenever you substitute type variables you
+ need to substitutes all of them in one go.
+
+
+ There is a reason for not allowing the second kind of types. Type
+ checking as well as type inference with such general types (the
+ corresponding lambda calculus is called System-F) is undecidable.
+
+** Monotypes
+
+I will use τ with possible subscripts to denote mono-types. This is
+exactly like types in the simply typed lambda calculus but for type
+variables.
+
+#+begin_example
+
+τ := b          b ∈ B the set of basic type
+  |  α          α ∈ Type variable
+  |  τ₁ -> τ₂   where τ₁ and τ₂ are mono-types.
+
+#+end_example
+
+- Point of confusion :: In SML, when I write a type containing type
+  variables you immediately think of the associated type scheme where
+  all the type variables are quantified. In other words there are no
+  mono-types with type free type variables in the SML top level.
+
+  When talking about type inference algorithm and rules we need to be
+  more precise on this. So only when type variables are quantified are
+  the types considerd poly types (type schemes is a better word)
+  otherwise they are treated as mono-types.
+
+  #+begin_src sml
+
+     fun foo x = let val y = (x,x)
+                 in
+                     (y,y)
+                 end
+
+    (*  Figuring out the type of foo.
+
+        Start by an assumption x : nat
+        See that in the rhs the type y : nat * nat
+        and hence (y,y) is of type (nat * nat) * (nat * nat)
+
+        and hence foo : nat -> (nat * nat) * (nat * nat)
+
+        This is how one would have infered the type of foo in
+        simply-typed lambda calculus
+
+       If I had started with the assumption x : bool I would have ended
+       with foo : bool -> (bool * bool) * (bool * bool)
+
+       If I had started with the assumption x : α, whatever mono-type it
+       is, I would have ended with foo : α -> (α * α) * (α * α)
+
+
+       Let α be any type in the simply-typed lambda calculus.
+
+        Starting by an assumption x : α
+
+        See that in the rhs the type y : α * α
+        and hence (y,y) is of type (α * α) * (α * α)
+
+       (fixed but arbitrary)
+
+     ,*)
+
+  #+end_src
+
+  #+RESULTS:
+  : val foo = fn : 'a -> ('a * 'a) * ('a * 'a)
+
+  In the language of Hindley-Milner type system I should really be saying
+
+  ~foo : ∀ α . α -> (α * α) * (α * α)~ which is a type-scheme and not a mono-type.
+
+
+** Type schemes.
+
+Essentially type schemes are monotypes where some of the types are
+∀-quantified in the outermost layer.
+
+I will use σ with appropriate subscript to denote type schemes.
+
+#+begin_example
+
+σ = τ           for any monotype τ
+  | ∀ α . σ'    for some type scheme σ'
+
+#+end_example
+
+i.e any type scheme looks like ~∀ α₁ ∀ α₂ .... ∀ αₙ . τ~ for some mono-type τ.
+
+
+** Typing rules
+
+Take all the typing rules for simply typed lambda calclus with all
+types being mono-types. These rules continue to hold for
+Hindley-Milner type system. There are two additional rules.
+
+
+For example the VAR rule can be written as
+
+#+begin_example
+
+=================   for all mono-types τ.
+{ x : τ } ⊢ x : τ
+
+#+end_example
+
+
+*** Specialisation
+
+Γ ⊢ e : ∀ α . σ
+===================
+Γ ⊢ e : σ [ α := τ]  for some mono-type τ.
+
+
+- Note :: Only monotypes are allowed to be substituted for type
+  variables. Why ?
+
+Suppose we have the judgement
+
+1. e : ∀ α . α -> α
+
+2. If Specialisation is allowed for all type schemes then consider
+   replacing α by ∀ γ . γ -> γ. Then we will be able to get e : (∀γ
+   . γ -> γ) -> (∀ β . β -> β) which is clearly not a Hindley Milner
+   type.
+
+
+Let us look at he more principled reason.
+
+
+What is the understanding of the judgement  e : ∀ α . τ ?
+
+No matter what monotype α is I can derive the type the type τ for e.
+I am allowed to replace α consistently throughout τ with an arbitrary monotype
+τ₁
+
+If I apply specialisation repeatedly for the type scheme ∀ α₁ ... ∀ αₙ τ
+
+Γ ⊢ e : ∀ α₁ ... ∀ αₙ τ
+=====================================
+Γ ⊢ e :  τ [α₁ := τ₁] ... [αₙ := τₙ]  for monotypes τ₁,...,τₙ
+
+*** Generalisation
+
+
+Γ ⊢ e : σ
+α is not free in Γ (side condition)
+===================
+Γ ⊢ e : ∀ α . σ
+
+The side condition implies that there is no "fixing" of alpha done in the Γ
+
+**** Explanation behind the side condition.
+Imagine in the pre-condition Γ ⊢ e : σ  let us say that α is a type variable
+that occurs in σ.
+
+- α is Free in Γ :: i.e. there is an assumption { xᵢ : σᵢ } ⊆ Γ where α is free in σᵢ
+
+
+
+   { x₁ : σ₁ .... , xᵢ : σᵢ(α) , ... } ⊢ e : σ  . In this case the α is fixed by the assumption
+
+   xᵢ : σᵢ
+
+   In this case generalisation is not allowed.
+
+- α is /not/ Free in Γ :: i.e. there is an assumption { xᵢ : σᵢ } ⊆ Γ
+
+  In this case you can generalise.
+
+
+*** A simple type derivation.
+
+#+begin_example
+id = λ x . x
+#+end_example
+
+I want to give all possible types for id. (id : ∀ α . α -> α)
+
+
+id : nat -> nat
+
+
+1. x : bool ⊢ x : bool                    (By VAR rule)
+2. ⊢ (λ (x : bool) . x) : bool -> bool    (By ABS rule)
+
+
+
+Fix any α
+
+1. x : α  ⊢ x : α               (BY Var rule)
+2. ⊢ λ (x : α) . x : α -> α     (By ABS rule)
+3. ⊢ λ x . x : ∀ α . α -> α     (BY GEN rule)
+
+
+
+*** What are well typed program ?
+
+A /proof/ of a typing judgement Γ ⊢ e : σ is a finite sequence of
+Judgements J₁, ... , Jₙ where Jₙ is the judgement Γ ⊢ e : σ and for
+every judgement Jᵢ there is a typing rule R such that The
+pre-conditions of R is contained in the set {J₁,...,Jᵢ₋₁ } and Jᵢ is
+the consequence of R.
+
+
+An expression e is well typed under the context Γ if there exists a
+type scheme σ such that Γ ⊢ e : σ has a proof using the typing rules.
+
+
+*** Type inference algorithm in this context.
+
+- Input :: Γ and e
+- Output ::  σ such that Γ ⊢ e : σ is derivable using the typing rules.
+  or error if e is ill-typed in Γ.
+- Additional requirement/property of the algorithm is that it computes
+  the /most general type/ that is possible to be assigned to ~e~
+
+
+What is the type of ~λ x . x~ ? Its type is (nat -> nat), Its type is
+(nat -> bool) -> nat -> bool or in other words you can say that its
+type is τ -> τ for all monotypes. Or in other words you can say that
+it has type ~∀ α . α -> α~
+
+Clearly (nat -> nat) is a specialisation of ∀ α . α -> α. SO the
+latter is more general than the former. The algorithm we design should
+compute the most general type possible.
+
+
+We define an pre-ordering ≤ on type schemes. A pre-order is a
+reflexive, transitive relation.
+
+pre-order + anti-symmetry = partial order.
+
+
+i.e a ≤ a (reflexive) , a ≤ b and b ≤ c implies a ≤ c (transitive)
+
+
+We say that σ₁ ≤ σ₂ if σ₁ is a special case of σ₂.
+
+You should think of the relation σ₁ ≤ σ₂ as saying σ₁ is less general
+type than σ₂.
+
+
+Suppose we have  type scheme σ = ∀ α₁ .... αₙ . τ. Let us look at monotypes alone.
+
+1. Clearly τ' := τ [ α₁ := τ₁] .... [αₙ = τₙ]  is a special case of σ or τ' ≤ σ.
+
+2. Let β₁,....,βₘ be any set of type variables such that βᵢ is /not free/  in σ.
+
+   Then any type scheme σ' = ∀ β₁ .... ∀ βₙ . τ' where τ' = τ' := τ [
+   α₁ := τ₁] .... [αₙ = τₙ] is less general than σ.
+
+
+In other words what ever type scheme you get form sigma by the following two steps
+
+- monomorphise ::  Compute the mono-type τ' = τ' := τ [ α₁ := τ₁] .... [αₙ = τₙ]
+
+- Quantify :: Compute the σ' =  σ' = ∀ β₁ .... ∀ βₙ . τ' for βᵢ not free in σ
+
+
+
+Let us look at an example
+
+
+- σ₁ = ∀ α . α -> α  = ∀ α . τ₁
+
+
+
+- σ₂ = ∀ β . (β -> β) -> (β -> β)
+
+  σ₂ can be obtained by the following steps.
+
+ 1. τ' = replace α with the monotype β-> β in τ₁ to get (β -> β) -> (β -> β)
+ 2. Then quantify over β because in τ' that is not free in the original type scheme σ₁
+
+
+- σ₃ = ∀ β ∀ γ . (β -> γ) -> (β -> γ)
+
+
+  1. Replace α with (β -> γ) in τ₁
+  2. Quantify over β and γ.
+
+
+
+What mono-types are specialisation of σ₃
+
+Any monotype  (τ₁ -> τ₂) -> (τ₁ -> τ₂). Or
+any monotype that looks like
+(something -> someting else) -> (the same something -> the same something else)
+
+( something -> something
+
+- σ  = ∀ α₁ ∀ α₂ ... ∀ αₙ .
+
+          (α₁ -> α₂ -> .... -> αₙ)
+       -> (α₁ -> α₂ -> ...  -> αₙ)
+
+- σ₄ = ∀ β . (β -> β) -> β
+
+  Answer the following :
+- σ₂ ≤ σ₁ ? :: Yes
+- σ₃ ≤ σ₁ ? :: Yes
+- σ₄ ≤ σ₁ ? :: No
+- σ ≤ σ₁    :: Yes
+
+
+In other words what we are really interested is the "shape" of the type scheme.
+
+
+Closure(σ) = the type scheme obtained by quantifying over all the type variables
+of σ.
+
+σ and look at all free variables let us say they are α₁ .... αₙ  Then
+
+Closure(σ) = ∀ α₁ ... ∀ αₙ σ
+
+
+If the starting type scheme σ is closed, then the specialisations of σ are
+
+
+
+Exercise that you can try to prove.
+
+Form the rules of specialisation and generalisation
+prove the following.
+
+Suppose that Γ ⊢ e : σ is provable and σ' ≤ σ then Γ ⊢ e : σ' is also
+provable.
+
+
+
+#+begin_example
+
+ Γ ⊢ e : σ
+
+ σ' ≤ σ
+===================
+ Γ ⊢ e : σ'
+
+
+ The generalised specialisation rule. If I can deduce e : σ then I can deduce e : σ' for all
+ specialisation σ' of σ.
+
+
+#+end_example
+
+Remember that σ' ≤ σ if there is a τ' such that
+
+(1) τ' = τ [ α₁ = τ₁ ] .... [αₙ = τₙ ]  where σ = ∀ α₁ ... ∀ αₙ τ.
+
+Repeated use of the specialisation rule should give you Γ ⊢ e : τ'
+To get to Γ ⊢ e : σ' I almost need to use the generalisation rule multiple times.
+
 
 
 
