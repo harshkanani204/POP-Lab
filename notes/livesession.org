@@ -1,4 +1,5 @@
 #+STARTUP: indent
+#+STARTUP: overview
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 * TODO Getting started                                            :CLASSROOM:
 
@@ -2341,12 +2342,6 @@ Remember that σ' ≤ σ if there is a τ' such that
 
 Repeated use of the specialisation rule should give you Γ ⊢ e : τ'
 To get to Γ ⊢ e : σ' I almost need to use the generalisation rule multiple times.
-
-
-
-
-
-
 
 
 * Type inference rules
