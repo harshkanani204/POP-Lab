@@ -2001,7 +2001,7 @@ variables.
 #+begin_example
 
 τ := b          b ∈ B the set of basic type
-  |  α          α ∈ Type variable
+  |  α          α ∈ Type variable  (in addition to what you have for simply-typed calculus)
   |  τ₁ -> τ₂   where τ₁ and τ₂ are mono-types.
 
 #+end_example
@@ -2127,7 +2127,7 @@ I am allowed to replace α consistently throughout τ with an arbitrary monotype
 
 If I apply specialisation repeatedly for the type scheme ∀ α₁ ... ∀ αₙ τ
 
-Γ ⊢ e : ∀ α₁ ... ∀ αₙ τ
+Γ ⊢ e : ∀ α₁ ... ∀ αₙ . τ
 =====================================
 Γ ⊢ e :  τ [α₁ := τ₁] ... [αₙ := τₙ]  for monotypes τ₁,...,τₙ
 
@@ -2185,7 +2185,7 @@ Fix any α
 
 
 
-*** What are well typed program ?
+*** What are well typed program under type assumptions Γ?
 
 A /proof/ of a typing judgement Γ ⊢ e : σ is a finite sequence of
 Judgements J₁, ... , Jₙ where Jₙ is the judgement Γ ⊢ e : σ and for
@@ -2346,7 +2346,152 @@ To get to Γ ⊢ e : σ' I almost need to use the generalisation rule multiple t
 
 
 
+
+
+
+* Type inference rules
+
+
 *  Old notes starts here
+
+
+** Informal description.
+
+#+begin_src  sml
+
+
+  val foo = fn x => fn y => x
+
+  (*
+
+   The algorithm should figure out that foo : σ where the judgement ⊢ foo : σ should be
+   derivable from the rules of typing.
+
+  1. We first figure out a τ such that foo : τ and Closure(τ) is the most general type
+     that we can assign to foo.
+
+     Closure(τ) = ∀ α₁ ... ∀ αₙ . τ  where FV(τ) = { α₁ ... αₙ }
+
+
+
+   Let us pick a fresh variable α
+
+
+
+   1. ...
+   2. ...
+   3. .....
+      { x : α₁ } ⊢ e : β
+      =====================
+      foo = λ x . e : α₁ -> β
+
+
+  ,*)
+
+
+#+end_src
+
+#+RESULTS:
+: val foo = fn : 'a -> 'b -> 'a
+
+~foo : ∀ α ∀ β . α -> β -> α~
+
+
+** Inference algorithm
+
+Closure(Γ, τ) = ∀ α₁, .... , ∀ αₙ τ where FV(τ) ∖ FV(Γ) = {α₁,....,αₙ}
+
+- Input :: Type assumption Γ, and an expression e
+- Output :: If possible a monotype τ such that Γ ⊢ e : Closure(Γ, τ) is derivable by the type rules
+  and if Γ ⊢ e : σ is some other type scheme which is provable then σ ≤ Closure
+
+
+The generalisation rule can be extended as follows
+
+
+Γ ⊢ e : τ
+====================  (Extended generalisation rule)
+Γ ⊢ e : Closure(Γ, τ)
+
+Suppose under Γ the most general type scheme that you can deduce for e is σ = ∀ α₁ ... ∀ αₙ . τ
+
+...
+...
+...
+
+-> (m)    Γ ⊢ e : τ
+(m+1)  Γ ⊢ e : ∀ αₙ . τ  (Gen m)
+(m+2)  ....
+(m+n)  Γ ⊢ e : ∀ α₁ .... ∀ αₙ . τ (Gen m + n - 1)
+
+
+
+Take all the variables that are free in τ but not in Γ and do generalisation some many times.
+That will give you the extended generalisation rule.
+
+
+Γ = { x₁ : σ₁ ; .... , xₙ : σₙ }  FV(Γ) = FV(σ₁) ∪ FV(σ₂) .... ∪ FV(σₙ)
+
+
+| Assumptions        | Infer               | Constraint     | Rule used |
+|--------------------+---------------------+----------------+-----------|
+|                    |                     |                |           |
+| { }                | (λ x . λ y . x) : α | {}             | ABS       |
+|--------------------+---------------------+----------------+-----------|
+| { x : α₁ }         | (λ y . x) : β₁      | α ≡ α₁ -> β₁   | ABS       |
+|--------------------+---------------------+----------------+-----------|
+| { x : α₁ ; y : α₂} | x : β₂              | α ≡ α₁ -> β₁   | VAR       |
+|                    |                     | β₁≡ α₂ -> β₂   |           |
+|--------------------+---------------------+----------------+-----------|
+| { x : α₁ ; y : α₂} | {}                  | α ≡ α₁ -> β₁ ; |           |
+|                    |                     | β₁≡ α₂ -> β₂ ; |           |
+|                    |                     | β₂≡ α₁         |           |
+|                    |                     |                |           |
+
+
+
+If I solve for this constraints I get the equations.
+
+α  ≡ α₁ -> (α₂ -> α₁)
+β₁ ≡ α₂ -> α₁
+β₂ ≡ α₁
+
+
+1. {x : α₁ ; y : α₂ } ⊢ x : α₁          (VAR Rule + Weakening)
+2. {x : α₁ } ⊢ λ y . x : α₂ -> α₁       (From 1 with ABS)
+3.  ⊢ λ x . λ y . x : α₁ -> (α₂ -> α₁)            (From 2 with ABS)
+4. ⊢ λ x . λ y . x : ∀ α₁ ∀ α₂ . α₁ -> (α₂ -> α₁) ( Generalisation 2 times )
+
+
+What we need is an algorithm to solve set of typing equations which looks like
+
+
+τ₁₁ ≡ τ₂₁ ; τ₂₁ ≡ τ₂₂ ....  τₘ₁ ≡ τₘ₂
+
+#+begin_example sml
+
+val foo = map (fn x => plus x 1)
+
+(*
+
+   foo : α list -> β list
+   foo : int list -> int list
+   where fn x => plus x 1 should have type α -> β
+   {x : α } ⊢  plus x 1 : β
+
+   β ≡ int
+   α ≡ int
+
+*)
+#+end_example
+
+
+
+The free variables here are map and plus.
+
+I can infer the type of foo only in the context where map and plus has been assigned some type.
+
+Γ = { map : ∀ α ∀ β . (α -> β) -> α list -> β list ; plus : int -> int -> int }
 
 
 * DONE Types and Functions                                        :CLASSROOM:
