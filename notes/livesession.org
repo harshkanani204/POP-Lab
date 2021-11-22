@@ -2344,11 +2344,7 @@ Repeated use of the specialisation rule should give you Γ ⊢ e : τ'
 To get to Γ ⊢ e : σ' I almost need to use the generalisation rule multiple times.
 
 
-* Type inference rules
-
-
-*  Old notes starts here
-
+* Type inference algorithm
 
 ** Informal description.
 
@@ -2397,8 +2393,14 @@ To get to Γ ⊢ e : σ' I almost need to use the generalisation rule multiple t
 Closure(Γ, τ) = ∀ α₁, .... , ∀ αₙ τ where FV(τ) ∖ FV(Γ) = {α₁,....,αₙ}
 
 - Input :: Type assumption Γ, and an expression e
-- Output :: If possible a monotype τ such that Γ ⊢ e : Closure(Γ, τ) is derivable by the type rules
-  and if Γ ⊢ e : σ is some other type scheme which is provable then σ ≤ Closure
+
+- Output :: If possible a monotype τ such that Γ ⊢ e : Closure(Γ, τ)
+  is derivable by the type rules and if Γ ⊢ e : σ is some other type
+  scheme which is provable then σ ≤ Closure(Γ, τ)
+
+  We want to compute the monotype τ such that Closure(Γ, τ) is the
+  most general type that we can assign to e under the typing
+  assumptions Γ.
 
 
 The generalisation rule can be extended as follows
@@ -2408,7 +2410,8 @@ The generalisation rule can be extended as follows
 ====================  (Extended generalisation rule)
 Γ ⊢ e : Closure(Γ, τ)
 
-Suppose under Γ the most general type scheme that you can deduce for e is σ = ∀ α₁ ... ∀ αₙ . τ
+Suppose under Γ the most general type scheme that you can deduce for e
+is σ = ∀ α₁ ... ∀ αₙ . τ
 
 ...
 ...
@@ -2421,8 +2424,9 @@ Suppose under Γ the most general type scheme that you can deduce for e is σ = 
 
 
 
-Take all the variables that are free in τ but not in Γ and do generalisation some many times.
-That will give you the extended generalisation rule.
+Take all the variables that are free in τ but not in Γ and do
+generalisation some many times.  That will give you the extended
+generalisation rule.
 
 
 Γ = { x₁ : σ₁ ; .... , xₙ : σₙ }  FV(Γ) = FV(σ₁) ∪ FV(σ₂) .... ∪ FV(σₙ)
@@ -2487,6 +2491,381 @@ The free variables here are map and plus.
 I can infer the type of foo only in the context where map and plus has been assigned some type.
 
 Γ = { map : ∀ α ∀ β . (α -> β) -> α list -> β list ; plus : int -> int -> int }
+
+
+
+
+
+
+** Inference algorithm reduces to Unification.
+
+- Input :: Γ and e
+
+- Output :: If possible compute the monotype τ such that Γ ⊢ e : τ and
+  the Closure(Γ, τ) is the most general type that can be assigned to
+  e.
+
+The algorithm is a recursive algorithm that recurses on the structure
+of e.
+
+#+begin_example ascii
+
+e :  x         a variabe
+  | e₁ e₂      application
+  | λ x . e    abstraction
+
+#+end_example
+
+It assigns types to all variables that are occuring in e. We can
+assign types to all subexressions in the expression e.
+
+1. For each subexpression it assigns a monotype τ
+
+2. It computes a set S of /type unification/ constraints S = { τ₁ ≡
+   τ₁' , ...., τₙ ≡ τₙ' }.
+
+   A set W of /type variable assignment/ { α₁ := κ₁ , ...., αₘ := κₘ }
+   where αᵢ's are type variables and the κᵢ are monotypes that do not
+   contain {α₁,...., αₘ }, is a solution to the type unification constraints S if.
+   For every constraint τ ≡ τ' ∈ S we have τ[W] = τ'[W]
+
+   τ[W] is the monotype τ[α₁ := κ₁]....[αₙ := κₙ] got by
+   simultaneously substituting αᵢ with κᵢ for all assignments αᵢ := κᵢ
+   ∈ W.
+
+3. The expression e is well typed under Γ if and only if  S can be /solved/.
+
+   i.e. If the computed constraints can be solved then e is well typed
+   and If it cannot be solved then e is ill-typed.
+
+4.  If W is a solution to the constraint that has been computed and let τ be the
+   monotype that has been assigned to e then the desired type for e is τ[W].
+
+5. As a result, all we need as a subroutine is a way to solve the type
+   unification problem.
+
+
+Since an expression is of one of the below three forms we have three cases in the
+type inference algorithm
+#+begin_example ascii
+
+e :  x         a variabe
+  | e₁ e₂      application
+  | λ x . e    abstraction
+
+#+end_example
+
+- VAR Case :: We already have a typing assumption Γ with us.
+  Suppose the input expression e is actually x for some variable x.
+
+  1. There is a typing assumption (x : σ) ∈ Γ . I have to compute a
+     monotype for τ for e (which happens to be the variable x).
+
+     Suppose σ = ∀ α₁...∀ αₙ . τ . Then compute /fresh variables/
+     β₁,...., βₙ and associated the subexpression x with the type
+     τ' = τ[α₁:= β₁] ....[αₙ := βₙ]
+
+  - Question :: We have assigned the monotype τ' for x , Is it the case
+      that  Closure(Γ, τ') is the most general type that we can associated for
+       the expression x under Γ ?
+
+       - Answer is that yes it is be most general type
+         we can associated for x because.
+
+         Closure(Γ,τ') =
+
+         σ' ∀ β₁,....∀ βₙ τ [α₁ := β₁] .....[αₙ := βₙ]
+
+         x : σ ∈ Γ
+
+         Note that σ' is essentially σ (because only a bound variable
+         rename has been done).
+
+         The output is (∅  , e : τ') , i.e. empty set of constraints and
+         for e the type is τ'
+
+  2. There is no typing assumption for the variable x in Γ, x ∉ domain(Γ)
+     The algorithm fails with an error message "undefined variable x"
+
+
+- APP case ::
+
+  The input expression e := e₁ e₂
+
+  We pick fresh type variables α and β. Recursively run the inference algorithm on
+  Γ, e₁ and Γ, e₂
+
+  1. (S₁, e₁ : τ₁) := Infer(Γ, e₁)
+
+  2. (S₂, e₂ : τ₂) := Infer(Γ, e₂)
+
+     The output is (S₁ ∪ S₂ ∪ { α -> β ≡ τ₁ , α ≡ τ₂ }, e₁ e₂ : β )
+     For some fresh variables α and β. The point of this step is to
+     enforce that τ₁ looks like something -> something else where τ₂
+     is also something.
+
+- ABS case ::
+
+  The expression e = λ x . M.
+
+  Recursively infer (S, M : τ) := Infer(Γ ∪ (x : α), M)
+
+  Then Output is (S , λ x . M : α -> τ) For some fresh variable α.
+
+
+#+begin_example sml
+
+val foo := map incr
+
+Γ := { map : ∀ α ∀ β, (α -> β) -> α list -> β list ; incr : int -> int }, foo = (map incr) }
+
+1. We are in the VAR case where e = map incr.
+
+   (S₁, map : τ)    := Infer (Γ, map)
+   (S₂, incr : τ)   := Infer (Γ, incr
+
+
+
+
+
+
+
+#+end_example
+
+
+1. Start with Infer (Γ, map incr)
+
+   Use the Apply case and recursively compute the type of each sub expression map and incr
+
+   Result will be {  (α₃ -> α₄) ≡ (α₁ -> α₂) -> (α₁ list -> α₂ list))
+                     α₃         ≡ (int -> int)
+                   },
+
+
+                   map incr : α₄
+
+                   α₃ ≡ (α₁ -> α₂)
+                   α₄ ≡ α₁ list -> α₂ list
+                   α₃ ≡ int -> int
+
+                   α₁ ≡ int
+                   α₂ ≡ int
+                   α₃ ≡ int -> int
+                   α₄ ≡ int list -> int list
+
+   - Infer(Γ, map)
+
+     Use the Var case. map : ∀ α ∀ β (α -> β) -> (α list -> β list)
+
+     Result ( ∅ , map : (α₁ -> α₂) -> α₁ list -> α₂ list)
+
+   - Infer(Γ, incr)
+
+     Result ( ∅ , incr : int -> int)
+
+
+
+* Type unification algorithm.
+
+** Recap
+Hindle-Milner type schemes.
+
+σ = ∀ α₁ ... ∀ αₙ τ   where τ is a mono-type.
+
+#+begin_example
+
+τ = basic types
+  | type variable
+  | τ₁ -> τ₂     where τ₁ and τ₂ are themselves
+                 monotypes.
+
+#+end_example
+
+
+Typing environment/ typing assumption Γ = { x₁ : σ₁, ...., xₘ : σₘ }
+where xᵢ 's are variables (not type variables but variables of the
+language } and σᵢ's are type schemes.
+
+
+Given a typing assumption and an expression e the algorithm should
+
+1. Find the most general type scheme σ such that Γ ⊢ e : σ if e is well-typed or
+
+2. Should say that e is ill-typed under the assumptions Γ.
+
+
+A general type inference algorithm reduces to the type unification
+problem.
+
+
+
+1. A special case of type inference (mono-type type inference problem)
+   which is defined as follows.
+
+   Given Γ and e compute the monotype (if possible) τ such that Γ ⊢
+   e : τ and σ = Closure(Γ, τ) is the most general type scheme such
+   that Γ ⊢ e : σ.
+
+   Firstly if Γ ⊢ e : σ' then Γ ⊢ e : Closure(Γ, σ'), clearly it is
+   sufficient to solve the mono-type inference for e (Easy, use the
+   generalisation rule multiple times).
+
+   If α is free in σ' and not free in Γ, i.e. α ∈ FreetypeV(σ') ∖ FreetypeV(Γ) then
+
+   #+begin_example
+   Γ ⊢ e : σ'
+   ================  (one step of GEN)
+   Γ ⊢ e : ∀ α . σ'
+
+
+#+end_example
+
+
+The monotype inference algorithm has three cases (based on the structure of the
+expression)
+
+
+1. e is a variable x :: Suppose x : σ ∈ Γ then the type inferred for e is τ where
+   τ is obtained by specialising σ by fresh type variables.
+
+   x : ∀ α ∀ β ∀ γ . τ
+
+
+   e : τ [α := α'] [β := β'] [γ = γ'] where α', β' , γ' are all fresh variables.
+
+   The set of constraints on generated is ∅
+
+
+2. e = e₁ e₂
+
+   Generate fresh variables α, β such that ?
+
+   let (S₁, τ₁) = Infer(Γ, e₁)
+
+       (S₂, τ₂) = Infer(Γ, e₂)
+
+
+   We want to ensure that τ₁ is τ₁' -> τ₂'  and τ₂ should be τ₁'
+
+   Result := (S, τ) where
+   S = S₁ ∪ S₂ ∪ { τ₁ ≡ α -> β ; τ₂ ≡ β }
+   τ = β
+
+
+3. e = λ x . e' then
+
+   (S, τ) = Infer(Γ, { x : α } , e')
+
+   Result = (S, α -> τ)
+
+
+
+
+The final result of the algorithm :
+
+- We have got a set of constraints S and a type τ such that
+
+- The final monotype that we want to assign e is just τ[S]
+
+
+In general the constraints S = { τ₁ ≡ τ₁' , τ₂ ≡ τ₂' ..... τₘ ≡ τₘ'
+}. We want to solve the constraints above.
+
+
+- Substitution :: A set of type variable replacement { α₁ := κ₁ ;
+  ...... αₘ := κₘ } where αᵢ's are type variables and κᵢ's are
+  monotypes with the property that FV(kᵢ) ∩ { α₁ , .... ,αₘ } = ∅
+
+
+- Solution for an equation τ ≡ τ' :: A substitution T such that if
+  τ[T] = τ'[T]
+
+  e.g. For the equation α -> int ≡ char -> β { α := char, β := int }
+  is a solution.
+
+- Solution for a set S of equations :: A solution T that is simultaneously
+  the solution for every equation τ ≡ τ' ∈ S
+
+- Among the solutions we can find the most general solution.
+
+  α -> γ ≡ (α₁ -> β₁) -> α
+
+  α := α₁ -> β₁  γ := α₁ -> β₁    (most general solution)
+
+  α := int -> β₁  γ := int -> β₁  (some solution)
+
+
+
+*
+
+
+
+
+
+
+
+
+
+
+** Type unification problem.
+
+
+
+Sometimes solving a "harder problem" is "easier". Solving a more
+general problem is often easier than solving a specific problem.
+
+
+1. Given as input two monotypes τ₁ and τ₂ find the most general unifier (i.e the substitution T
+   that makes both τ₁ and τ₂ the same.) if possible.
+
+   τ₁ = α -> β    τ₂ = (α -> γ) -> β
+
+   α ≡ α -> γ    α := α -> γ  (not a solution)
+
+
+2. Given a finite set of equations S = { τ₁ ≡ τ₁' , .... , τₙ ≡ τₙ' } find the most general
+   unifier for S. The first problem is a special case of the second S = { τ₁ ≡ τ₂ }
+
+
+3. Given an equation τ₁ ≡ τ₂ and a substitution T = { α₁ := κ₁, ... , αₘ := κₘ }, Find
+   the most general unifier for the equation τ₁ [T] ≡ τ₂[T]
+
+
+4. The variant of 3 where we deal with multiple equations. Given S = { equations } and
+   a substitution T, find the solution for S = { τ₁[T] ≡ τ₂ [T} | τ₁ ≡ τ₂ ∈ S }
+
+Why I need (2) instead (1).
+
+
+The solution for (τ₁ -> τ₂) ≡ τ₁' -> τ₂' is the same as the solution for the set
+
+S = { τ₁ ≡ τ₁' , τ₂ ≡ τ₂' }
+
+
+
+Why I need 4.
+
+S = { τ₁ ≡ τ₁' } ∪ S'
+
+Let T be a solution of τ₁ ≡ τ₁'. Then a solution for S is just a
+solution for S' under the substitution T
+
+
+*** Type Unification problem.
+
+- Input :: A set S of equations and a substitution T
+- Output :: The most general substitution R such that
+  τ[T] [R] = τ'[T] [R] for all equations τ ≡ τ' ∈ S.
+
+
+
+Type unification to type inference.
+
+Recall that the algorithm computes a set S of constraints (equations) and a type τ
+for e. The final result of the type inference algorithm is τ[T] where T is the solution
+for the type unfication problem for S.
+
+*  Old notes starts here
 
 
 * DONE Types and Functions                                        :CLASSROOM:
