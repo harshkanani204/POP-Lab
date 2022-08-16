@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Script to compress the ogv file from recordmydesktop to .mp4 file
 #
