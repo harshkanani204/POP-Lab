@@ -1,6 +1,6 @@
 # Getting Started.
 
-DEADLINE: 30 Aug 2021, Monday 11:59 hrs.
+DEADLINE: 23 Aug 2021, Monday 11:59 hrs.
 
 This lab session is meant to help you setup your machine and account
 so that you can easily submit your assignment for this course. We will
@@ -21,7 +21,7 @@ You will need to bring your laptop to the lab as well.
    hopefully have them already). You might already know about `git`
    and `emacs`, checkout what the other software does (Google search).
 
-	    sudo apt update  # update the package list
+        sudo apt update  # update the package list
         sudo apt install git emacs magit tig gitk # install emacs git and helper programs.
         sudo apt install smlnj smlnj-doc # install standard ML interpreter
         sudo apt install mlton           # install standard Ml compiler.
@@ -31,7 +31,7 @@ You will need to bring your laptop to the lab as well.
    git to use your name and email on commit messages.
 
         git config --global user.name 'Your Name'
-		git config --global user.email 'your-email-id@iitpkd.ac.in'
+        git config --global user.email 'your-email-id@iitpkd.ac.in'
 
 
 3. Create an account on [gitlab] (use your iitpkd email address for
