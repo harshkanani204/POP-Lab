@@ -21,10 +21,12 @@ fun snd (x,y) = y
 fun length [] = 0
     | length (x :: xs) = 1 + length xs
 
+fun newList [] ys = ys
+    | newList (x :: xs) ys = newList xs (x :: ys)
 
 (* FOURTH QUESTION  *)
 fun reverse [] = []
-    | reverse (x :: xs) = concat (reverse xs) [x]
+    | reverse (x :: xs) = newList (x :: xs) []
 
 
 (* FIFTH QUESTION *)
