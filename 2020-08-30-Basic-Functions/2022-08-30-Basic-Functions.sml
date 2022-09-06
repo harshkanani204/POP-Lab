@@ -1,37 +1,28 @@
-fun concat [] xs = xs
-    | concat (y :: ys) xs = y :: concat ys xs
-
-fun append [] y = [y]
-    | append (x :: xs) y = x :: append xs y
-
-fun concatSlow xs [] = xs
-    | concatSlow xs (y :: ys) = concatSlow (append xs y) ys
-
-(* FIRST QUESTION *)
+(*========== FIRST QUESTION ==========*)
 fun curry f a b c = f (a,b,c)
 fun uncurry f (a,b,c) = f a b c 
 
 
-(* SECOND QUESTION *)
+(*========== SECOND QUESTION ==========*)
 fun fst (x,y) = x
 fun snd (x,y) = y
 
 
-(* THIRD QUESTION *)
+(*========== THIRD QUESTION ==========*)
 fun length [] = 0
     | length (x :: xs) = 1 + length xs
 
+
+(*========== FOURTH QUESTION  ==========*)
 fun newList [] ys = ys
     | newList (x :: xs) ys = newList xs (x :: ys)
 
-(* FOURTH QUESTION  *)
 fun reverse [] = []
     | reverse (x :: xs) = newList (x :: xs) []
 
 
-(* FIFTH QUESTION *)
-fun fib n = if n <= 2
-    then 1
-        else fib (n-1) + fib (n-2)
+(*========== FIFTH QUESTION ==========*)
+fun fib 1 a b ans = ans
+    | fib n a b ans = fib (n-1) b ans (b + ans)
 
-(* TRYING *)
+fun fibonacci n = fib n 0 1 1
