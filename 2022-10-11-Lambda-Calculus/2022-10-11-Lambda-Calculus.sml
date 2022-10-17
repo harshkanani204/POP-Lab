@@ -1,1 +1,1 @@
-datatype expr = 
+datatype expr = x
