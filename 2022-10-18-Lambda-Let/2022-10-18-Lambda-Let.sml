@@ -14,3 +14,8 @@ datatype lamdaLetrec = lrVar of Atom.atom
                      | lrLet of Atom.atom*lamdaLetrec*lamdaLetrec
 
 (* QUESTION 2 *)
+(* letTolambda = fn : lamdaLet -> expr *)
+fun letTolambda (lVar x) = Var x
+    | letTolambda (lApply (a,b)) = Apply (letTolambda a, letTolambda b)
+    | letTolambda (lLambda (x,a)) = Lambda (x,letTolambda a)
+    | letTolambda (lLet (x,a,b)) = Apply (Lambda (x,letTolambda b), letTolambda a) 
